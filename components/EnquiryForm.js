@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-export default function EnquiryForm({ listingId = null, source = 'website', defaultMessage = '', submitLabel = 'Send enquiry', compact = false }) {
+// firmId: the firm whose website this is. The enquiry lands in that firm's admin panel only.
+export default function EnquiryForm({ firmId, listingId = null, source = 'website', defaultMessage = '', submitLabel = 'Send enquiry', compact = false }) {
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: defaultMessage });
   const [state, setState] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState('');
@@ -20,6 +21,7 @@ export default function EnquiryForm({ listingId = null, source = 'website', defa
     setState('sending');
     const supabase = createClient();
     const { error: dbError } = await supabase.from('enquiries').insert({
+      firm_id: firmId,
       name: form.name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim() || null,

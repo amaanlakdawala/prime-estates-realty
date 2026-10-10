@@ -4,28 +4,33 @@ import Gallery from '@/components/Gallery';
 import EmiCalculator from '@/components/EmiCalculator';
 import EnquiryForm from '@/components/EnquiryForm';
 import { WhatsAppIcon } from '@/components/WhatsAppButton';
-import { createClient } from '@/lib/supabase/server';
-import { site } from '@/lib/site';
+import { getSiteBySlug } from '@/lib/firm';
+import { createPublicClient } from '@/lib/supabase/public';
+import { href } from '@/lib/site';
 import { formatPrice, typeLabel, whatsappLink } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
-async function getListing(id) {
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const supabase = await createClient();
-  const { data } = await supabase.from('listings').select('*').eq('id', id).eq('status', 'available').maybeSingle();
+// Only an available listing that belongs to this firm: another firm's listing id gives "not found".
+async function getListing(site, id) {
+  if (!site || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const { data } = await createPublicClient().from('listings').select('*').eq('id', id).eq('firm_id', site.id).eq('status', 'available').maybeSingle();
   return data;
 }
 
 export async function generateMetadata({ params }) {
-  const listing = await getListing((await params).id);
+  const { firm, id } = await params;
+  const listing = await getListing(await getSiteBySlug(firm), id);
   if (!listing) return { title: 'Property not found' };
   return { title: `${listing.title}, ${listing.locality}`, description: listing.description?.slice(0, 160) };
 }
 
 export default async function PropertyPage({ params }) {
-  const listing = await getListing((await params).id);
+  const { firm, id } = await params;
+  const site = await getSiteBySlug(firm);
+  const listing = await getListing(site, id);
   if (!listing) notFound();
+  const where = [listing.address || listing.locality, site.city].filter(Boolean).join(', ');
 
   const specs = [
     ['Price', formatPrice(listing.price, listing.deal_type)],
@@ -40,22 +45,22 @@ export default async function PropertyPage({ params }) {
   const mapSrc =
     listing.latitude && listing.longitude
       ? `https://maps.google.com/maps?q=${listing.latitude},${listing.longitude}&z=15&output=embed`
-      : `https://maps.google.com/maps?q=${encodeURIComponent(`${listing.address || listing.locality}, ${site.city}`)}&z=14&output=embed`;
+      : `https://maps.google.com/maps?q=${encodeURIComponent(where)}&z=14&output=embed`;
 
   const waText = `Hello ${site.name}, I'm interested in "${listing.title}" in ${listing.locality} (${formatPrice(listing.price, listing.deal_type)}). Is it still available?`;
 
   return (
     <div className="page py-8 sm:py-12">
       <nav className="text-sm text-muted" aria-label="Breadcrumb">
-        <Link href="/properties" className="hover:text-basalt">Properties</Link>
+        <Link href={href(site, '/properties')} className="hover:text-basalt">Properties</Link>
         <span className="mx-2">/</span>
-        <Link href={`/properties?locality=${encodeURIComponent(listing.locality)}`} className="hover:text-basalt">{listing.locality}</Link>
+        <Link href={href(site, `/properties?locality=${encodeURIComponent(listing.locality)}`)} className="hover:text-basalt">{listing.locality}</Link>
       </nav>
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold sm:text-4xl">{listing.title}</h1>
-          <p className="mt-2 text-muted">{listing.address || `${listing.locality}, ${site.city}`}</p>
+          <p className="mt-2 text-muted">{where}</p>
         </div>
         <div className="text-right">
           <p className="font-display text-3xl font-semibold text-teal sm:text-4xl">{formatPrice(listing.price, listing.deal_type)}</p>
@@ -125,13 +130,15 @@ export default async function PropertyPage({ params }) {
             <h2 className="font-display text-xl font-semibold">Interested in this property?</h2>
             <p className="mt-1 text-sm text-muted">Ask a question or book a site visit.</p>
             <div className="mt-4 grid gap-2">
-              <a href={whatsappLink(site.whatsapp, waText)} target="_blank" rel="noopener noreferrer" className="btn-whatsapp">
-                <WhatsAppIcon size={18} /> Ask on WhatsApp
-              </a>
-              <a href={`tel:${site.phoneHref}`} className="btn-outline">Call {site.phoneDisplay}</a>
+              {site.whatsapp && (
+                <a href={whatsappLink(site.whatsapp, waText)} target="_blank" rel="noopener noreferrer" className="btn-whatsapp">
+                  <WhatsAppIcon size={18} /> Ask on WhatsApp
+                </a>
+              )}
+              {site.phoneHref && <a href={`tel:${site.phoneHref}`} className="btn-outline">Call {site.phoneDisplay}</a>}
             </div>
             <div className="my-5 border-t border-line" />
-            <EnquiryForm listingId={listing.id} source="property" compact defaultMessage={`I'd like to know more about ${listing.title}.`} submitLabel="Book a site visit" />
+            <EnquiryForm firmId={site.id} listingId={listing.id} source="property" compact defaultMessage={`I'd like to know more about ${listing.title}.`} submitLabel="Book a site visit" />
           </div>
         </aside>
       </div>

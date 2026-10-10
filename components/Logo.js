@@ -1,10 +1,12 @@
 import Link from 'next/link';
-import { site } from '@/lib/site';
+import { PLATFORM_NAME, href } from '@/lib/site';
 
-export default function Logo({ light = false }) {
+// A firm's logo and name, linking to its home page. Without a site (sign-in page) it shows your brand.
+export default function Logo({ site = null, light = false }) {
+  const name = site?.name ?? PLATFORM_NAME;
   return (
-    <Link href="/" className="flex items-center gap-2.5" aria-label={`${site.name} home`}>
-      {site.logoUrl ? (
+    <Link href={site ? href(site) : '/'} className="flex items-center gap-2.5" aria-label={`${name} home`}>
+      {site?.logoUrl ? (
         <img src={site.logoUrl} alt="" className="h-9 w-auto max-w-[120px] object-contain" />
       ) : (
         <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
@@ -13,7 +15,7 @@ export default function Logo({ light = false }) {
         </svg>
       )}
       <span className={`font-display text-lg font-semibold leading-none ${light ? 'text-white' : 'text-basalt'}`}>
-        {site.name}
+        {name}
       </span>
     </Link>
   );

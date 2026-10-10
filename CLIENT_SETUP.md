@@ -1,58 +1,43 @@
-# Setting up a new client firm
+# Adding a new client firm
 
-Every firm runs on this same GitHub repository. Each one gets its own Supabase project (its own listings, enquiries and logins) and its own Netlify project. Its name, phone, city and areas come from Netlify environment variables, so you never edit code for a client.
+One website, one database and one admin panel serve every client. Each firm gets:
 
-Because every client site builds from the same `main` branch, one `git push` updates all of them. Test locally before pushing.
+- its own website at `yoursite/<their-name>`, e.g. `primeestaterealty.netlify.app/seabreeze`
+- a login that sees and changes **only that firm's** listings, enquiries and profile
 
-Time per client: about 30 minutes.
+The separation is enforced by the database's security rules, not just hidden in the pages: a firm's login cannot read, change or delete another firm's listings, enquiries or photos.
 
-## 1. Their database (Supabase)
+Time per client: about 5 minutes. No Netlify or Supabase setup is needed.
 
-1. Go to [supabase.com](https://supabase.com) → **New project**. Name it after the firm, pick region **Mumbai (ap-south-1)**, and save the database password.
-2. **SQL Editor → New query**: paste `supabase/schema.sql` and **Run**.
-3. **Authentication → Sign In / Providers → Email**: turn **off** "Allow new users to sign up".
-4. **Authentication → Users → Add user → Create new user**: add the firm owner's email and a password, and tick **Auto Confirm User**.
-5. **SQL Editor**: run `supabase/make_admin.sql` with the owner's email in it. They become admin and can add their own staff from the **Team** page.
-6. **Project Settings → API Keys**: copy the Project URL, the anon key and the secret key for step 2.
+## Steps
 
-## 2. Their website (Netlify)
+1. Sign in at `/login` with your platform admin login and open **Firms**.
+2. Under **Add a firm**, enter the firm name. A web address is suggested from the name; change it if you like. Add the city and phone, then select **Create firm**.
+3. On the firm's page, under **Login**, enter the owner's email. Keep the generated password or type one, then select **Create login**. Send them the email and password. They sign in at `/login`.
+4. Under **Website details**, fill in their address, areas covered (comma-separated), email, office hours, founding year and, if they have one, their MahaRERA agent number. Save.
+5. Optional: select **Manage listings & enquiries** to add their first listings for them. Select **Back to all firms** when done.
 
-1. Netlify → **Add new project → Import an existing project → GitHub** → choose `prime-estates-realty`.
-2. Before deploying, open **Environment variables** and add:
+## Before their site goes live
 
-| Variable | Example | Required |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://abcd1234.supabase.co` | Yes |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key from step 1 | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | secret key from step 1 | Yes (for the Team page) |
-| `NEXT_PUBLIC_FIRM_NAME` | `Sea Breeze Realtors` | Yes |
-| `NEXT_PUBLIC_FIRM_CITY` | `Mumbai` | Yes |
-| `NEXT_PUBLIC_FIRM_PHONE` | `+91 98200 12345` (also used for WhatsApp) | Yes |
-| `NEXT_PUBLIC_FIRM_LOCALITIES` | `Andheri West, Bandra West, Powai, Juhu` | Yes |
-| `NEXT_PUBLIC_FIRM_ADDRESS` | `Shop 3, Lokhandwala Complex, Andheri West, Mumbai 400053` | Yes |
-| `NEXT_PUBLIC_FIRM_EMAIL` | `hello@seabreezerealtors.in` | Yes |
-| `NEXT_PUBLIC_FIRM_FOUNDED_YEAR` | `2015` | Yes (shown as "since 2015") |
-| `NEXT_PUBLIC_FIRM_RERA_NO` | their MahaRERA agent number | Recommended; all MahaRERA mentions stay hidden without it |
-| `NEXT_PUBLIC_FIRM_HOURS` | `Monday to Saturday, 10 am to 7 pm` | Optional |
-| `NEXT_PUBLIC_FIRM_WHATSAPP` | only if WhatsApp is a different number | Optional |
-| `NEXT_PUBLIC_FIRM_LOGO_URL` | `https://…/logo.png` | Optional |
-
-3. **Deploy.** Their site is live at `something.netlify.app` in a few minutes.
-4. Changed a variable later? Go to **Deploys → Trigger deploy → Clear cache and deploy site**. These values are built into the pages, so they only update on a new deploy.
-
-## 3. Their domain (optional)
-
-Netlify → **Domain management → Add a domain**, then add the DNS records it shows at their domain provider. HTTPS is set up automatically.
-
-## 4. Before it goes live
-
-- [ ] Every "Yes" variable above is set with the firm's **real** details (name, phone, address, founding year).
-- [ ] `NEXT_PUBLIC_DEMO_CONTENT` is **not** set on their site. It is only for your demo sites. On a live site, the sample testimonials and sample team must never appear as if real. To show real testimonials or the real team, that is a code change: ask before doing it.
+- [ ] Name, phone, address and founding year are the firm's **real** details.
+- [ ] **Demo firm** is **unticked**. It shows sample testimonials and a sample team, and is only for your own demo sites. On a real firm's site those would look like invented reviews.
 - [ ] Their first listings are added, with real photos.
-- [ ] The owner can sign in at `/login` and sees **Team** in the menu.
-- [ ] A test enquiry from the website appears under **Enquiries**.
-- [ ] Send the owner their login, and keep a copy of their keys somewhere safe (not in this repository).
+- [ ] They can sign in and see their own listings.
+- [ ] A test enquiry from their website appears under **Enquiries** in their login.
+
+## Day to day
+
+| Task | Where |
+|---|---|
+| Client forgot their password | **Logins** → open their login → **Set password** |
+| Client stops paying | Firm page → **Pause firm**. Their site goes offline and their login stops working. Nothing is deleted; **Resume firm** brings it back. |
+| Add or edit a client's listings yourself | Firm page → **Manage listings & enquiries** |
+| Client changes phone or address | They can do it themselves under **Firm profile**, or you can on their firm page |
 
 ## Demo sites for pitching
 
-The same steps, with your own Supabase project and `NEXT_PUBLIC_DEMO_CONTENT=true`, give a full-looking demo with any firm's name and city. Add 3–5 of their real listings before the meeting.
+Create a firm with the prospect's name, tick **Demo firm**, and add 3–5 of their real listings before the meeting. Untick **Demo firm** if they sign up, or delete the demo and create their real firm.
+
+## Later: subdomains
+
+Websites are path-based today (`/seabreeze`). Moving to subdomains (`seabreeze.yourbrand.in`) needs your own domain with a wildcard DNS record in Netlify, plus a small change so links on a firm's site drop the `/seabreeze` prefix (`base` in `toSite`, `lib/site.js`).

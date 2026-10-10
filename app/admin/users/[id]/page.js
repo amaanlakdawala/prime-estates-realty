@@ -1,32 +1,33 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { getAdminContext } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { toEmployee } from '@/lib/team';
+import { firmsByUser, toEmployee } from '@/lib/team';
 import { formatDate, formatDateTime, formatPrice } from '@/lib/format';
 import { RoleBadge } from '@/components/admin/UsersTable';
 import UserActions from '@/components/admin/UserActions';
 import UserProfileForm from '@/components/admin/UserProfileForm';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Team member', robots: { index: false, follow: false } };
+export const metadata = { title: 'Login', robots: { index: false, follow: false } };
 
 const STATUS_LABELS = { available: 'Available', sold: 'Sold', rented: 'Rented' };
 
-export default async function TeamMemberPage({ params }) {
+export default async function LoginDetailPage({ params }) {
   const { id } = await params;
-  const me = await getCurrentUser();
-  if (!isAdmin(me)) redirect('/admin');
+  const ctx = await getAdminContext();
+  if (!ctx?.isPlatformAdmin) redirect('/admin');
+  const me = ctx.user;
 
   // Supabase throws (rather than returning "not found") on ids that aren't UUIDs.
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) notFound();
 
   const admin = createAdminClient();
-  const { data, error } = await admin.auth.admin.getUserById(id);
+  const [{ data, error }, firms] = await Promise.all([admin.auth.admin.getUserById(id), firmsByUser(admin)]);
   if (error || !data?.user) notFound();
-  const employee = toEmployee(data.user);
+  const employee = toEmployee(data.user, firms);
 
-  // Listings this person added. Needs the created_by column from supabase/add_listing_owner.sql.
+  // Listings this person added (created_by).
   const { data: listings, error: listingsError } = await admin
     .from('listings')
     .select('id, title, locality, price, deal_type, status, created_at')
@@ -36,7 +37,9 @@ export default async function TeamMemberPage({ params }) {
 
   const details = [
     ['Email', employee.email],
-    ['Role', <RoleBadge key="role" role={employee.role} />],
+    ['Access', employee.firm
+      ? <Link key="firm" href={`/admin/firms/${employee.firm.id}`} className="font-medium text-teal underline">{employee.firm.name}</Link>
+      : <RoleBadge key="role" employee={employee} />],
     ['Added', formatDateTime(employee.created_at)],
     ['Last sign-in', employee.last_sign_in_at ? formatDateTime(employee.last_sign_in_at) : 'Never signed in'],
     ['User ID', <code key="id" className="break-all text-xs">{employee.id}</code>],
@@ -45,7 +48,9 @@ export default async function TeamMemberPage({ params }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/users" className="text-sm font-medium text-teal hover:underline">← Team</Link>
+        <Link href={employee.firm ? `/admin/firms/${employee.firm.id}` : '/admin/users'} className="text-sm font-medium text-teal hover:underline">
+          ← {employee.firm ? employee.firm.name : 'Logins'}
+        </Link>
         <h1 className="mt-2 text-2xl font-semibold">
           {employee.name || employee.email}
           {employee.id === me.id && <span className="ml-2 text-base font-normal text-muted">(you)</span>}

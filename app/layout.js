@@ -1,9 +1,9 @@
 import './globals.css';
-import { site } from '@/lib/site';
+import { PLATFORM_NAME } from '@/lib/site';
 
+// Each firm's website sets its own title in app/[firm]/layout.js; this covers sign-in and admin.
 export const metadata = {
-  title: { default: `${site.name} | Real estate brokers in ${site.city}`, template: `%s | ${site.name}` },
-  description: site.description,
+  title: { default: PLATFORM_NAME, template: `%s | ${PLATFORM_NAME}` },
 };
 
 export default function RootLayout({ children }) {

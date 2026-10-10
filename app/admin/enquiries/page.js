@@ -1,18 +1,23 @@
 import Link from 'next/link';
 import DeleteEnquiryButton from '@/components/admin/DeleteEnquiryButton';
+import { requireFirm } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { site } from '@/lib/site';
-import { whatsappLink } from '@/lib/format';
+import { formatDateTime, whatsappLink } from '@/lib/format';
 
 export const metadata = { title: 'Enquiries' };
 
 const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website' };
 
 export default async function EnquiriesPage() {
+  const ctx = await requireFirm();
+  if (!ctx) return null;
+  const site = ctx.firm;
+
   const supabase = await createClient();
   const { data: enquiries, error } = await supabase
     .from('enquiries')
     .select('*, listings(id, title)')
+    .eq('firm_id', site.id)
     .order('created_at', { ascending: false })
     .limit(200);
 
@@ -36,7 +41,7 @@ export default async function EnquiriesPage() {
                 <div>
                   <p className="font-semibold">{q.name}</p>
                   <p className="text-sm text-muted">
-                    {new Date(q.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}, {SOURCE_LABELS[q.source] ?? q.source}
+                    {formatDateTime(q.created_at)}, {SOURCE_LABELS[q.source] ?? q.source}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

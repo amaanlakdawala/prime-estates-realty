@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { removeImages } from '@/lib/storage';
 import { formatPrice } from '@/lib/format';
-import { site, PROPERTY_TYPES, AMENITIES, STORAGE_BUCKET } from '@/lib/site';
+import { PROPERTY_TYPES, AMENITIES, STORAGE_BUCKET } from '@/lib/site';
 
 const MAX_FILE_MB = 5;
 const MAX_PHOTOS = 20;
@@ -49,7 +49,9 @@ async function uploadFile(supabase, folder, file) {
   return supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-export default function ListingForm({ initial = null }) {
+// firm: the firm this listing belongs to (from the admin context, never from the browser's choice;
+// the database also refuses a listing for any firm the login doesn't belong to).
+export default function ListingForm({ firm, initial = null }) {
   const router = useRouter();
   const isEdit = !!initial;
   const [form, setForm] = useState(() => toFormState(initial));
@@ -157,7 +159,9 @@ export default function ListingForm({ initial = null }) {
 
     setSaving(true);
     const supabase = createClient();
-    const folder = initial?.id ?? (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `new-${Date.now()}`);
+    // Photos go under the firm's own folder: the storage rules only let a firm touch <firm id>/…
+    const listingFolder = initial?.id ?? (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `new-${Date.now()}`);
+    const folder = `${firm.id}/${listingFolder}`;
 
     try {
       // 1. Upload new photos in their current order
@@ -207,7 +211,7 @@ export default function ListingForm({ initial = null }) {
 
       const { error } = isEdit
         ? await supabase.from('listings').update(record).eq('id', initial.id)
-        : await supabase.from('listings').insert(record);
+        : await supabase.from('listings').insert({ ...record, firm_id: firm.id });
       if (error) throw new Error(`The listing could not be saved: ${error.message}`);
 
       // 4. Clean up photos that were removed during editing
@@ -295,8 +299,8 @@ export default function ListingForm({ initial = null }) {
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="field-label">Locality <span className="font-normal text-muted">(optional)</span></span>
-            <input className={fieldClass('locality')} list="localities" value={form.locality} onChange={set('locality')} placeholder={site.localities[0] ?? ''} />
-            <datalist id="localities">{site.localities.map((l) => <option key={l} value={l} />)}</datalist>
+            <input className={fieldClass('locality')} list="localities" value={form.locality} onChange={set('locality')} placeholder={firm.localities[0] ?? ''} />
+            <datalist id="localities">{firm.localities.map((l) => <option key={l} value={l} />)}</datalist>
             <p className="mt-1.5 text-sm text-muted">Pick from the list so the listing appears in locality searches.</p>
             <Err k="locality" />
           </label>
@@ -308,7 +312,7 @@ export default function ListingForm({ initial = null }) {
           </label>
           <label className="block sm:col-span-2">
             <span className="field-label">Full address <span className="font-normal text-muted">(optional)</span></span>
-            <input className="field" value={form.address} onChange={set('address')} placeholder={`Tower B, Green Meadows, ${site.localities[0] ?? ''}, ${site.city}`} />
+            <input className="field" value={form.address} onChange={set('address')} placeholder={['Tower B, Green Meadows', firm.localities[0], firm.city].filter(Boolean).join(', ')} />
           </label>
         </div>
       </section>

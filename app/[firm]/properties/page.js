@@ -1,10 +1,15 @@
 import Link from 'next/link';
 import PropertyCard from '@/components/PropertyCard';
-import { createClient } from '@/lib/supabase/server';
-import { site, PROPERTY_TYPES, BUY_BUDGETS, RENT_BUDGETS } from '@/lib/site';
+import { getSiteBySlug, requireSite } from '@/lib/firm';
+import { createPublicClient } from '@/lib/supabase/public';
+import { href, PROPERTY_TYPES, BUY_BUDGETS, RENT_BUDGETS } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: `Properties in ${site.city}` };
+
+export async function generateMetadata({ params }) {
+  const site = await getSiteBySlug((await params).firm);
+  return { title: site?.city ? `Properties in ${site.city}` : 'Properties' };
+}
 
 const SORTS = {
   newest: { column: 'created_at', ascending: false, label: 'Newest first' },
@@ -13,6 +18,7 @@ const SORTS = {
 };
 
 export default async function PropertiesPage(props) {
+  const site = await requireSite(props.params);
   const searchParams = await props.searchParams;
   const deal = ['buy', 'rent'].includes(searchParams.deal) ? searchParams.deal : '';
   const locality = searchParams.locality ?? '';
@@ -25,8 +31,7 @@ export default async function PropertiesPage(props) {
   let listings = [];
   let failed = false;
   try {
-    const supabase = await createClient();
-    let query = supabase.from('listings').select('*').eq('status', 'available');
+    let query = createPublicClient().from('listings').select('*').eq('firm_id', site.id).eq('status', 'available');
     if (deal) query = query.eq('deal_type', deal);
     if (locality) query = query.eq('locality', locality);
     if (type) query = query.eq('property_type', type);
@@ -48,7 +53,7 @@ export default async function PropertiesPage(props) {
     if (locality) p.set('locality', locality);
     if (type) p.set('type', type);
     if (bhk) p.set('bhk', bhk);
-    return `/properties${p.toString() ? `?${p}` : ''}`;
+    return href(site, `/properties${p.toString() ? `?${p}` : ''}`);
   };
   const hasFilters = locality || type || bhk || min || max;
 
@@ -56,7 +61,7 @@ export default async function PropertiesPage(props) {
     <div className="page py-10 sm:py-14">
       <h1 className="text-4xl font-semibold sm:text-5xl">
         {deal === 'rent' ? 'Properties for rent' : deal === 'buy' ? 'Properties for sale' : 'All properties'}
-        {locality ? ` in ${locality}` : ` in ${site.city}`}
+        {locality ? ` in ${locality}` : site.city ? ` in ${site.city}` : ''}
       </h1>
 
       <nav className="mt-6 flex gap-2" aria-label="Buy or rent">
@@ -115,19 +120,19 @@ export default async function PropertiesPage(props) {
         </label>
         <div className="flex gap-3 sm:col-span-3 lg:col-span-6">
           <button type="submit" className="btn-primary">Apply filters</button>
-          {hasFilters && <Link href={deal ? `/properties?deal=${deal}` : '/properties'} className="btn-outline">Clear filters</Link>}
+          {hasFilters && <Link href={href(site, deal ? `/properties?deal=${deal}` : '/properties')} className="btn-outline">Clear filters</Link>}
         </div>
       </form>
 
       {failed ? (
         <p className="mt-10 rounded-xl border border-red-200 bg-red-50 p-5 text-red-800" role="alert">
-          Listings could not be loaded right now. Refresh the page, or call us on {site.phoneDisplay}.
+          Listings could not be loaded right now. Refresh the page{site.phoneDisplay ? `, or call us on ${site.phoneDisplay}` : ''}.
         </p>
       ) : listings.length ? (
         <>
           <p className="mt-8 text-sm text-muted">{listings.length} {listings.length === 1 ? 'property' : 'properties'} found</p>
           <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((l) => <PropertyCard key={l.id} listing={l} />)}
+            {listings.map((l) => <PropertyCard key={l.id} site={site} listing={l} />)}
           </div>
         </>
       ) : (
@@ -135,8 +140,8 @@ export default async function PropertiesPage(props) {
           <p className="font-semibold">No properties match these filters.</p>
           <p className="mt-1 text-muted">Try a wider budget or another locality, or tell us what you need and we will find it.</p>
           <div className="mt-5 flex justify-center gap-3">
-            <Link href="/properties" className="btn-outline">Clear all filters</Link>
-            <Link href="/contact" className="btn-primary">Tell us what you need</Link>
+            <Link href={href(site, '/properties')} className="btn-outline">Clear all filters</Link>
+            <Link href={href(site, '/contact')} className="btn-primary">Tell us what you need</Link>
           </div>
         </div>
       )}

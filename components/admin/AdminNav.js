@@ -3,19 +3,25 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const LINKS = [
-  { href: '/admin', label: 'Listings', match: (p) => p === '/admin' || /^\/admin\/[^/]+\/edit/.test(p) },
+const FIRM_LINKS = [
+  { href: '/admin', label: 'Listings', match: (p) => p === '/admin' || /^\/admin\/[0-9a-f-]{36}\/edit/.test(p) },
   { href: '/admin/new', label: 'Add listing', match: (p) => p === '/admin/new' },
   { href: '/admin/enquiries', label: 'Enquiries', match: (p) => p.startsWith('/admin/enquiries') },
+  { href: '/admin/profile', label: 'Firm profile', match: (p) => p.startsWith('/admin/profile') },
 ];
 
-const ADMIN_ONLY_LINK = { href: '/admin/users', label: 'Team', match: (p) => p.startsWith('/admin/users') };
+const PLATFORM_LINKS = [
+  { href: '/admin/firms', label: 'Firms', match: (p) => p.startsWith('/admin/firms') },
+  { href: '/admin/users', label: 'Logins', match: (p) => p.startsWith('/admin/users') },
+];
 
-export default function AdminNav({ mobile = false, isAdmin = false }) {
+// Platform admin: Firms and Logins, plus the firm pages while managing a firm.
+// Firm login: only its own firm's pages.
+export default function AdminNav({ mobile = false, isPlatformAdmin = false, hasFirm = false }) {
   const pathname = usePathname();
-  const links = isAdmin ? [...LINKS, ADMIN_ONLY_LINK] : LINKS;
+  const links = [...(isPlatformAdmin ? PLATFORM_LINKS : []), ...(hasFirm ? FIRM_LINKS : [])];
   return (
-    <nav className={mobile ? 'flex gap-1' : 'hidden gap-1 md:flex'} aria-label="Admin">
+    <nav className={mobile ? 'flex flex-wrap gap-1' : 'hidden gap-1 md:flex'} aria-label="Admin">
       {links.map((l) => {
         const active = l.match(pathname);
         return (

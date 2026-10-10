@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { localityList } from '@/lib/site';
+import { requireSite } from '@/lib/firm';
+import { href, localityList } from '@/lib/site';
 
 export const metadata = { title: 'Services' };
 
-const SERVICES = [
+const services = (site) => [
   {
     id: 'buy',
     title: 'Buying a home',
@@ -28,7 +29,7 @@ const SERVICES = [
   {
     id: 'commercial',
     title: 'Commercial spaces',
-    intro: `For startups, clinics, retailers and growing teams across ${localityList(3)} and more.`,
+    intro: `For startups, clinics, retailers and growing teams across ${localityList(site, 3)} and more.`,
     points: ['Offices, shops and showrooms on lease or sale', 'Fit-out and lock-in terms negotiated', 'Parking and power load checks', 'Title and approvals verified'],
     cta: { href: '/properties?type=office', label: 'See commercial listings' },
   },
@@ -41,18 +42,19 @@ const SERVICES = [
   },
 ];
 
-export default function ServicesPage() {
+export default async function ServicesPage({ params }) {
+  const site = await requireSite(params);
   return (
     <div className="page py-14 sm:py-20">
       <h1 className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">Services</h1>
       <p className="mt-4 max-w-xl text-lg text-muted">Everything from the first site visit to the day you get the keys.</p>
       <div className="mt-12 divide-y divide-line border-y border-line">
-        {SERVICES.map((s) => (
+        {services(site).map((s) => (
           <section key={s.id} id={s.id} className="grid scroll-mt-24 gap-6 py-10 md:grid-cols-[1fr_1.3fr]">
             <div>
               <h2 className="text-2xl font-semibold sm:text-3xl">{s.title}</h2>
               <p className="mt-3 max-w-md text-muted">{s.intro}</p>
-              <Link href={s.cta.href} className="btn-primary mt-5">{s.cta.label}</Link>
+              <Link href={href(site, s.cta.href)} className="btn-primary mt-5">{s.cta.label}</Link>
             </div>
             <ul className="space-y-3 self-center">
               {s.points.map((p) => (

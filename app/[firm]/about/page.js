@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { site, localityList } from '@/lib/site';
+import { requireSite } from '@/lib/firm';
+import { href, localityList } from '@/lib/site';
 
 export const metadata = { title: 'About us' };
 
-// SAMPLE team, shown only when NEXT_PUBLIC_DEMO_CONTENT=true (demo sites). For a live firm,
-// replace with the real team before showing this section - see CLIENT_SETUP.md.
+// SAMPLE team, shown only for demo firms (demo_content). A real firm's site never shows it.
 const TEAM = [
   { name: 'Rohan Mehta', role: 'Founder and managing director', initials: 'RM' },
   { name: 'Priya Deshmukh', role: 'Head of residential sales', initials: 'PD' },
@@ -12,18 +12,20 @@ const TEAM = [
   { name: 'Neha Joshi', role: 'Rentals and client support', initials: 'NJ' },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage({ params }) {
+  const site = await requireSite(params);
+  const firstArea = site.localities[0] ?? site.city;
   return (
     <>
       <section className="page py-14 sm:py-20">
         <h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">
-          A {site.city} brokerage built on referrals since {site.foundedYear}.
+          A {site.city ? `${site.city} ` : ''}brokerage built on referrals{site.foundedYear ? ` since ${site.foundedYear}` : ''}.
         </h1>
         <div className="mt-10 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
           <div className="prose-body space-y-5">
             <p>
-              {site.name} started as a small office in {site.localities[0] ?? site.city}, helping families find homes close to
-              work and school. Today our team covers {site.city}, including {localityList(4)}.
+              {site.name} started as a small office{firstArea ? ` in ${firstArea}` : ''}, helping families find homes close to
+              work and school. Today our team covers {site.city ? `${site.city}, including ` : ''}{localityList(site, 4)}.
             </p>
             <p>
               We work with homebuyers, sellers, landlords, tenants and businesses. Whether it is a first flat or an office
@@ -71,8 +73,8 @@ export default function AboutPage() {
         <h2 className="section-title">Looking to buy, sell or rent?</h2>
         <p className="mx-auto mt-3 max-w-lg text-muted">Talk to us about what you need. The first conversation is free and carries no obligation.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/properties" className="btn-outline">Browse properties</Link>
-          <Link href="/contact" className="btn-primary">Contact us</Link>
+          <Link href={href(site, '/properties')} className="btn-outline">Browse properties</Link>
+          <Link href={href(site, '/contact')} className="btn-primary">Contact us</Link>
         </div>
       </section>
     </>
