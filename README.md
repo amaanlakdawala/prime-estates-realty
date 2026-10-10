@@ -13,6 +13,12 @@ One codebase that gives each client brokerage its own property website and a pri
 
 **`CLIENT_SETUP.md`** covers adding a client and day-to-day tasks.
 
+## Lead finder (platform admin → Leads)
+
+Finds brokerages on Google (Places API Text Search) area by area, scores them as prospects for a website (no website +3, WhatsApp-able mobile +2, 20+ reviews +1, rating ≥ 4 +1), and tracks outreach: status, follow-up date, notes, Call/WhatsApp buttons that log contact, a fill-in WhatsApp message, and **Create demo website** (a demo firm built from the lead's details). Tables: `leads`, `lead_activities`, `outreach_template`, `places_usage` (`supabase/leads.sql`, platform admin only).
+
+Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY_REQUEST_LIMIT` Google requests (default 900) are used in a month, to stay inside Google's free allowance. Google's terms allow keeping place IDs long-term; other details are meant to be refreshed, which re-running a search does.
+
 ## Pages
 
 **Each firm's website** (`/<slug>/…`): home, properties with filters, property detail (gallery, map, EMI calculator, enquiry form, WhatsApp), about, services, contact.
@@ -23,7 +29,7 @@ One codebase that gives each client brokerage its own property website and a pri
 
 You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Netlify account.
 
-1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, then `supabase/multi_tenant.sql`. Optionally run `supabase/seed.sql` first for 5 sample listings.
+1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, then `supabase/leads.sql`. Optionally run `supabase/seed.sql` after the first for 5 sample listings.
 2. **Lock sign-ups.** **Authentication → Sign In / Providers → Email**: turn off "Allow new users to sign up".
 3. **Settings.** Copy `.env.example` to `.env.local` and fill in the Supabase URL, anon key and secret key.
 4. **Your admin login.** `npm install`, then `npm run set-admin -- you@example.com 'YourPassword'`.

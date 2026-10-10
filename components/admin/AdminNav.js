@@ -11,6 +11,7 @@ const FIRM_LINKS = [
 ];
 
 const PLATFORM_LINKS = [
+  { href: '/admin/leads', label: 'Leads', match: (p) => p.startsWith('/admin/leads') },
   { href: '/admin/firms', label: 'Firms', match: (p) => p.startsWith('/admin/firms') },
   { href: '/admin/users', label: 'Logins', match: (p) => p.startsWith('/admin/users') },
 ];
