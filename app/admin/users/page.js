@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { toEmployee } from '@/lib/team';
 import UserForm from '@/components/admin/UserForm';
 import UsersTable from '@/components/admin/UsersTable';
 
@@ -18,7 +19,7 @@ export default async function UsersPage() {
     const { data, error } = await admin.auth.admin.listUsers({ perPage: 200 });
     if (error) throw error;
     employees = (data?.users ?? [])
-      .map((u) => ({ id: u.id, email: u.email, role: u.app_metadata?.role === 'admin' ? 'admin' : 'staff', created_at: u.created_at, last_sign_in_at: u.last_sign_in_at }))
+      .map(toEmployee)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   } catch (err) {
     loadError = err.message || 'Could not load the team list.';
@@ -42,6 +43,7 @@ export default async function UsersPage() {
 
         <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
           <h2 className="text-lg font-semibold">Everyone with access</h2>
+          <p className="mt-1 text-sm text-muted">Select a person to see their details, the listings they added, and to set their password or role.</p>
           {loadError ? (
             <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">{loadError}</p>
           ) : (

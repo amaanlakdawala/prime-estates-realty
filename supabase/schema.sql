@@ -27,8 +27,14 @@ create table if not exists public.listings (
   photos        text[] not null default '{}',          -- public image URLs, first one is the cover
   floor_plan    text,
   status        text not null default 'available' check (status in ('available','sold','rented')),
-  featured      boolean not null default false
+  featured      boolean not null default false,
+  created_by    uuid default auth.uid() references auth.users(id) on delete set null  -- team member who added it
 );
+
+-- For databases created before created_by existed (same as supabase/add_listing_owner.sql)
+alter table public.listings
+  add column if not exists created_by uuid default auth.uid() references auth.users(id) on delete set null;
+create index if not exists listings_created_by_idx on public.listings (created_by);
 
 create index if not exists listings_status_idx   on public.listings (status);
 create index if not exists listings_locality_idx on public.listings (locality);

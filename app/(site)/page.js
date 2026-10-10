@@ -4,7 +4,7 @@ import path from 'path';
 import PropertyCard from '@/components/PropertyCard';
 import EnquiryForm from '@/components/EnquiryForm';
 import { createClient } from '@/lib/supabase/server';
-import { site } from '@/lib/site';
+import { site, localityList } from '@/lib/site';
 
 // Drop a file named public/hero.mp4 to use a video hero, or public/hero.jpg for a single
 // full-width photo hero. Until you add one, a placeholder property photo collage is shown
@@ -29,25 +29,28 @@ const SERVICES = [
   { title: 'Buy a home', text: 'Shortlists matched to your budget and commute, site visits arranged around your schedule.', href: '/services#buy' },
   { title: 'Sell your property', text: 'A fair price based on recent deals nearby, and serious buyers only.', href: '/services#sell' },
   { title: 'Rent or let out', text: 'Tenant checks, rent agreements and police verification handled for you.', href: '/services#rent' },
-  { title: 'Commercial spaces', text: 'Offices, shops and showrooms on lease or for sale across Pune.', href: '/services#commercial' },
+  { title: 'Commercial spaces', text: `Offices, shops and showrooms on lease or for sale across ${site.city}.`, href: '/services#commercial' },
 ];
 
 const REASONS = [
-  { title: 'MahaRERA registered', text: `Registered agent no. ${site.mahareraAgentNo}. Every project we show carries its RERA number.` },
+  site.mahareraAgentNo && { title: 'MahaRERA registered', text: `Registered agent no. ${site.mahareraAgentNo}. Every project we show carries its RERA number.` },
   { title: 'Listings we have visited', text: 'Our team visits every property before it goes on this site, so the photos match what you will see.' },
   { title: 'Brokerage agreed upfront', text: 'You know our fee before your first site visit. There are no charges added later.' },
   { title: 'Paperwork to possession', text: 'We coordinate home loans, agreement registration and society transfer until you get the keys.' },
-];
+].filter(Boolean);
 
+// SAMPLE quotes, shown only when NEXT_PUBLIC_DEMO_CONTENT=true (demo sites). A live firm's site
+// shows this section only once real client quotes (with permission) replace these - see CLIENT_SETUP.md.
+const area = (i) => site.localities[i] ?? site.city;
 const TESTIMONIALS = [
-  { quote: 'They showed us only homes that fit our budget and my wife’s commute to Hinjewadi. We booked our flat in two weekends.', name: 'Rohit and Sneha K.', detail: 'Bought a 2 BHK in Wakad' },
-  { quote: 'Sold my parents’ flat in Kothrud while I was working in Bengaluru. Every step was explained on WhatsApp.', name: 'Anjali M.', detail: 'Sold a 3 BHK in Kothrud' },
-  { quote: 'Found an office for our team of twelve in Baner within a week, and the lease terms were clearly negotiated.', name: 'Karan S.', detail: 'Leased an office in Baner' },
+  { quote: 'They showed us only homes that fit our budget and our commute. We booked our flat in two weekends.', name: 'Rohit and Sneha K.', detail: `Bought a 2 BHK in ${area(0)}` },
+  { quote: 'Sold my parents’ flat while I was working in another city. Every step was explained on WhatsApp.', name: 'Anjali M.', detail: `Sold a 3 BHK in ${area(1)}` },
+  { quote: 'Found an office for our team of twelve within a week, and the lease terms were clearly negotiated.', name: 'Karan S.', detail: `Leased an office in ${area(2)}` },
 ];
 
 async function getHomeData() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const [featured, latest] = await Promise.all([
       supabase.from('listings').select('*').eq('status', 'available').eq('featured', true).order('created_at', { ascending: false }).limit(6),
       supabase.from('listings').select('*').eq('status', 'available').order('created_at', { ascending: false }).limit(6),
@@ -71,10 +74,10 @@ export default async function HomePage() {
           <div className="page grid gap-12 py-14 sm:py-20 lg:grid-cols-2 lg:items-center lg:gap-16">
             <div>
               <p className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-marigold">
-                Trusted Pune brokerage since {site.foundedYear}
+                Trusted {site.city} brokerage since {site.foundedYear}
               </p>
               <h1 className="mt-5 max-w-xl text-4xl font-semibold leading-[1.05] sm:text-6xl">
-                Find a home in Pune with a broker who knows the neighbourhood.
+                Find a home in {site.city} with a broker who knows the neighbourhood.
               </h1>
               <p className="mt-5 max-w-xl text-lg text-white/75">
                 Flats, villas, plots and commercial spaces for sale and rent, visited and verified by our team.
@@ -86,7 +89,7 @@ export default async function HomePage() {
                 </a>
               </div>
               <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/10 pt-6 text-sm font-semibold text-white/80">
-                <li>MahaRERA registered</li>
+                {site.mahareraAgentNo && <li>MahaRERA registered</li>}
                 <li>Every listing visited by our team</li>
                 <li>Brokerage agreed upfront</li>
               </ul>
@@ -124,7 +127,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-basalt/90 via-basalt/20 to-transparent" />
           <div className="page relative pb-12 sm:pb-16">
             <h1 className="max-w-3xl text-4xl font-semibold leading-[1.05] sm:text-6xl">
-              Find a home in Pune with a broker who knows the neighbourhood.
+              Find a home in {site.city} with a broker who knows the neighbourhood.
             </h1>
             <p className="mt-5 max-w-xl text-lg text-white/75">
               Flats, villas, plots and commercial spaces for sale and rent, visited and verified by our team.
@@ -174,9 +177,9 @@ export default async function HomePage() {
       {/* Why choose us */}
       <section className="page grid gap-10 py-16 sm:py-20 lg:grid-cols-[1fr_1.4fr]">
         <div>
-          <h2 className="section-title">Why families in Pune choose us</h2>
+          <h2 className="section-title">Why families in {site.city} choose us</h2>
           <p className="mt-4 text-lg text-muted">
-            We have been closing deals in Pune’s western and eastern suburbs since {site.foundedYear}. Most of our clients come through referrals.
+            We have been closing deals across {localityList(3)} since {site.foundedYear}. Most of our clients come through referrals.
           </p>
         </div>
         <dl className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
@@ -189,23 +192,25 @@ export default async function HomePage() {
         </dl>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-teal text-white">
-        <div className="page py-16 sm:py-20">
-          <h2 className="section-title">What our clients say</h2>
-          <div className="mt-8 grid gap-8 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <figure key={t.name} className="flex flex-col">
-                <blockquote className="flex-1 font-display text-xl leading-snug">“{t.quote}”</blockquote>
-                <figcaption className="mt-5 text-sm">
-                  <span className="font-semibold">{t.name}</span>
-                  <span className="block text-white/70">{t.detail}</span>
-                </figcaption>
-              </figure>
-            ))}
+      {/* Testimonials (sample quotes: demo sites only) */}
+      {site.demoContent && (
+        <section className="bg-teal text-white">
+          <div className="page py-16 sm:py-20">
+            <h2 className="section-title">What our clients say</h2>
+            <div className="mt-8 grid gap-8 md:grid-cols-3">
+              {TESTIMONIALS.map((t) => (
+                <figure key={t.name} className="flex flex-col">
+                  <blockquote className="flex-1 font-display text-xl leading-snug">“{t.quote}”</blockquote>
+                  <figcaption className="mt-5 text-sm">
+                    <span className="font-semibold">{t.name}</span>
+                    <span className="block text-white/70">{t.detail}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Callback */}
       <section className="page grid gap-10 py-16 sm:py-20 lg:grid-cols-2">

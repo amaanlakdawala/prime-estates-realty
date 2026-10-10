@@ -6,8 +6,9 @@ import { createClient } from '@/lib/supabase/server';
 export const metadata = { title: 'Edit listing' };
 
 export default async function EditListingPage({ params }) {
-  const supabase = createClient();
-  const { data: listing } = await supabase.from('listings').select('*').eq('id', params.id).maybeSingle();
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: listing } = await supabase.from('listings').select('*').eq('id', id).maybeSingle();
   if (!listing) notFound();
 
   return (

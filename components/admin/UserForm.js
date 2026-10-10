@@ -1,20 +1,16 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createEmployee } from '@/app/admin/users/actions';
-
-function generatePassword() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-  let out = '';
-  for (let i = 0; i < 12; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return out;
-}
+import { generatePassword } from '@/lib/password';
 
 export default function UserForm() {
   const router = useRouter();
   const formRef = useRef(null);
-  const [password, setPassword] = useState(generatePassword);
+  const [password, setPassword] = useState('');
+  // Generated after load so the server-rendered and browser values don't differ.
+  useEffect(() => setPassword(generatePassword()), []);
   const [error, setError] = useState('');
   const [created, setCreated] = useState(null);
   const [pending, startTransition] = useTransition();
@@ -40,6 +36,14 @@ export default function UserForm() {
   return (
     <form ref={formRef} onSubmit={onSubmit} className="mt-5 space-y-4">
       <label className="block">
+        <span className="field-label">Full name</span>
+        <input name="full_name" type="text" className="field" placeholder="Priya Deshmukh" autoComplete="off" />
+      </label>
+      <label className="block">
+        <span className="field-label">Phone <span className="font-normal text-muted">(optional)</span></span>
+        <input name="phone" type="tel" className="field" placeholder="+91 98765 43210" autoComplete="off" />
+      </label>
+      <label className="block">
         <span className="field-label">Email</span>
         <input name="email" type="email" required className="field" placeholder="employee@primeestatesrealty.com" />
       </label>
@@ -49,7 +53,7 @@ export default function UserForm() {
           <input name="password" type="text" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="field" />
           <button type="button" className="btn-outline whitespace-nowrap" onClick={() => setPassword(generatePassword())}>New</button>
         </div>
-        <p className="mt-1.5 text-sm text-muted">Share this with them directly. They can change it later from Supabase, or you can create a new one here.</p>
+        <p className="mt-1.5 text-sm text-muted">Share this with them directly. If they forget it, open their page from the list and set a new one.</p>
       </label>
       <fieldset>
         <legend className="field-label">Access level</legend>

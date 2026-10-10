@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { localityList } from '@/lib/site';
 
 export const metadata = { title: 'Services' };
 
@@ -27,7 +28,7 @@ const SERVICES = [
   {
     id: 'commercial',
     title: 'Commercial spaces',
-    intro: 'For startups, clinics, retailers and growing teams across Baner, Kharadi, Viman Nagar and more.',
+    intro: `For startups, clinics, retailers and growing teams across ${localityList(3)} and more.`,
     points: ['Offices, shops and showrooms on lease or sale', 'Fit-out and lock-in terms negotiated', 'Parking and power load checks', 'Title and approvals verified'],
     cta: { href: '/properties?type=office', label: 'See commercial listings' },
   },

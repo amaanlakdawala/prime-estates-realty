@@ -41,7 +41,7 @@ export default function HeroSearch() {
         <label className="block">
           <span className="field-label">Locality</span>
           <select className="field" value={locality} onChange={(e) => setLocality(e.target.value)}>
-            <option value="">All of Pune</option>
+            <option value="">All of {site.city}</option>
             {site.localities.map((l) => <option key={l} value={l}>{l}</option>)}
           </select>
         </label>

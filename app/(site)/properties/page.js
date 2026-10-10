@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { site, PROPERTY_TYPES, BUY_BUDGETS, RENT_BUDGETS } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Properties in Pune' };
+export const metadata = { title: `Properties in ${site.city}` };
 
 const SORTS = {
   newest: { column: 'created_at', ascending: false, label: 'Newest first' },
@@ -12,7 +12,8 @@ const SORTS = {
   price_desc: { column: 'price', ascending: false, label: 'Price: high to low' },
 };
 
-export default async function PropertiesPage({ searchParams }) {
+export default async function PropertiesPage(props) {
+  const searchParams = await props.searchParams;
   const deal = ['buy', 'rent'].includes(searchParams.deal) ? searchParams.deal : '';
   const locality = searchParams.locality ?? '';
   const type = searchParams.type ?? '';
@@ -24,7 +25,7 @@ export default async function PropertiesPage({ searchParams }) {
   let listings = [];
   let failed = false;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     let query = supabase.from('listings').select('*').eq('status', 'available');
     if (deal) query = query.eq('deal_type', deal);
     if (locality) query = query.eq('locality', locality);
@@ -55,7 +56,7 @@ export default async function PropertiesPage({ searchParams }) {
     <div className="page py-10 sm:py-14">
       <h1 className="text-4xl font-semibold sm:text-5xl">
         {deal === 'rent' ? 'Properties for rent' : deal === 'buy' ? 'Properties for sale' : 'All properties'}
-        {locality ? ` in ${locality}` : ' in Pune'}
+        {locality ? ` in ${locality}` : ` in ${site.city}`}
       </h1>
 
       <nav className="mt-6 flex gap-2" aria-label="Buy or rent">

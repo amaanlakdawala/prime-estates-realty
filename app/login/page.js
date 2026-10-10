@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Logo from '@/components/Logo';
+import AuthCard from '@/components/AuthCard';
 import { createClient } from '@/lib/supabase/client';
 
 function LoginForm() {
@@ -21,7 +21,7 @@ function LoginForm() {
     const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (authError) {
       setLoading(false);
-      setError('Email or password is incorrect. Ask your admin to reset your password if you have forgotten it.');
+      setError('Email or password is incorrect.');
       return;
     }
     const next = params.get('next');
@@ -41,23 +41,15 @@ function LoginForm() {
       </label>
       {error && <p className="text-sm font-medium text-red-700" role="alert">{error}</p>}
       <button type="submit" className="btn-primary w-full" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+      <p className="text-center text-sm text-muted">Forgot your password? Ask your admin to set a new one.</p>
     </form>
   );
 }
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stone px-5">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex justify-center"><Logo /></div>
-        <div className="rounded-xl border border-line bg-white p-6 sm:p-7">
-          <h1 className="text-2xl font-semibold">Employee sign in</h1>
-          <p className="mt-1 text-sm text-muted">For staff managing property listings.</p>
-          <div className="mt-6">
-            <Suspense fallback={null}><LoginForm /></Suspense>
-          </div>
-        </div>
-      </div>
-    </main>
+    <AuthCard title="Employee sign in" subtitle="For staff managing property listings.">
+      <Suspense fallback={null}><LoginForm /></Suspense>
+    </AuthCard>
   );
 }

@@ -9,7 +9,7 @@ export const metadata = { title: 'Enquiries' };
 const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website' };
 
 export default async function EnquiriesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: enquiries, error } = await supabase
     .from('enquiries')
     .select('*, listings(id, title)')

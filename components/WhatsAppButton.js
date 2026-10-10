@@ -12,7 +12,7 @@ export function WhatsAppIcon({ size = 22 }) {
 export default function WhatsAppButton() {
   return (
     <a
-      href={whatsappLink(site.whatsapp, `Hello ${site.name}, I'm looking for a property in Pune.`)}
+      href={whatsappLink(site.whatsapp, `Hello ${site.name}, I'm looking for a property in ${site.city}.`)}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-5 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1E8E4E] text-white shadow-lg hover:bg-[#177540]"

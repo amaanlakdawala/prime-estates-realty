@@ -295,7 +295,7 @@ export default function ListingForm({ initial = null }) {
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="field-label">Locality <span className="font-normal text-muted">(optional)</span></span>
-            <input className={fieldClass('locality')} list="localities" value={form.locality} onChange={set('locality')} placeholder="Baner" />
+            <input className={fieldClass('locality')} list="localities" value={form.locality} onChange={set('locality')} placeholder={site.localities[0] ?? ''} />
             <datalist id="localities">{site.localities.map((l) => <option key={l} value={l} />)}</datalist>
             <p className="mt-1.5 text-sm text-muted">Pick from the list so the listing appears in locality searches.</p>
             <Err k="locality" />
@@ -308,7 +308,7 @@ export default function ListingForm({ initial = null }) {
           </label>
           <label className="block sm:col-span-2">
             <span className="field-label">Full address <span className="font-normal text-muted">(optional)</span></span>
-            <input className="field" value={form.address} onChange={set('address')} placeholder="Tower B, Green Meadows, Baner–Pashan Link Road, Baner, Pune 411045" />
+            <input className="field" value={form.address} onChange={set('address')} placeholder={`Tower B, Green Meadows, ${site.localities[0] ?? ''}, ${site.city}`} />
           </label>
         </div>
       </section>

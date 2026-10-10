@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import PropertyImage from './PropertyImage';
 import { formatPrice, shortSpecs } from '@/lib/format';
+import { site } from '@/lib/site';
 
 export default function PropertyCard({ listing }) {
   return (
@@ -18,7 +19,7 @@ export default function PropertyCard({ listing }) {
             {listing.title}
           </Link>
         </h3>
-        <p className="mt-1 text-sm text-muted">{listing.locality}, Pune</p>
+        <p className="mt-1 text-sm text-muted">{listing.locality}, {site.city}</p>
         <ul className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4 text-sm text-basalt/80">
           {shortSpecs(listing).map((s) => (
             <li key={s} className="rounded-md bg-stone px-2.5 py-1">{s}</li>

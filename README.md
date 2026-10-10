@@ -2,7 +2,7 @@
 
 A complete website for a Pune real estate brokerage, with a private admin dashboard where employees add, edit, hide and delete property listings.
 
-**Built with:** Next.js 14 (website), Supabase (database, employee logins, photo storage), Tailwind CSS (styling). Hosted on Vercel.
+**Built with:** Next.js 15 (website), Supabase (database, employee logins, photo storage), Tailwind CSS (styling). Hosted on Vercel.
 
 ## What's included
 
@@ -39,13 +39,11 @@ You need: a free [GitHub](https://github.com) account, a free [Supabase](https:/
 4. Open http://localhost:3000 for the website and http://localhost:3000/login for the admin.
 
 ### 4. Put in the firm's real details
-Everything firm-specific is in **`lib/site.js`**: name, phone, WhatsApp number, email, address, office hours, MahaRERA number, founding year and the list of localities. Change them once there and they update across the site.
+The firm's name, city, phone/WhatsApp, email, address, office hours, MahaRERA number, founding year, localities and logo are **environment variables** (`NEXT_PUBLIC_FIRM_…`), so one codebase serves every client. Set them in `.env.local` locally and in Netlify for each live site. **`CLIENT_SETUP.md`** has the full list and the steps for setting up a new firm.
 
-Also replace the placeholder text in:
-- `app/(site)/about/page.js` — team names and roles, firm story
-- `app/(site)/page.js` — testimonials (use real client quotes with their permission)
+Sample testimonials and a sample team appear only when `NEXT_PUBLIC_DEMO_CONTENT=true` (demo sites). MahaRERA mentions appear only once `NEXT_PUBLIC_FIRM_RERA_NO` is set.
 
-For a photo behind the home page headline, add an image named **`hero.jpg`** to the `public/` folder (a wide Pune skyline or building photo, ideally around 2000 px wide and under 400 KB).
+For a photo behind the home page headline, add an image named **`hero.jpg`** to the `public/` folder (a wide skyline or building photo, ideally around 2000 px wide and under 400 KB).
 
 ### 5. Deploy to Vercel
 1. Create a new **private** repository on GitHub and upload this folder (without `node_modules` or `.env.local`):

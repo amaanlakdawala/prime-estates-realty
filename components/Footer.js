@@ -9,9 +9,9 @@ export default function Footer() {
         <div>
           <Logo light />
           <p className="mt-4 max-w-sm text-[15px] leading-relaxed">
-            Helping families and businesses buy, sell and rent property across Pune since {site.foundedYear}.
+            Helping families and businesses buy, sell and rent property across {site.city} since {site.foundedYear}.
           </p>
-          <p className="mt-4 text-sm text-white/60">MahaRERA agent registration no. {site.mahareraAgentNo}</p>
+          {site.mahareraAgentNo && <p className="mt-4 text-sm text-white/60">MahaRERA agent registration no. {site.mahareraAgentNo}</p>}
         </div>
         <div>
           <h2 className="font-display text-base font-semibold text-white">Explore</h2>

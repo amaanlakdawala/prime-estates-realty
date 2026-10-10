@@ -2,7 +2,7 @@ import './globals.css';
 import { site } from '@/lib/site';
 
 export const metadata = {
-  title: { default: `${site.name} | Real estate brokers in Pune`, template: `%s | ${site.name}` },
+  title: { default: `${site.name} | Real estate brokers in ${site.city}`, template: `%s | ${site.name}` },
   description: site.description,
 };
 

@@ -3,7 +3,7 @@ import ListingsTable from '@/components/admin/ListingsTable';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function AdminListingsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: listings, error } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
 
   return (

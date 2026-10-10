@@ -12,19 +12,19 @@ export const dynamic = 'force-dynamic';
 
 async function getListing(id) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase.from('listings').select('*').eq('id', id).eq('status', 'available').maybeSingle();
   return data;
 }
 
 export async function generateMetadata({ params }) {
-  const listing = await getListing(params.id);
+  const listing = await getListing((await params).id);
   if (!listing) return { title: 'Property not found' };
   return { title: `${listing.title}, ${listing.locality}`, description: listing.description?.slice(0, 160) };
 }
 
 export default async function PropertyPage({ params }) {
-  const listing = await getListing(params.id);
+  const listing = await getListing((await params).id);
   if (!listing) notFound();
 
   const specs = [
@@ -40,7 +40,7 @@ export default async function PropertyPage({ params }) {
   const mapSrc =
     listing.latitude && listing.longitude
       ? `https://maps.google.com/maps?q=${listing.latitude},${listing.longitude}&z=15&output=embed`
-      : `https://maps.google.com/maps?q=${encodeURIComponent(`${listing.address || listing.locality}, Pune`)}&z=14&output=embed`;
+      : `https://maps.google.com/maps?q=${encodeURIComponent(`${listing.address || listing.locality}, ${site.city}`)}&z=14&output=embed`;
 
   const waText = `Hello ${site.name}, I'm interested in "${listing.title}" in ${listing.locality} (${formatPrice(listing.price, listing.deal_type)}). Is it still available?`;
 
@@ -55,7 +55,7 @@ export default async function PropertyPage({ params }) {
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold sm:text-4xl">{listing.title}</h1>
-          <p className="mt-2 text-muted">{listing.address || `${listing.locality}, Pune`}</p>
+          <p className="mt-2 text-muted">{listing.address || `${listing.locality}, ${site.city}`}</p>
         </div>
         <div className="text-right">
           <p className="font-display text-3xl font-semibold text-teal sm:text-4xl">{formatPrice(listing.price, listing.deal_type)}</p>
