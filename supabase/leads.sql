@@ -44,10 +44,13 @@ create table if not exists public.outreach_template (
   id    smallint primary key default 1 check (id = 1),
   body  text not null
 );
+-- {a|b|c} = wording that varies from lead to lead (see spin() in lib/leads.js).
 insert into public.outreach_template (id, body) values (1,
-'Namaste {name} ji, I build websites for property brokers in {city}. I made a free sample website for {firm}: {demo_link}
+'{Namaste|Hello|Hi} {name} ji, I build websites for property brokers in {city}. I made a free sample website for {firm}: {demo_link}
 
-Your own website means your enquiries come straight to you, not shared like on portals. Can I show you in 10 minutes this week?')
+{Your own website means your enquiries come straight to you, not shared like on portals.|With your own website, enquiries come straight to you instead of being shared on portals.|A website of your own means buyers contact you directly, not five brokers at once.} {Can I show you in 10 minutes this week?|Could we talk for 10 minutes this week?|Would you have 10 minutes this week for a quick look?}
+
+Reply STOP if you''d rather not hear from me.')
 on conflict (id) do nothing;
 
 -- Google requests per month, so the dashboard can stay inside the free allowance.

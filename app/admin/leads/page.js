@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getAdminContext } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -40,6 +41,7 @@ export default async function LeadsPage() {
           <h1 className="text-3xl font-semibold">Leads</h1>
           <p className="mt-1 text-muted">Brokerages found on Google, to pitch your website service to.</p>
         </div>
+        <Link href="/admin/leads/outreach" className="btn-whatsapp">Start send queue</Link>
         <div className="min-w-[220px] text-sm">
           <p className="text-muted">Google searches this month</p>
           <p className="font-semibold">{used} of {MONTHLY_LIMIT}</p>

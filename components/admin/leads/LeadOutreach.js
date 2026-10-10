@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createDemoSite, logContact } from '@/app/admin/leads/actions';
-import { cleanName, fillTemplate, whatsappNumber } from '@/lib/leads';
+import { buildMessage, whatsappNumber } from '@/lib/leads';
 
 // The outreach message with this lead's details filled in, plus WhatsApp, Call and demo-site buttons.
 // Each WhatsApp/Call tap is recorded on the lead (and a New lead becomes Contacted).
@@ -19,8 +19,7 @@ export default function LeadOutreach({ lead, template, demoFirm }) {
   const blocked = lead.status === 'do_not_contact';
   const wa = whatsappNumber(lead.phone_intl);
   const demoLink = demoFirm && origin ? `${origin}/${demoFirm.slug}` : '';
-  const name = cleanName(lead.name);
-  const message = fillTemplate(template, { name, firm: name, city: lead.city, demo_link: demoLink || '[create the demo website first]' });
+  const message = buildMessage(template, lead, demoLink);
 
   function contact(kind) {
     setError('');

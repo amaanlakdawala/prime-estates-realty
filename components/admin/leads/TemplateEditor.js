@@ -27,6 +27,10 @@ export default function TemplateEditor({ initial }) {
         <code className="rounded bg-stone px-1">{'{firm}'}</code> (same), <code className="rounded bg-stone px-1">{'{city}'}</code> and{' '}
         <code className="rounded bg-stone px-1">{'{demo_link}'}</code> (their demo website, once created).
       </p>
+      <p className="mt-2 text-sm text-muted">
+        Write <code className="rounded bg-stone px-1">{'{Hello|Namaste|Hi}'}</code> to vary the wording: each lead gets one of the options, so your messages
+        aren&apos;t all identical. If the message has no line with “STOP”, an opt-out line is added automatically.
+      </p>
       <textarea className="field mt-4 min-h-[150px]" value={body} onChange={(e) => setBody(e.target.value)} />
       <div className="mt-3 flex items-center gap-3">
         <button type="button" className="btn-primary" onClick={save} disabled={pending || body === initial}>{pending ? 'Saving…' : 'Save message'}</button>

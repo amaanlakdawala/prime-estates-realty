@@ -136,6 +136,31 @@ export async function logContact(leadId, kind) {
   }
 }
 
+// Send queue: you sent the message yourself in WhatsApp; this records it, marks the lead
+// Contacted and books the follow-up.
+export async function markWhatsAppSent(leadId, { followUpDays = 3, message = '' } = {}) {
+  try {
+    await requirePlatformAdmin();
+    if (!UUID.test(leadId)) throw new Error('Unknown lead.');
+    const db = createAdminClient();
+    const { data: lead } = await db.from('leads').select('status').eq('id', leadId).single();
+    if (lead?.status === 'do_not_contact') throw new Error('This lead asked not to be contacted.');
+
+    const followUp = new Date(Date.now() + Math.min(Math.max(Number(followUpDays) || 3, 1), 30) * 86400000)
+      .toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }); // YYYY-MM-DD in Indian time
+    const update = { last_contacted_at: new Date().toISOString(), next_follow_up: followUp };
+    if (['new', 'contacted'].includes(lead?.status)) update.status = 'contacted';
+    const { error } = await db.from('leads').update(update).eq('id', leadId);
+    if (error) throw error;
+
+    await logActivity(db, leadId, 'whatsapp', `Sent from the send queue:\n${message.toString().slice(0, 1500)}`);
+    if (lead?.status === 'new') await logActivity(db, leadId, 'status', 'New → Contacted');
+    return { success: true, followUp };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
 // A demo website for the lead, filled with their details, to send before the first call.
 export async function createDemoSite(leadId) {
   try {
