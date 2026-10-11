@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import DeleteEnquiryButton from '@/components/admin/DeleteEnquiryButton';
+import CallEnquiryButton from '@/components/admin/calls/CallEnquiryButton';
 import { requireFirm } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { formatDateTime, whatsappLink } from '@/lib/format';
@@ -47,6 +48,7 @@ export default async function EnquiriesPage() {
                 <div className="flex flex-wrap gap-2">
                   <a href={`tel:${q.phone}`} className="btn-outline py-2">Call {q.phone}</a>
                   <a href={whatsappLink(wa, `Hello ${q.name}, this is ${site.name} replying to your enquiry.`)} target="_blank" rel="noopener noreferrer" className="btn-whatsapp py-2">WhatsApp</a>
+                  {site.aiCallsEnabled && <CallEnquiryButton enquiryId={q.id} />}
                   <DeleteEnquiryButton id={q.id} />
                 </div>
               </div>

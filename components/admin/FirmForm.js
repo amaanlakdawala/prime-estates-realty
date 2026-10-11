@@ -47,6 +47,31 @@ export default function FirmForm({ firm, adminFields = false }) {
       {field('logo_url', 'Logo image link', firm.logoUrl, { optional: true, placeholder: 'https://…/logo.png' })}
       {field('hero_url', 'Home page photo or video link', firm.heroUrl, { optional: true, wide: true, placeholder: 'https://…/building.jpg or …/tour.mp4', hint: 'Shown behind the headline. Empty = sample photo collage.' })}
       {adminFields && (
+        <fieldset className="rounded-lg border border-line p-4 sm:col-span-2">
+          <legend className="px-1 font-medium">AI calling</legend>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input type="checkbox" name="ai_calls_enabled" defaultChecked={firm.aiCallsEnabled} className="mt-1 h-4 w-4 accent-teal" />
+            <span>
+              <span className="block font-medium">Allow this firm to place AI calls</span>
+              <span className="text-sm text-muted">Calls are billed to your ElevenLabs and Twilio accounts.</span>
+            </span>
+          </label>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="field-label">Calls per month (limit)</span>
+              <input name="ai_calls_monthly_limit" type="number" min="0" defaultValue={firm.aiCallsMonthlyLimit} className="field" />
+            </label>
+            <label className="block">
+              <span className="field-label">Voice</span>
+              <select name="voice_agent" defaultValue={firm.voiceAgent} className="field">
+                <option value="sia">Sia</option>
+                <option value="simran">Simran</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+      )}
+      {adminFields && (
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-marigold has-[:checked]:bg-marigold/10">
           <input type="checkbox" name="demo_content" defaultChecked={firm.demoContent} className="mt-1 h-4 w-4 accent-teal" />
           <span>

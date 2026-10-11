@@ -77,6 +77,10 @@ export async function updateFirm(firmId, formData) {
     if (badSlug) return { error: badSlug };
     fields.slug = slug;
     fields.demo_content = formData.get('demo_content') === 'on';
+    // AI calling costs the platform owner money, so only the platform admin switches it on and sets the cap.
+    fields.ai_calls_enabled = formData.get('ai_calls_enabled') === 'on';
+    fields.ai_calls_monthly_limit = Math.min(Math.max(Number.parseInt(text(formData, 'ai_calls_monthly_limit', 6), 10) || 0, 0), 100000);
+    fields.voice_agent = text(formData, 'voice_agent', 10) === 'simran' ? 'simran' : 'sia';
   }
 
   const { error } = await createAdminClient().from('firms').update(fields).eq('id', firmId);

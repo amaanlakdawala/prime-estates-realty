@@ -7,6 +7,7 @@ const FIRM_LINKS = [
   { href: '/admin', label: 'Listings', match: (p) => p === '/admin' || /^\/admin\/[0-9a-f-]{36}\/edit/.test(p) },
   { href: '/admin/new', label: 'Add listing', match: (p) => p === '/admin/new' },
   { href: '/admin/enquiries', label: 'Enquiries', match: (p) => p.startsWith('/admin/enquiries') },
+  { href: '/admin/calls', label: 'AI calls', match: (p) => p.startsWith('/admin/calls') },
   { href: '/admin/profile', label: 'Firm profile', match: (p) => p.startsWith('/admin/profile') },
 ];
 
