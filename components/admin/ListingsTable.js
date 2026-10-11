@@ -161,6 +161,7 @@ export default function ListingsTable({ listings }) {
                           </button>
                         )}
                         <Link href={`/admin/${l.id}/edit`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt">Edit</Link>
+                        <Link href={`/admin/${l.id}/reel`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt">Make reel</Link>
                         <button type="button" onClick={() => setToDelete(l)} className="rounded-md border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:border-red-700">Delete</button>
                       </div>
                     </td>

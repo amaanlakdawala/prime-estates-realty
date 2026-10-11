@@ -13,6 +13,10 @@ One codebase that gives each client brokerage its own property website and a pri
 
 **`CLIENT_SETUP.md`** covers adding a client and day-to-day tasks.
 
+## Listing reels (Listings → Make reel)
+
+Every listing has a **Make reel** button. It turns the listing's photos into a 1080×1920 Instagram reel with the headline, location, price, one fact per photo (BHK and size, amenities, floor) and a closing card with the firm's phone number and website, plus the MahaRERA numbers when filled in. Firms pick the photos and their order, the corner label (Just listed, Price drop, Sold…), speed and style (full screen or framed), preview it live, then download the MP4 or share it from a phone. A ready-to-paste caption with five hashtags is generated alongside. The video is encoded in the browser with WebCodecs ([Mediabunny](https://mediabunny.dev)), so it costs nothing per reel and nothing is uploaded; it works in Chrome, Edge and Safari. Reels have no sound, so firms add a trending song in Instagram when posting. Drawing code: `lib/reel.js`; screen: `components/admin/reel/ReelMaker.js`. Photos linked from other websites only work if that site allows it (CORS); uploaded photos and Unsplash always do.
+
 ## AI calls (firm admin → AI calls)
 
 Riya, an ElevenLabs voice agent, phones a firm's clients over Twilio in Hindi, English or Hinglish. Firms add clients by hand, upload a CSV (phone plus optional name, why calling, looking for), or press **AI call** on a website enquiry. Calls run one at a time; after each call the summary, the extracted requirement (buy/rent, area, project, BHK, budget, timeline, site visit, callback time) and the transcript appear on the page. One agent serves all firms: firm and contact details are passed per call as dynamic variables (`lib/voice.js`), and the agent looks up that firm's listings through `/api/voice/listings`.
