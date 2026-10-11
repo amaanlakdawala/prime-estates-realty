@@ -19,6 +19,8 @@ Riya, an ElevenLabs voice agent, phones a firm's clients over Twilio in Hindi, E
 
 Safeguards: consent confirmation on every add/upload, calls only 9 am–9 pm IST, people who ask not to be called are marked "Do not call" automatically, and calling is off per firm until the platform admin switches it on (with a monthly cap) on the firm's page. Tables: `call_contacts`, `calls` (`supabase/ai_calls.sql`). Needs `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID_SIA`, `ELEVENLABS_AGENT_ID_SIMRAN`, `ELEVENLABS_PHONE_NUMBER_ID`.
 
+**Automatic callback for website enquiries.** A firm can switch on "Call new website enquiries automatically" on its AI calls page. A database trigger (`supabase/auto_call.sql`) then queues a call about a minute after each enquiry (enquiries at night wait until 9 am IST). Supabase pg_cron pings `/api/voice/process-queue` every minute while there is work (`supabase/auto_call_cron.sql`), which places due calls through the same safeguards as the Call button and saves finished calls' results. Each number is auto-called at most once a day, only one call per firm runs at a time, technical failures are retried twice 10 minutes apart, and anything not placed within 24 hours is dropped. Needs `CRON_SECRET` in the site env and in the cron SQL.
+
 ## Lead finder (platform admin → Leads)
 
 Finds brokerages on Google (Places API Text Search) area by area, scores them as prospects for a website (no website +3, WhatsApp-able mobile +2, 20+ reviews +1, rating ≥ 4 +1), and tracks outreach: status, follow-up date, notes, Call/WhatsApp buttons that log contact, a fill-in WhatsApp message, and **Create demo website** (a demo firm built from the lead's details). Tables: `leads`, `lead_activities`, `outreach_template`, `places_usage` (`supabase/leads.sql`, platform admin only).
@@ -35,7 +37,7 @@ Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY
 
 You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Netlify account.
 
-1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, then `supabase/ai_calls.sql`. Optionally run `supabase/seed.sql` after the first for 5 sample listings.
+1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, then `supabase/auto_call.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Optionally run `supabase/seed.sql` after the first for 5 sample listings.
 2. **Lock sign-ups.** **Authentication → Sign In / Providers → Email**: turn off "Allow new users to sign up".
 3. **Settings.** Copy `.env.example` to `.env.local` and fill in the Supabase URL, anon key and secret key.
 4. **Your admin login.** `npm install`, then `npm run set-admin -- you@example.com 'YourPassword'`.

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getAdminContext } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { callVariables, placeCall, readConversation, syncFirmCalls, toIndianMobile, withinCallingHours, CALLING_HOURS } from '@/lib/voice';
+import { callContactNow, readConversation, syncFirmCalls, toIndianMobile } from '@/lib/voice';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_IMPORT = 1000;
@@ -102,31 +102,17 @@ export async function markDoNotCall(contactId) {
   });
 }
 
-async function callsThisMonth(db, firmId) {
-  const start = new Date();
-  start.setUTCDate(1);
-  start.setUTCHours(0, 0, 0, 0);
-  const { count } = await db.from('calls').select('id', { count: 'exact', head: true }).eq('firm_id', firmId).gte('created_at', start.toISOString());
-  return count ?? 0;
-}
+const callContact = (ctx, firm, contact) => callContactNow({ firm, contact, startedBy: ctx.user.id });
 
-async function callContact(ctx, firm, contact) {
-  const db = createAdminClient();
-  if (!firm.ai_calls_enabled) throw new Error('AI calling is not switched on for this firm yet.');
-  if (!withinCallingHours()) throw new Error(`Calls can only be made between ${CALLING_HOURS.start} am and ${CALLING_HOURS.end - 12} pm (Indian time).`);
-  if (contact.status === 'do_not_call') throw new Error('This person asked not to be called.');
-  if (!contact.consent_confirmed) throw new Error('Consent for this contact is not confirmed.');
-  if ((await callsThisMonth(db, firm.id)) >= firm.ai_calls_monthly_limit) throw new Error(`This month's limit of ${firm.ai_calls_monthly_limit} AI calls is reached.`);
-  const { data: busy } = await db.from('calls').select('id').eq('contact_id', contact.id).in('status', ['queued', 'in_progress']).limit(1);
-  if (busy?.length) throw new Error('A call to this person is already in progress.');
-
-  const { conversationId, callSid } = await placeCall({ voice: firm.voice_agent, toNumber: contact.phone, variables: callVariables(firm, contact) });
-  const { data: call, error } = await db.from('calls').insert({
-    firm_id: firm.id, contact_id: contact.id, conversation_id: conversationId, call_sid: callSid, status: 'in_progress', started_by: ctx.user.id,
-  }).select('id').single();
-  if (error) throw new Error(error.message);
-  await db.from('call_contacts').update({ status: 'calling', call_count: contact.call_count + 1, last_called_at: new Date().toISOString() }).eq('id', contact.id);
-  return call.id;
+// The firm's own switch for calling new website enquiries automatically.
+export async function setAutoCallEnquiries(enabled) {
+  return run(async () => {
+    const { firm } = await requireFirmRow();
+    const { error } = await createAdminClient().from('firms').update({ ai_auto_call_enquiries: Boolean(enabled) }).eq('id', firm.id);
+    if (error) throw new Error(error.message);
+    revalidatePath('/admin/calls');
+    return { success: true };
+  });
 }
 
 export async function startCall(contactId) {
