@@ -6,7 +6,8 @@
 
 -- Calls cost the platform owner money, so each firm is switched on individually, with a monthly cap.
 alter table public.firms add column if not exists ai_calls_enabled boolean not null default false;
-alter table public.firms add column if not exists ai_calls_monthly_limit integer not null default 100;
+alter table public.firms add column if not exists ai_calls_monthly_limit integer not null default 300;
+alter table public.firms alter column ai_calls_monthly_limit set default 300; -- for databases created with the old default of 100
 alter table public.firms add column if not exists voice_agent text not null default 'sia' check (voice_agent in ('sia', 'simran'));
 
 create table if not exists public.call_contacts (
