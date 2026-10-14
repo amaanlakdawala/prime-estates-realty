@@ -59,14 +59,15 @@ export default function ReelMaker({ listing, site, listingPath }) {
     return buildPlan({
       listing, site, logo, tag, headline, showPrice, style, speed,
       photos: usable.map((url) => images[url]),
-      siteUrl: origin ? `${origin}/${site.slug}` : '',
+      siteUrl: origin && site.websiteEnabled ? `${origin}/${site.slug}` : '', // no website address on the reel when the firm has no website
     });
   }, [usable.join('|'), loading, logo, tag, headline, showPrice, style, speed, origin, fontsReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Any change makes the last video out of date.
   useEffect(() => {
     if (!plan) return;
-    setCaption(reelCaption({ listing, site, plan, listingUrl: origin ? `${origin}${listingPath}` : '' }));
+    const linkable = origin && site.websiteEnabled && listing.show_on_website !== false;
+    setCaption(reelCaption({ listing, site, plan, listingUrl: linkable ? `${origin}${listingPath}` : '' }));
     setJob((j) => {
       if (j.state === 'done') URL.revokeObjectURL(j.url);
       return j.state === 'rendering' ? j : { state: 'idle' };

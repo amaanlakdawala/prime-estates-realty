@@ -40,7 +40,7 @@ export default async function AdminLayout({ children }) {
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-white/70 sm:inline">{user.email}</span>
-            {firm && !blocked && <Link href={href(firm)} target="_blank" className="hidden text-sm text-white/70 hover:text-white md:inline">View website</Link>}
+            {firm && !blocked && firm.websiteEnabled && <Link href={href(firm)} target="_blank" className="hidden text-sm text-white/70 hover:text-white md:inline">View website</Link>}
             <SignOutButton />
           </div>
         </div>

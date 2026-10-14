@@ -47,6 +47,15 @@ export default function FirmForm({ firm, adminFields = false }) {
       {field('logo_url', 'Logo image link', firm.logoUrl, { optional: true, placeholder: 'https://…/logo.png' })}
       {field('hero_url', 'Home page photo or video link', firm.heroUrl, { optional: true, wide: true, placeholder: 'https://…/building.jpg or …/tour.mp4', hint: 'Shown behind the headline. Empty = sample photo collage.' })}
       {adminFields && (
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
+          <input type="checkbox" name="website_enabled" defaultChecked={firm.websiteEnabled} className="mt-1 h-4 w-4 accent-teal" />
+          <span>
+            <span className="block font-medium">Public website is live</span>
+            <span className="text-sm text-muted">Untick for firms that only use AI calling. Their website is hidden, but their admin panel works and the AI assistant still offers their listings to callers.</span>
+          </span>
+        </label>
+      )}
+      {adminFields && (
         <fieldset className="rounded-lg border border-line p-4 sm:col-span-2">
           <legend className="px-1 font-medium">AI calling</legend>
           <label className="flex cursor-pointer items-start gap-3">

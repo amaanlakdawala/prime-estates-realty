@@ -1,8 +1,12 @@
+import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createPublicClient } from '@/lib/supabase/public';
 
-// Listings search for the AI voice agents (Retell / ElevenLabs "tools").
-// Returns only what a website visitor can already see: available listings of an active firm.
+// Listings search for the AI voice agents (ElevenLabs "tools").
+// The agents send the x-voice-key header (VOICE_TOOL_SECRET): then the search covers the firm's whole
+// available inventory, including private listings and firms without a public website. Without the key
+// it returns only what a website visitor can already see.
 //   GET  /api/voice/listings?firm=prime-estates&area=Lower%20Parel&bhk=3&deal=buy&max_price=70000000
 //   POST /api/voice/listings?firm=prime-estates   body: { args: {…} } (Retell) or {…} (ElevenLabs)
 export const dynamic = 'force-dynamic';
@@ -22,6 +26,14 @@ function spokenPrice(price, deal) {
 // Free text from the caller goes into a PostgREST filter, so strip characters that have meaning there.
 const clean = (s) => (s ?? '').toString().replace(/[%,()*\\.:"]/g, ' ').trim().slice(0, 60);
 
+// The agent's key, compared in constant time.
+function trusted(request) {
+  const expected = process.env.VOICE_TOOL_SECRET;
+  const given = request.headers.get('x-voice-key') ?? '';
+  if (!expected || given.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(given), Buffer.from(expected));
+}
+
 function summarise(l, base) {
   return {
     title: l.title,
@@ -31,16 +43,16 @@ function summarise(l, base) {
     for: l.deal_type === 'rent' ? 'rent' : 'sale',
     price: spokenPrice(l.price, l.deal_type),
     size: l.area_sqft ? `${Number(l.area_sqft).toLocaleString('en-IN')} sq ft` : null,
-    link: `${base}/properties/${l.id}`,
+    link: base && l.show_on_website !== false ? `${base}/properties/${l.id}` : null, // never link to a page that isn't public
   };
 }
 
-async function search(params, origin) {
+async function search(params, origin, isAgent) {
   const slug = clean(params.firm).toLowerCase();
   if (!slug) return NextResponse.json({ error: 'firm is required' }, { status: 400 });
 
-  const db = createPublicClient();
-  const { data: firm } = await db.from('firms').select('id, slug, name').eq('slug', slug).eq('active', true).maybeSingle();
+  const db = isAgent ? createAdminClient() : createPublicClient();
+  const { data: firm } = await db.from('firms').select('id, slug, name, website_enabled').eq('slug', slug).eq('active', true).maybeSingle();
   if (!firm) return NextResponse.json({ error: 'Unknown firm' }, { status: 404 });
 
   const deal = /rent/i.test(params.deal ?? '') ? 'rent' : /buy|sale|purchase/i.test(params.deal ?? '') ? 'buy' : '';
@@ -51,7 +63,7 @@ async function search(params, origin) {
 
   const run = async ({ withProject = true, withBhk = true, withPrice = true } = {}) => {
     let q = db.from('listings')
-      .select('id, title, locality, address, bhk, property_type, deal_type, price, area_sqft')
+      .select('id, title, locality, address, bhk, property_type, deal_type, price, area_sqft, show_on_website')
       .eq('firm_id', firm.id)
       .eq('status', 'available');
     if (deal) q = q.eq('deal_type', deal);
@@ -64,7 +76,7 @@ async function search(params, origin) {
     return data ?? [];
   };
 
-  const base = `${origin}/${firm.slug}`;
+  const base = firm.website_enabled === false ? '' : `${origin}/${firm.slug}`;
   const exact = await run();
   if (exact.length) {
     return NextResponse.json({
@@ -87,12 +99,12 @@ async function search(params, origin) {
 
 export async function GET(request) {
   const url = new URL(request.url);
-  return search(Object.fromEntries(url.searchParams), url.origin);
+  return search(Object.fromEntries(url.searchParams), url.origin, trusted(request));
 }
 
 export async function POST(request) {
   const url = new URL(request.url);
   const body = await request.json().catch(() => ({}));
   const args = body?.args ?? body ?? {}; // Retell sends { name, args, call }; ElevenLabs sends the parameters directly
-  return search({ ...Object.fromEntries(url.searchParams), ...args }, url.origin);
+  return search({ ...Object.fromEntries(url.searchParams), ...args }, url.origin, trusted(request));
 }

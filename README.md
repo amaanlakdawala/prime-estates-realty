@@ -17,6 +17,10 @@ One codebase that gives each client brokerage its own property website and a pri
 
 Every listing has a **Make reel** button. It turns the listing's photos into a 1080×1920 Instagram reel with the headline, location, price, one fact per photo (BHK and size, amenities, floor) and a closing card with the firm's phone number and website, plus the MahaRERA numbers when filled in. Firms pick the photos and their order, the corner label (Just listed, Price drop, Sold…), speed and style (full screen or framed), preview it live, then download the MP4 or share it from a phone. A ready-to-paste caption with five hashtags is generated alongside. The video is encoded in the browser with WebCodecs ([Mediabunny](https://mediabunny.dev)), so it costs nothing per reel and nothing is uploaded; it works in Chrome, Edge and Safari. Reels have no sound, so firms add a trending song in Instagram when posting. Drawing code: `lib/reel.js`; screen: `components/admin/reel/ReelMaker.js`. Photos linked from other websites only work if that site allows it (CORS); uploaded photos and Unsplash always do.
 
+## Private inventory and firms without a website
+
+Every listing has a **Show on the website** switch (on by default). Off = a private listing: the firm's team and the AI calling assistant see it, website visitors never do. The platform admin can also switch a firm's **Public website is live** off (Firms → the firm) for firms that only buy AI calling: their website is hidden, while their admin panel, listings and AI calls keep working. The voice agents' `search_listings` tool sends `x-voice-key` (= `VOICE_TOOL_SECRET`), and with it `/api/voice/listings` searches the firm's whole available inventory; without it, only what is public. Database: `supabase/inventory.sql`.
+
 ## AI calls (firm admin → AI calls)
 
 Riya, an ElevenLabs voice agent, phones a firm's clients over Twilio in Hindi, English or Hinglish. Firms add clients by hand, upload a CSV (phone plus optional name, why calling, looking for), or press **AI call** on a website enquiry. Calls run one at a time; after each call the summary, the extracted requirement (buy/rent, area, project, BHK, budget, timeline, site visit, callback time) and the transcript appear on the page. One agent serves all firms: firm and contact details are passed per call as dynamic variables (`lib/voice.js`), and the agent looks up that firm's listings through `/api/voice/listings`.
@@ -41,7 +45,7 @@ Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY
 
 You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Netlify account.
 
-1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, then `supabase/auto_call.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Optionally run `supabase/seed.sql` after the first for 5 sample listings.
+1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, `supabase/auto_call.sql`, then `supabase/inventory.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Optionally run `supabase/seed.sql` after the first for 5 sample listings.
 2. **Lock sign-ups.** **Authentication → Sign In / Providers → Email**: turn off "Allow new users to sign up".
 3. **Settings.** Copy `.env.example` to `.env.local` and fill in the Supabase URL, anon key and secret key.
 4. **Your admin login.** `npm install`, then `npm run set-admin -- you@example.com 'YourPassword'`.

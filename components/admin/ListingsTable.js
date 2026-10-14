@@ -139,6 +139,7 @@ export default function ListingsTable({ listings }) {
                           <p className="text-muted">
                             {typeLabel(l.property_type)}{l.bhk ? `, ${l.bhk} BHK` : ''}
                             {l.featured && <span className="ml-2 rounded bg-marigold/30 px-1.5 py-0.5 text-xs font-semibold text-basalt">Featured</span>}
+                            {l.show_on_website === false && <span className="ml-2 rounded bg-basalt/10 px-1.5 py-0.5 text-xs font-semibold text-basalt" title="Not on the website. Your team and AI assistant can see it.">Private</span>}
                           </p>
                         </div>
                       </div>

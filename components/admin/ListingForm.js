@@ -28,6 +28,7 @@ function toFormState(l) {
     rera_number: l?.rera_number ?? '',
     status: l?.status ?? 'available',
     featured: l?.featured ?? false,
+    show_on_website: l?.show_on_website ?? true,
   };
 }
 
@@ -207,6 +208,7 @@ export default function ListingForm({ firm, initial = null }) {
         floor_plan: floorPlanUrl,
         status: form.status,
         featured: form.featured,
+        show_on_website: form.show_on_website,
       };
 
       const { error } = isEdit
@@ -398,22 +400,36 @@ export default function ListingForm({ firm, initial = null }) {
       {/* Visibility */}
       <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
         <h2 className="text-xl font-semibold">Visibility</h2>
+        {firm.websiteEnabled === false && (
+          <p className="mt-2 text-sm text-muted">Your firm has no public website, so listings are seen only by your team and by your AI calling assistant, who offers them to callers.</p>
+        )}
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="field-label">Status</span>
             <select className="field" value={form.status} onChange={set('status')}>
-              <option value="available">Available (shown on website)</option>
-              <option value="sold">Sold (hidden from website)</option>
-              <option value="rented">Rented (hidden from website)</option>
+              <option value="available">Available</option>
+              <option value="sold">Sold (hidden everywhere)</option>
+              <option value="rented">Rented (hidden everywhere)</option>
             </select>
           </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
-            <input type="checkbox" checked={form.featured} onChange={set('featured')} className="mt-1 h-4 w-4 accent-teal" />
-            <span>
-              <span className="block font-medium">Feature on the home page</span>
-              <span className="text-sm text-muted">Up to 6 featured listings are shown, newest first.</span>
-            </span>
-          </label>
+          {firm.websiteEnabled !== false && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
+              <input type="checkbox" checked={form.show_on_website} onChange={set('show_on_website')} className="mt-1 h-4 w-4 accent-teal" />
+              <span>
+                <span className="block font-medium">Show on the website</span>
+                <span className="text-sm text-muted">Untick to keep it private: only your team and your AI calling assistant will see it.</span>
+              </span>
+            </label>
+          )}
+          {firm.websiteEnabled !== false && form.show_on_website && (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
+              <input type="checkbox" checked={form.featured} onChange={set('featured')} className="mt-1 h-4 w-4 accent-teal" />
+              <span>
+                <span className="block font-medium">Feature on the home page</span>
+                <span className="text-sm text-muted">Up to 6 featured listings are shown, newest first.</span>
+              </span>
+            </label>
+          )}
         </div>
       </section>
 
