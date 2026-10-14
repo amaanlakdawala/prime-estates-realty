@@ -3,7 +3,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked } from '@/lib/voice';
+import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked, lastReadError } from '@/lib/voice';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +82,13 @@ export async function POST(request) {
 
   // Save the results of calls that have finished, for every firm, even if nobody has the page open.
   const { data: open } = await db.from('calls').select('firm_id').in('status', ['queued', 'in_progress']).limit(200);
-  for (const firmId of new Set((open ?? []).map((c) => c.firm_id))) await syncFirmCalls(firmId);
+  const sync = { open: 0, updated: 0, unreadable: 0 };
+  for (const firmId of new Set((open ?? []).map((c) => c.firm_id))) {
+    const s = await syncFirmCalls(firmId);
+    sync.open += s.open; sync.updated += s.updated; sync.unreadable += s.unreadable;
+  }
+  report.sync = sync;
+  if (sync.unreadable) report.elevenlabsError = lastReadError;
 
   return NextResponse.json({ ok: true, ...report });
 }
