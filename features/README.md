@@ -8,6 +8,7 @@ folder and contain no logic of their own. Code used by more than one feature goe
 
 | Folder | What it is | Status |
 | --- | --- | --- |
+| [`whatsapp-writeup/`](whatsapp-writeup/README.md) | Neat WhatsApp posts of properties for groups, with each sender's own number | Built |
 | [`social-replies/`](social-replies/README.md) | Automatic replies to comments on each firm's Instagram and Facebook | Planned |
 | [`whatsapp-assistant/`](whatsapp-assistant/README.md) | AI replies to clients who message the firm's WhatsApp | Planned |
 | [`email/`](email/README.md) | Alerts to firms and automatic emails to clients | Planned |

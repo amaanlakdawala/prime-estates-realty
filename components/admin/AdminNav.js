@@ -8,6 +8,7 @@ const FIRM_LINKS = [
   { href: '/admin/new', label: 'Add listing', match: (p) => p === '/admin/new' },
   { href: '/admin/enquiries', label: 'Enquiries', match: (p) => p.startsWith('/admin/enquiries') },
   { href: '/admin/calls', label: 'AI calls', match: (p) => p.startsWith('/admin/calls') },
+  { href: '/admin/writeup', label: 'WhatsApp write-up', match: (p) => p.startsWith('/admin/writeup') },
   { href: '/admin/profile', label: 'Firm profile', match: (p) => p.startsWith('/admin/profile') },
 ];
 
