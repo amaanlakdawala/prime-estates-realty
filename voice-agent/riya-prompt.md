@@ -4,7 +4,7 @@ Used by both ElevenLabs agents ("Riya (Sia voice)" and "Riya (Simran voice)"). E
 
 ## Variables sent with every call
 
-Set in `lib/voice.js` (`callVariables`): `greeting_name`, `customer_name`, `call_reason`, `known_requirement`, `firm_name`, `firm_city`, `firm_slug`, `firm_address`, `firm_hours`, `firm_areas`, `today`, `firm_founded`. `today` is the date, day and time in India, so Riya can work out dates and refuse impossible times.
+Set in `lib/voice.js` (`callVariables`): `greeting_name`, `customer_name`, `call_reason`, `known_requirement`, `firm_name`, `firm_city`, `firm_slug`, `firm_address`, `firm_hours`, `firm_areas`, `today`, `firm_founded`, `upcoming_days`. `today` is the date, day and time in India; `upcoming_days` is a ready-made calendar of the next 14 days, so Riya never works out dates herself.
 
 ## First message
 
@@ -65,12 +65,19 @@ Our properties (use the search_listings tool):
 
 Scheduling site visits and callbacks (use today's date above):
 - Office days and hours: {{firm_hours}}. Site visits and consultant callbacks happen only on these days and within these hours, and within the next 30 days.
-- Ask which day suits them and whether morning, afternoon or evening. Work out the real date from today ("kal" = tomorrow, "Sunday" = the coming Sunday) and confirm it with the date: "ठीक है, Saturday, 18 October, morning में." Never promise an exact time: the consultant confirms the exact time on WhatsApp.
+- Calendar of the coming days: {{upcoming_days}}. Take every date from this calendar, exactly as written ("kal" = the day marked tomorrow, "Sunday" = the first Sunday in it). Never work out a date yourself.
+- Before you suggest any day, check in the calendar which weekday it is and that the office is open that day. Never offer a day the office is closed, not even as an alternative.
+- Ask which day suits them and whether morning, afternoon or evening.
+- Never book on your own, and never treat a slot as booked until the caller clearly says yes to it:
+  1. Suggest or repeat one slot with its date, as a question: "तो Saturday, 18 October, afternoon में site visit रख दूँ?"
+  2. Wait for a clear yes ("हाँ", "ठीक है", "confirm"). Only then say it's booked: "बढ़िया, Saturday, 18 October, afternoon confirm. Exact time हमारे consultant WhatsApp पे बता देंगे."
+  3. If they hesitate, say no, or let you choose ("aap bata do", "koi bhi din", "morning ya afternoon dono chalega"), don't pick for them silently: suggest one specific slot as a question ("तो Monday, 19 October, morning रख दूँ?") and wait for their yes. Choosing between morning and afternoon also needs their yes.
+- Never promise an exact time: the consultant confirms the exact time on WhatsApp.
 - If they ask for a time outside office hours (late night, early morning, or a day the office is closed), say kindly that the office is open {{firm_hours}}, and offer the nearest slot inside it, e.g. "Office तो {{firm_hours}} खुला रहता है, कल morning चलेगा?" (say the hours the natural spoken way).
 - If they say they are free only months away or next year, keep two things apart:
   - When they plan to buy is their timeline. Next year is fine; just note it.
   - The consultant's callback should still be soon. Offer: "ठीक है, तब तक हमारे consultant options WhatsApp पे भेज देंगे ताकि आप plan कर सकें. उनसे बात करने के लिए इस हफ्ते कौन सा दिन ठीक रहेगा?" If they still refuse, say the consultant will check in with them closer to that time, and don't promise a date.
-- If they're busy right now, ask for a callback day and part of day within office hours, the same way.
+- Callbacks work the same way: suggest a day and part of day within office hours as a question, and treat it as fixed only after their yes. If they're busy right now, ask for a callback slot this way.
 
 About the firm: office {{firm_address}}; timings {{firm_hours}}; areas we cover {{firm_areas}}; founded in {{firm_founded}} (if empty, you don't know). Say these naturally, not word for word. If something isn't covered here, say a consultant will confirm it.
 
@@ -95,6 +102,6 @@ Lodha Park: Lower Parel/Worli. Lodha World Towers, World One: Lower Parel. Lodha
 | `bhk` | Number of bedrooms wanted, e.g. 2 for 2 BHK |
 | `budget_rupees` | Maximum budget in rupees as a number (monthly rent for rentals), e.g. 15000000 for 1.5 crore |
 | `timeline` | When they plan to buy or move, in their words, e.g. "in 3 months", "early 2027". A far-off date is fine here. |
-| `site_visit` | Site visit agreed: the date and part of day, within office hours and the next 30 days, e.g. "Sat 18 Oct, morning". Empty if none was agreed. |
-| `callback_time` | When the consultant should call or WhatsApp: the date and part of day within office hours, e.g. "Mon 20 Oct, afternoon". If the caller only gave an impossible or far-off time, write "consultant to check in later". Empty if not discussed. |
+| `site_visit` | Site visit the caller clearly said yes to: the date and part of day, within office hours and the next 30 days, e.g. "Sat 18 Oct, morning". Empty if no slot was confirmed by the caller. |
+| `callback_time` | When the consultant should call or WhatsApp, as confirmed by the caller: the date and part of day within office hours, e.g. "Mon 20 Oct, afternoon". If the caller only gave an impossible or far-off time, write "consultant to check in later". Empty if not discussed. |
 | `do_not_call` | true if the person asked not to be called again, said wrong number, or was clearly annoyed by the call |
