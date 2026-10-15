@@ -36,12 +36,12 @@ Instagram / Facebook ──webhook──▶ /api/social/webhook ──▶ engine
 | --- | --- |
 | `README.md` | This file: what the feature does, how it works, how to set it up |
 | `schema.sql` | Database tables and security rules. Run once in Supabase |
-| `config.js` | Limits and the Meta Graph API version, in one place (to come) |
-| `meta.js` | Meta Graph API client: webhook signature check, public reply, private reply (to come) |
 | `rules.js` | Keyword matching and the spam / skip filter (to come) |
-| `ai.js` | AI-written replies (to come) |
 | `engine.js` | Handles one comment end to end and logs the result (to come) |
 | `admin/` | The firm's admin screens: connection, rules, settings, comment log (to come) |
+
+Uses `features/shared/meta` (webhook signature check, public reply, private reply) and
+`features/shared/assistant` (AI-written replies with the firm's details and listings).
 
 Routes in `app/` (thin, no logic): `app/api/social/webhook/route.js` (Meta webhook) and
 `app/admin/social/page.js` (admin page).

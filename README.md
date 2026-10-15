@@ -19,7 +19,7 @@ Every listing has a **Make reel** button. It turns the listing's photos into a 1
 
 ## Project layout
 
-New, larger features each live in their own folder under [`features/`](features/README.md), with their logic, admin screens, database setup and README together; `app/` only holds thin route files that point into them. Planned: [`features/social-replies/`](features/social-replies/README.md), automatic replies to comments on firms' Instagram and Facebook.
+New, larger features each live in their own folder under [`features/`](features/README.md), with their logic, admin screens, database setup and README together; `app/` only holds thin route files that point into them. Planned: automatic replies to Instagram and Facebook comments, an AI WhatsApp assistant, and email alerts and client emails (see [`features/README.md`](features/README.md)).
 
 ## Private inventory and firms without a website
 
