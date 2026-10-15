@@ -17,6 +17,10 @@ One codebase that gives each client brokerage its own property website and a pri
 
 Every listing has a **Make reel** button. It turns the listing's photos into a 1080×1920 Instagram reel with the headline, location, price, one fact per photo (BHK and size, amenities, floor) and a closing card with the firm's phone number and website, plus the MahaRERA numbers when filled in. Firms pick the photos and their order, the corner label (Just listed, Price drop, Sold…), speed and style (full screen or framed), preview it live, then download the MP4 or share it from a phone. A ready-to-paste caption with five hashtags is generated alongside. The video is encoded in the browser with WebCodecs ([Mediabunny](https://mediabunny.dev)), so it costs nothing per reel and nothing is uploaded; it works in Chrome, Edge and Safari. Reels have no sound, so firms add a trending song in Instagram when posting. Drawing code: `lib/reel.js`; screen: `components/admin/reel/ReelMaker.js`. Photos linked from other websites only work if that site allows it (CORS); uploaded photos and Unsplash always do.
 
+## Project layout
+
+New, larger features each live in their own folder under [`features/`](features/README.md), with their logic, admin screens, database setup and README together; `app/` only holds thin route files that point into them. Planned: [`features/social-replies/`](features/social-replies/README.md), automatic replies to comments on firms' Instagram and Facebook.
+
 ## Private inventory and firms without a website
 
 Every listing has a **Show on the website** switch (on by default). Off = a private listing: the firm's team and the AI calling assistant see it, website visitors never do. The platform admin can also switch a firm's **Public website is live** off (Firms → the firm) for firms that only buy AI calling: their website is hidden, while their admin panel, listings and AI calls keep working. The voice agents' `search_listings` tool sends `x-voice-key` (= `VOICE_TOOL_SECRET`), and with it `/api/voice/listings` searches the firm's whole available inventory; without it, only what is public. Database: `supabase/inventory.sql`.
