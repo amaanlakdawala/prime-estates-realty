@@ -116,37 +116,47 @@ async function search(params, origin, isAgent) {
   // In the area they asked, but for rent when they want to buy (or the other way round): worth a mention,
   // e.g. a caller who knows of the firm's Goregaon East rental and asks "Goregaon East में है ना?".
   const otherDeal = deal && (area || project)
-    ? (await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })).map((l) => summarise(l, base))
+    ? await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })
     : [];
-  const otherDealNote = otherDeal.length
-    ? ` "same_area_other_deal" is in the area they asked but for ${deal === 'rent' ? 'sale' : 'rent'}: right after the consultant clause, mention it in one line `
-      + `("<area> में एक <BHK> ${deal === 'rent' ? 'sale' : 'rent'} के लिए है, <price>, अगर वो भी चलेगा"), then the first "other_areas" property.`
+
+  // The sentences to say are written here, with the real areas and prices filled in: left to assemble them
+  // from the lists, the agent skipped the same-area rental and named areas that have no listings.
+  const asked = areaRow?.name ?? zone?.name ?? (project || area);
+  const kind = (l) => (l.bhk ? `${l.bhk} BHK` : l.property_type);
+  const both = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} और ${names.at(-1)}` : names[0]);
+  const otherDealLine = otherDeal[0]
+    ? `${otherDeal[0].locality} में एक ${kind(otherDeal[0])} ${deal === 'rent' ? 'sale' : 'rent'} के लिए भी है, ${spokenPrice(otherDeal[0].price, otherDeal[0].deal_type)}, अगर वो भी चलेगा.`
     : '';
-  const askedAgain = ' If they ask again whether we have anything in that area, answer once, honestly and without the forbidden words: '
-    + '"<area> के लिए consultant fresh options निकालेंगे, अभी ready options <areas from other_areas> में हैं." Name only areas that appear in "other_areas". Do not repeat the consultant sentence after that.';
+  const rules = `Do NOT claim or hint that we have options in ${asked}, and do NOT say we do not have it. `
+    + 'Say "say_now" now, in your voice, keeping its areas and prices exactly. If they ask again whether we have anything there, say "say_if_asked_again" once, '
+    + 'then move on: never repeat the consultant sentence after that.';
+
   if (elsewhere.length) {
+    const first = elsewhere[0];
+    const ready = both([...new Set(elsewhere.map((l) => l.locality))]);
     return NextResponse.json({
       matches: [],
       similar: [],
       other_areas: elsewhere.map((l) => ({ ...summarise(l, base), ...(l.km != null && { km_away: l.km, nearness: nearness(l.km) }) })),
-      ...(otherDeal.length && { same_area_other_deal: otherDeal }),
-      nearby_areas: nearby,
-      note: 'Nothing is listed in the area or project they asked for, so do NOT claim or hint that we have options there. Do NOT say we do not have it either. '
-        + 'In this same reply: one short clause that the consultant will look for options there (only if you have not said so already), then describe the first '
-        + 'property in "other_areas" with its area, BHK and price, and ask if they would like to see it. Do not just name areas: name the property. '
-        + 'If its "nearness" is "far" or "a bit far", say honestly that it is some distance away. Say prices exactly as written in "price".'
-        + otherDealNote + askedAgain,
+      ...(otherDeal.length && { same_area_other_deal: otherDeal.map((l) => summarise(l, base)) }),
+      say_now: [
+        `${asked} के लिए हमारे consultant fresh options निकालेंगे.`,
+        otherDealLine,
+        `अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${first.km > 8 ? `, ${asked} से थोड़ा दूर है` : ''}, देखना चाहेंगे?`,
+      ].filter(Boolean).join(' '),
+      say_if_asked_again: `${asked} के लिए consultant fresh options निकालेंगे, अभी ready options ${ready} में हैं.`,
+      note: `Nothing is listed in ${asked}. ${rules} If they say no to the first property, you may offer the next one in "other_areas".`,
     });
   }
   return NextResponse.json({
     matches: [],
     similar: [],
     other_areas: [],
-    ...(otherDeal.length && { same_area_other_deal: otherDeal }),
+    ...(otherDeal.length && { same_area_other_deal: otherDeal.map((l) => summarise(l, base)) }),
     nearby_areas: nearby,
-    note: 'Nothing to offer right now. Do not mention any other property, and do not claim or hint that we have options. '
-      + 'Do NOT say we do not have it: say the consultant will look for options for their requirement and contact them. '
-      + 'If you suggest other areas, use only "nearby_areas".' + otherDealNote,
+    say_now: [`ठीक है, ${asked} के लिए हमारे consultant आपकी requirement के हिसाब से options देखकर आपसे खुद contact करेंगे.`, otherDealLine].filter(Boolean).join(' '),
+    say_if_asked_again: `${asked} के लिए consultant fresh options निकालेंगे और आपसे contact करेंगे.`,
+    note: `Nothing to offer right now. ${rules} Do not mention any other property. If you suggest other areas, use only "nearby_areas".`,
   });
 }
 
