@@ -2,7 +2,7 @@
 
 One website, one database and one admin panel serve every client. Each firm gets:
 
-- its own website at `yoursite/<their-name>`, e.g. `primeestaterealty.netlify.app/seabreeze`
+- its own website at `yoursite/<their-name>`, e.g. `delightful-otter-34d9ac.netlify.app/seabreeze`
 - a login that sees and changes **only that firm's** listings, enquiries and profile
 
 The separation is enforced by the database's security rules, not just hidden in the pages: a firm's login cannot read, change or delete another firm's listings, enquiries or photos.

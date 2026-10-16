@@ -1,7 +1,7 @@
 -- =============================================================
 -- Every minute, ping the website so it places due automatic calls and saves call results.
 -- Run AFTER auto_call.sql, in Supabase: SQL Editor -> New query.
--- 1. Replace YOUR_SITE with your website address (e.g. https://primeestaterealty.netlify.app)
+-- 1. Replace YOUR_SITE with your website address (e.g. https://delightful-otter-34d9ac.netlify.app)
 -- 2. Replace PASTE_CRON_SECRET_HERE with the same CRON_SECRET you set in Netlify.
 -- Don't commit the file with the real secret in it. Safe to run again (it replaces the old schedule).
 -- The ping is only sent when there is something to do, so idle minutes cost nothing.
