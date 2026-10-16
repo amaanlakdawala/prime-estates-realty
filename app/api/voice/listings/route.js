@@ -108,8 +108,9 @@ async function search(params, origin, isAgent) {
       matches: [],
       similar: [],
       other_areas: elsewhere.map((l) => summarise(l, base)),
-      note: 'Nothing is listed in the area or project they asked for, so do NOT claim or hint that we have options there. Do NOT say we do not have it either: '
-        + 'say the consultant will look for options there, and offer one property from "other_areas" as an alternative, saying its area clearly.',
+      note: 'Nothing is listed in the area or project they asked for, so do NOT claim or hint that we have options there. Do NOT say we do not have it either. '
+        + 'In this same reply: one short clause that the consultant will look for options there (only if you have not said so already), then describe the first '
+        + 'property in "other_areas" with its area, BHK and price, and ask if they would like to see it. Do not just name areas: name the property.',
     });
   }
   return NextResponse.json({
