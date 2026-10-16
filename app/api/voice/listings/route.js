@@ -61,7 +61,7 @@ async function search(params, origin, isAgent) {
   const area = clean(params.area);
   const project = clean(params.project);
 
-  const run = async ({ withProject = true, withBhk = true, withPrice = true } = {}) => {
+  const run = async ({ withProject = true, withArea = true, withBhk = true, withPrice = true } = {}) => {
     let q = db.from('listings')
       .select('id, title, locality, address, bhk, property_type, deal_type, price, area_sqft, show_on_website')
       .eq('firm_id', firm.id)
@@ -71,7 +71,7 @@ async function search(params, origin, isAgent) {
     if (withPrice && maxPrice > 0) q = q.lte('price', Math.round(maxPrice * 1.1)); // a little over budget is still worth mentioning
     // A project already pins down the area, so search by project when there is one, otherwise by area.
     if (withProject && project) q = q.or(`title.ilike.%${project}%,address.ilike.%${project}%`);
-    else if (area) q = q.or(`locality.ilike.%${area}%,address.ilike.%${area}%,title.ilike.%${area}%`);
+    else if (withArea && area) q = q.or(`locality.ilike.%${area}%,address.ilike.%${area}%,title.ilike.%${area}%`);
     const { data } = await q.order('featured', { ascending: false }).order('created_at', { ascending: false }).limit(MAX_RESULTS);
     return data ?? [];
   };
@@ -86,14 +86,38 @@ async function search(params, origin, isAgent) {
   }
 
   // Nothing exact: look for something close, but never tell the caller "we don't have it".
-  const similar = project ? await run({ withProject: false }) : (await run({ withBhk: false })).concat(await run({ withPrice: false }));
   const seen = new Set();
-  const close = similar.filter((l) => !seen.has(l.id) && seen.add(l.id)).slice(0, 2);
+  const fresh = (rows) => rows.filter((l) => !seen.has(l.id) && seen.add(l.id)).slice(0, 2);
+  const similar = fresh(project ? await run({ withProject: false }) : (await run({ withBhk: false })).concat(await run({ withPrice: false })));
+  if (similar.length) {
+    return NextResponse.json({
+      matches: [],
+      similar: similar.map((l) => summarise(l, base)),
+      note: 'No exact match. "similar" is in the area or project they asked for but differs in BHK or budget. Do NOT say we do not have it. '
+        + 'Offer one of them, saying briefly how it differs, and add that the consultant will share more options on WhatsApp.',
+    });
+  }
+
+  // Nothing in that area at all: the closest real options elsewhere in the firm's listings, so that a caller
+  // asking "what do you have right now?" gets an honest answer instead of the same sentence again.
+  const elsewhere = area || project
+    ? fresh((await run({ withProject: false, withArea: false })).concat(await run({ withProject: false, withArea: false, withBhk: false, withPrice: false })))
+    : [];
+  if (elsewhere.length) {
+    return NextResponse.json({
+      matches: [],
+      similar: [],
+      other_areas: elsewhere.map((l) => summarise(l, base)),
+      note: 'Nothing is listed in the area or project they asked for, so do NOT claim or hint that we have options there. Do NOT say we do not have it either: '
+        + 'say the consultant will look for options there, and offer one property from "other_areas" as an alternative, saying its area clearly.',
+    });
+  }
   return NextResponse.json({
     matches: [],
-    similar: close.map((l) => summarise(l, base)),
-    note: 'No exact match is listed. Do NOT say we do not have it. Say: our consultant will share suitable options with you on WhatsApp. '
-      + (close.length ? 'You may briefly mention one similar option from "similar" if it is relevant.' : 'Do not mention any specific property.'),
+    similar: [],
+    other_areas: [],
+    note: 'Nothing to offer right now. Do not mention any property, and do not claim or hint that we have options. '
+      + 'Do NOT say we do not have it: say the consultant will look for options for their requirement and contact them.',
   });
 }
 
