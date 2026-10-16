@@ -42,10 +42,11 @@ export default async function FirmsPage() {
             <p className="mt-4 text-muted">No firms yet. Add your first client on the left.</p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-xl border border-line">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[640px] text-left text-sm">
                 <thead className="border-b border-line bg-stone text-muted">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">Firm</th>
+                    <th scope="col" className="px-4 py-3 font-medium">Website</th>
                     <th scope="col" className="px-4 py-3 font-medium">Listings</th>
                     <th scope="col" className="px-4 py-3 font-medium">Logins</th>
                     <th scope="col" className="px-4 py-3 font-medium">Added</th>
@@ -59,6 +60,12 @@ export default async function FirmsPage() {
                         {!f.active && <span className="ml-2 rounded bg-basalt px-1.5 py-0.5 text-xs font-semibold text-white">Paused</span>}
                         {f.demo_content && <span className="ml-2 rounded bg-marigold/30 px-1.5 py-0.5 text-xs font-semibold">Demo</span>}
                         <span className="block text-muted">/{f.slug}{f.city ? ` · ${f.city}` : ''}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {/* z-10 lifts the link above the row-wide link to the firm's page. */}
+                        {f.active && f.website_enabled !== false
+                          ? <Link href={`/${f.slug}`} target="_blank" className="relative z-10 font-medium text-teal underline">Visit ↗</Link>
+                          : <span className="text-muted">{f.active ? 'Switched off' : 'Offline'}</span>}
                       </td>
                       <td className="px-4 py-3">{listingCount[f.id] ?? 0}</td>
                       <td className="px-4 py-3">{loginCount[f.id] ?? 0}</td>

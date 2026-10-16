@@ -25,6 +25,7 @@ export default async function FirmPage({ params }) {
   const { data: row } = await db.from('firms').select('*').eq('id', id).maybeSingle();
   if (!row) notFound();
   const firm = toSite(row);
+  const siteLive = firm.active && firm.websiteEnabled;
 
   const [{ data: links }, { count: listingCount }, { count: enquiryCount }] = await Promise.all([
     db.from('firm_users').select('user_id').eq('firm_id', id),
@@ -48,10 +49,12 @@ export default async function FirmPage({ params }) {
             </h1>
             <p className="mt-1 text-muted">
               {listingCount ?? 0} listings · {enquiryCount ?? 0} enquiries ·{' '}
-              {firm.active ? <Link href={href(firm)} target="_blank" className="text-teal underline">/{firm.slug}</Link> : `/${firm.slug} (offline)`}
+              {siteLive ? <Link href={href(firm)} target="_blank" className="text-teal underline">/{firm.slug}</Link>
+                : `/${firm.slug} (${firm.active ? 'website switched off' : 'offline'})`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {siteLive && <Link href={href(firm)} target="_blank" className="btn-outline">Visit website ↗</Link>}
             <form action={manageFirm.bind(null, firm.id)}>
               <button type="submit" className="btn-primary">Manage listings &amp; enquiries</button>
             </form>
