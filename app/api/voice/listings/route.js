@@ -17,7 +17,8 @@ const MAX_RESULTS = 4;
 function spokenPrice(price, deal) {
   const p = Number(price) || 0;
   const trim = (n) => Number(n.toFixed(2)).toString();
-  if (deal === 'rent') return `${p.toLocaleString('en-IN')} rupees per month`;
+  // Rents as people say them ("1.25 lakh per month", "48 thousand per month"): the agent misread long digit strings.
+  if (deal === 'rent') return p >= 1e5 ? `${trim(p / 1e5)} lakh per month` : p >= 1e3 ? `${trim(p / 1e3)} thousand per month` : `${p} rupees per month`;
   if (p >= 1e7) return `${trim(p / 1e7)} crore`;
   if (p >= 1e5) return `${trim(p / 1e5)} lakh`;
   return `${p.toLocaleString('en-IN')} rupees`;
