@@ -1,0 +1,7 @@
+# Build settings come from the Netlify UI (Next.js is detected automatically).
+
+[build.environment]
+  # These are public by design: Next.js puts NEXT_PUBLIC_ values in the code every visitor's browser
+  # loads (the anon key is safe there because row level security guards the data). Netlify's secret
+  # scan would fail the build on them, so it skips these keys and still checks every real secret.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_DEFAULT_FIRM_SLUG"
