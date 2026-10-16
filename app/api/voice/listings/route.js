@@ -45,6 +45,10 @@ async function search(params, origin, isAgent) {
 
   const deal = /rent/i.test(params.deal ?? '') ? 'rent' : /buy|sale|purchase/i.test(params.deal ?? '') ? 'buy' : '';
   const bhk = Number.parseInt(params.bhk, 10);
+  // Property type in the caller's words: shop, office, plot, villa/bungalow, flat/apartment.
+  const t = (params.type ?? '').toString().toLowerCase();
+  const type = /shop|retail|showroom/.test(t) ? 'shop' : /office|commercial/.test(t) ? 'office' : /plot|land/.test(t) ? 'plot'
+    : /villa|bungalow|house/.test(t) ? 'villa' : /flat|apartment/.test(t) ? 'flat' : '';
   const maxPrice = Number(params.max_price) || 0;
   const area = clean(params.area);
   const project = clean(params.project);
@@ -52,13 +56,14 @@ async function search(params, origin, isAgent) {
   const areaRow = area ? await findArea(area) : null;
   const zone = area && !areaRow ? await findZone(area) : null;
 
-  const run = async ({ withProject = true, withArea = true, withBhk = true, withPrice = true, limit = MAX_RESULTS } = {}) => {
+  const run = async ({ withProject = true, withArea = true, withBhk = true, withPrice = true, otherDeal = false, limit = MAX_RESULTS } = {}) => {
     let q = db.from('listings')
       .select('id, title, locality, address, bhk, property_type, deal_type, price, area_sqft, show_on_website')
       .eq('firm_id', firm.id)
       .eq('status', 'available');
-    if (deal) q = q.eq('deal_type', deal);
-    if (bhk > 0) q = q.in('property_type', ['flat', 'villa']); // asking for a BHK means a home, even when BHK is relaxed
+    if (deal) q = q.eq('deal_type', otherDeal ? (deal === 'rent' ? 'buy' : 'rent') : deal);
+    if (type) q = q.eq('property_type', type);
+    else if (bhk > 0) q = q.in('property_type', ['flat', 'villa']); // asking for a BHK means a home, even when BHK is relaxed
     if (withBhk && bhk > 0) q = bhk >= 4 ? q.gte('bhk', 4) : q.eq('bhk', bhk);
     if (withPrice && maxPrice > 0) q = q.lte('price', Math.round(maxPrice * 1.1)); // a little over budget is still worth mentioning
     // A project already pins down the area, so search by project when there is one, otherwise by area.
@@ -108,26 +113,39 @@ async function search(params, origin, isAgent) {
       .concat(await byDistance(await run({ withProject: false, withArea: false, withBhk: false, withPrice: false, limit: 40 }))))
     : [];
   const nearby = wanted ? (await nearbyAreas(wanted, { count: 4, withinKm: 8 })).map((a) => a.name) : [];
+  // In the area they asked, but for rent when they want to buy (or the other way round): worth a mention,
+  // e.g. a caller who knows of the firm's Goregaon East rental and asks "Goregaon East में है ना?".
+  const otherDeal = deal && (area || project)
+    ? (await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })).map((l) => summarise(l, base))
+    : [];
+  const otherDealNote = otherDeal.length
+    ? ` "same_area_other_deal" is in the area they asked but for ${deal === 'rent' ? 'sale' : 'rent'}: if they ask about that area again, mention it in one line.`
+    : '';
+  const askedAgain = ' If they ask again whether we have anything in that area, answer once, honestly and without the forbidden words: '
+    + '"<area> के लिए consultant fresh options निकालेंगे, अभी ready options <areas from other_areas> में हैं." Do not repeat the consultant sentence after that.';
   if (elsewhere.length) {
     return NextResponse.json({
       matches: [],
       similar: [],
       other_areas: elsewhere.map((l) => ({ ...summarise(l, base), ...(l.km != null && { km_away: l.km, nearness: nearness(l.km) }) })),
+      ...(otherDeal.length && { same_area_other_deal: otherDeal }),
       nearby_areas: nearby,
       note: 'Nothing is listed in the area or project they asked for, so do NOT claim or hint that we have options there. Do NOT say we do not have it either. '
         + 'In this same reply: one short clause that the consultant will look for options there (only if you have not said so already), then describe the first '
         + 'property in "other_areas" with its area, BHK and price, and ask if they would like to see it. Do not just name areas: name the property. '
-        + 'If its "nearness" is "far" or "a bit far", say honestly that it is some distance away. Say prices exactly as written in "price".',
+        + 'If its "nearness" is "far" or "a bit far", say honestly that it is some distance away. Say prices exactly as written in "price".'
+        + otherDealNote + askedAgain,
     });
   }
   return NextResponse.json({
     matches: [],
     similar: [],
     other_areas: [],
+    ...(otherDeal.length && { same_area_other_deal: otherDeal }),
     nearby_areas: nearby,
-    note: 'Nothing to offer right now. Do not mention any property, and do not claim or hint that we have options. '
+    note: 'Nothing to offer right now. Do not mention any other property, and do not claim or hint that we have options. '
       + 'Do NOT say we do not have it: say the consultant will look for options for their requirement and contact them. '
-      + 'If you suggest other areas, use only "nearby_areas".',
+      + 'If you suggest other areas, use only "nearby_areas".' + otherDealNote,
   });
 }
 
