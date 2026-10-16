@@ -119,10 +119,11 @@ async function search(params, origin, isAgent) {
     ? (await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })).map((l) => summarise(l, base))
     : [];
   const otherDealNote = otherDeal.length
-    ? ` "same_area_other_deal" is in the area they asked but for ${deal === 'rent' ? 'sale' : 'rent'}: if they ask about that area again, mention it in one line.`
+    ? ` "same_area_other_deal" is in the area they asked but for ${deal === 'rent' ? 'sale' : 'rent'}: right after the consultant clause, mention it in one line `
+      + `("<area> में एक <BHK> ${deal === 'rent' ? 'sale' : 'rent'} के लिए है, <price>, अगर वो भी चलेगा"), then the first "other_areas" property.`
     : '';
   const askedAgain = ' If they ask again whether we have anything in that area, answer once, honestly and without the forbidden words: '
-    + '"<area> के लिए consultant fresh options निकालेंगे, अभी ready options <areas from other_areas> में हैं." Do not repeat the consultant sentence after that.';
+    + '"<area> के लिए consultant fresh options निकालेंगे, अभी ready options <areas from other_areas> में हैं." Name only areas that appear in "other_areas". Do not repeat the consultant sentence after that.';
   if (elsewhere.length) {
     return NextResponse.json({
       matches: [],
