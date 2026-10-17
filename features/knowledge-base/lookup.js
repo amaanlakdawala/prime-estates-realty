@@ -2,6 +2,7 @@
 // are near each other from their map positions.
 import { createAdminClient } from '@/lib/supabase/admin';
 import { hindiNumber } from '@/lib/hindi-amount';
+import { toEnglishPlaces } from '@/lib/place-names';
 
 // Read at most every 10 seconds per server instance: one search looks up several names, and an edit in the
 // admin panel still reaches calls within seconds (the panel and the API can run in different instances).
@@ -37,9 +38,13 @@ function similarity(a, b) {
   for (const g of p) if (counts.get(g)) { shared++; counts.set(g, counts.get(g) - 1); }
   return (2 * shared) / (p.length + q.length || 1);
 }
-const bestOf = (rows, q) => rows
-  .map((r) => ({ row: r, score: Math.max(similarity(q, r.name), ...(r.aliases ?? []).map((a) => similarity(q, a))) }))
-  .sort((a, b) => b.score - a.score)[0];
+// Names may arrive in Devanagari (Riya writes place names that way for her voice): compared in English.
+function bestOf(rows, name) {
+  const q = toEnglishPlaces(name);
+  return rows
+    .map((r) => ({ row: r, score: Math.max(similarity(q, r.name), ...(r.aliases ?? []).map((a) => similarity(q, a))) }))
+    .sort((a, b) => b.score - a.score)[0];
+}
 
 const MATCH = 0.72; // below this a name is treated as unknown rather than guessed
 

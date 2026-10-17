@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fromVoiceAgent } from '@/lib/voice-key';
 import { hindiAmount } from '@/lib/hindi-amount';
+import { toEnglishPlaces } from '@/lib/place-names';
 import { distanceKm, findArea, findProject, findZone, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
 
 // Listings search for the AI voice agents (ElevenLabs "tools").
@@ -50,8 +51,9 @@ async function search(params, origin, isAgent) {
   const type = /shop|retail|showroom/.test(t) ? 'shop' : /office|commercial/.test(t) ? 'office' : /plot|land/.test(t) ? 'plot'
     : /villa|bungalow|house/.test(t) ? 'villa' : /flat|apartment/.test(t) ? 'flat' : '';
   const maxPrice = Number(params.max_price) || 0;
-  const area = clean(params.area);
-  const project = clean(params.project);
+  // Riya writes place names in Devanagari for her voice; listings store them in English.
+  const area = clean(toEnglishPlaces(params.area));
+  const project = clean(toEnglishPlaces(params.project));
   // "South Mumbai", "Western suburbs"…: a region, searched as all the areas in it.
   const areaRow = area ? await findArea(area) : null;
   const zone = area && !areaRow ? await findZone(area) : null;
@@ -126,7 +128,7 @@ async function search(params, origin, isAgent) {
   const kind = (l) => (l.bhk ? `${l.bhk} BHK` : l.property_type);
   const both = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} और ${names.at(-1)}` : names[0]);
   const otherDealLine = otherDeal[0]
-    ? `${otherDeal[0].locality} में एक ${kind(otherDeal[0])} ${deal === 'rent' ? 'sale' : 'rent'} के लिए भी है, ${spokenPrice(otherDeal[0].price, otherDeal[0].deal_type)}, अगर वो भी चलेगा.`
+    ? `${otherDeal[0].locality} में एक ${kind(otherDeal[0])} ${deal === 'rent' ? 'sale' : 'rent'} के लिए है, ${spokenPrice(otherDeal[0].price, otherDeal[0].deal_type)}, अगर वो चलेगा.`
     : '';
   const rules = `Do NOT claim or hint that we have options in ${asked}, and do NOT say we do not have it. `
     + 'Say "say_now" now, in your voice, keeping its areas and prices exactly. If they ask again whether we have anything there, say "say_if_asked_again" once, '
@@ -140,13 +142,15 @@ async function search(params, origin, isAgent) {
       similar: [],
       other_areas: elsewhere.map((l) => ({ ...summarise(l, base), ...(l.km != null && { km_away: l.km, nearness: nearness(l.km) }) })),
       ...(otherDeal.length && { same_area_other_deal: otherDeal.map((l) => summarise(l, base)) }),
+      // What we have comes first and the consultant last: opening with "consultant options निकालेंगे" made a
+      // caller ask three or four times before hearing a property.
       say_now: [
-        `${asked} के लिए हमारे consultant fresh options निकालेंगे.`,
         otherDealLine,
-        `अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${first.km > 8 ? `, ${asked} से थोड़ा दूर है` : ''}, देखना चाहेंगे?`,
+        `${otherDealLine ? 'और ' : ''}अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${first.km > 8 ? `, ${asked} से थोड़ा दूर है` : ''}.`,
+        `${asked} के और options हमारे consultant भेज देंगे. देखना चाहेंगे?`,
       ].filter(Boolean).join(' '),
       // The same-area property goes in here too: on a call she dropped it from say_now, even when asked directly.
-      say_if_asked_again: [`${asked} के लिए consultant fresh options निकालेंगे.`, otherDealLine, `${otherDealLine ? 'बाकी' : 'अभी'} ready options ${ready} में हैं.`].filter(Boolean).join(' '),
+      say_if_asked_again: [otherDealLine, `${otherDealLine ? 'बाकी' : 'अभी'} ready options ${ready} में हैं, और ${asked} के लिए consultant fresh options निकालेंगे.`].filter(Boolean).join(' '),
       note: `Nothing is listed in ${asked}. ${rules} If they say no to the first property, you may offer the next one in "other_areas".`,
     });
   }
@@ -156,7 +160,7 @@ async function search(params, origin, isAgent) {
     other_areas: [],
     ...(otherDeal.length && { same_area_other_deal: otherDeal.map((l) => summarise(l, base)) }),
     nearby_areas: nearby,
-    say_now: [`ठीक है, ${asked} के लिए हमारे consultant आपकी requirement के हिसाब से options देखकर आपसे खुद contact करेंगे.`, otherDealLine].filter(Boolean).join(' '),
+    say_now: [otherDealLine, `${otherDealLine ? 'और' : 'ठीक है,'} ${asked} के लिए हमारे consultant आपकी requirement के हिसाब से options देखकर आपसे खुद contact करेंगे.`].filter(Boolean).join(' '),
     say_if_asked_again: `${asked} के लिए consultant fresh options निकालेंगे और आपसे contact करेंगे.`,
     note: `Nothing to offer right now. ${rules} Do not mention any other property. If you suggest other areas, use only "nearby_areas".`,
   });
