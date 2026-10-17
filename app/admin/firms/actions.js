@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { getAdminContext, MANAGE_FIRM_COOKIE } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { RESERVED_SLUGS } from '@/lib/site';
+import { revalidateSite } from '@/app/actions/site';
 
 // Firms are written with the secret key, so every action checks permission itself first.
 async function requirePlatformAdmin() {
@@ -84,10 +85,14 @@ export async function updateFirm(firmId, formData) {
     fields.voice_agent = text(formData, 'voice_agent', 10) === 'simran' ? 'simran' : 'sia';
   }
 
-  const { error } = await createAdminClient().from('firms').update(fields).eq('id', firmId);
+  const db = createAdminClient();
+  const { data: before } = await db.from('firms').select('slug').eq('id', firmId).maybeSingle();
+  const { error } = await db.from('firms').update(fields).eq('id', firmId);
   if (error) return { error: error.code === '23505' ? 'That web address is taken. Choose another.' : error.message };
 
   revalidatePath('/admin', 'layout');
+  await revalidateSite(before?.slug);
+  if (fields.slug && fields.slug !== before?.slug) await revalidateSite(fields.slug);
   return { success: true };
 }
 
@@ -97,9 +102,10 @@ export async function setFirmActive(firmId, active) {
   } catch (err) {
     return { error: err.message };
   }
-  const { error } = await createAdminClient().from('firms').update({ active: Boolean(active) }).eq('id', firmId);
+  const { data: firm, error } = await createAdminClient().from('firms').update({ active: Boolean(active) }).eq('id', firmId).select('slug').maybeSingle();
   if (error) return { error: error.message };
   revalidatePath('/admin', 'layout');
+  await revalidateSite(firm?.slug);
   return { success: true };
 }
 

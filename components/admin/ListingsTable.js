@@ -1,5 +1,6 @@
 'use client';
 
+import { refreshFirmSite } from '@/app/actions/site';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,6 +45,7 @@ export default function ListingsTable({ listings }) {
     const { error } = await createClient().from('listings').update({ status: newStatus }).eq('id', listing.id);
     setBusyId(null);
     if (error) return setNotice(`Status could not be changed: ${error.message}`);
+    refreshFirmSite().catch(() => {});
     setNotice(newStatus === 'available' ? `"${listing.title}" is live on the website again.` : `"${listing.title}" marked as ${STATUS_LABELS[newStatus].toLowerCase()} and hidden from the website.`);
     router.refresh();
   }
@@ -57,6 +59,7 @@ export default function ListingsTable({ listings }) {
     setDeleting(false);
     setToDelete(null);
     if (error) return setNotice(`The listing could not be deleted: ${error.message}`);
+    refreshFirmSite().catch(() => {});
     setNotice(`"${listing.title}" deleted.`);
     router.refresh();
   }

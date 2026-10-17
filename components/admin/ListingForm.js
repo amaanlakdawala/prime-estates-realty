@@ -1,5 +1,6 @@
 'use client';
 
+import { refreshFirmSite } from '@/app/actions/site';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -218,6 +219,7 @@ export default function ListingForm({ firm, initial = null }) {
 
       // 4. Clean up photos that were removed during editing
       if (removedUrls.current.length) await removeImages(supabase, removedUrls.current);
+      await refreshFirmSite().catch(() => {}); // the cached website shows the change straight away
 
       router.push('/admin');
       router.refresh();

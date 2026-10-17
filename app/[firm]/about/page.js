@@ -4,6 +4,11 @@ import { requireSite } from '@/lib/firm';
 import { href, localityList } from '@/lib/site';
 
 export const metadata = { title: 'About us' };
+// Cached like the home page (rebuilt every 5 minutes or after the firm's profile changes).
+export const revalidate = 300;
+export async function generateStaticParams() {
+  return [];
+}
 
 // SAMPLE team, shown only for demo firms (demo_content). A real firm's site never shows it.
 const TEAM = [

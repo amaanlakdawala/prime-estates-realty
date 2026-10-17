@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import Reveal from '@/components/Reveal';
 import PropertyCard from '@/components/PropertyCard';
 import { getSiteBySlug, requireSite } from '@/lib/firm';
@@ -11,6 +12,8 @@ export async function generateMetadata({ params }) {
   const site = await getSiteBySlug((await params).firm);
   return { title: site?.city ? `Properties in ${site.city}` : 'Properties' };
 }
+
+const PAGE_SIZE = 24; // a firm with hundreds of listings still sends a light page
 
 const SORTS = {
   newest: { column: 'created_at', ascending: false, label: 'Newest first' },
@@ -28,21 +31,26 @@ export default async function PropertiesPage(props) {
   const min = searchParams.min ?? '';
   const max = searchParams.max ?? '';
   const sort = SORTS[searchParams.sort] ? searchParams.sort : 'newest';
+  const page = Math.max(1, Number.parseInt(searchParams.page, 10) || 1);
 
   let listings = [];
+  let total = 0;
   let failed = false;
+  let pastEnd = false; // a page number beyond the last page
   try {
-    let query = createPublicClient().from('listings').select('*').eq('firm_id', site.id).eq('status', 'available');
+    let query = createPublicClient().from('listings').select('*', { count: 'exact' }).eq('firm_id', site.id).eq('status', 'available');
     if (deal) query = query.eq('deal_type', deal);
     if (locality) query = query.eq('locality', locality);
     if (type) query = query.eq('property_type', type);
     if (bhk) query = bhk === '4' ? query.gte('bhk', 4) : query.eq('bhk', Number(bhk));
     if (min) query = query.gte('price', Number(min));
     if (max) query = query.lte('price', Number(max));
-    query = query.order(SORTS[sort].column, { ascending: SORTS[sort].ascending });
-    const { data, error } = await query;
-    if (error) throw error;
+    query = query.order(SORTS[sort].column, { ascending: SORTS[sort].ascending }).order('id').range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    const { data, count, error } = await query;
+    if (error?.code === 'PGRST103') pastEnd = true; // the database says the range is past the end
+    else if (error) throw error;
     listings = data ?? [];
+    total = count ?? listings.length;
   } catch {
     failed = true;
   }
@@ -57,6 +65,14 @@ export default async function PropertiesPage(props) {
     return href(site, `/properties${p.toString() ? `?${p}` : ''}`);
   };
   const hasFilters = locality || type || bhk || min || max;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  // The same filters on another page of results.
+  const pageHref = (n) => {
+    const p = new URLSearchParams(Object.entries({ deal, locality, type, bhk, min, max, sort: sort === 'newest' ? '' : sort }).filter(([, v]) => v));
+    if (n > 1) p.set('page', String(n));
+    return href(site, `/properties${p.toString() ? `?${p}` : ''}`);
+  };
+  if (pastEnd || (!failed && total > 0 && page > pages)) redirect(pageHref(pastEnd ? 1 : pages)); // past the last page
 
   return (
     <div className="page py-10 sm:py-14">
@@ -131,10 +147,20 @@ export default async function PropertiesPage(props) {
         </p>
       ) : listings.length ? (
         <>
-          <p className="mt-8 text-sm text-muted">{listings.length} {listings.length === 1 ? 'property' : 'properties'} found</p>
+          <p className="mt-8 text-sm text-muted">
+            {total} {total === 1 ? 'property' : 'properties'} found
+            {pages > 1 && ` · showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)}`}
+          </p>
           <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map((l, i) => <Reveal key={l.id} delay={(i % 3) * 90} className="h-full"><PropertyCard site={site} listing={l} /></Reveal>)}
           </div>
+          {pages > 1 && (
+            <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Pages">
+              {page > 1 ? <Link href={pageHref(page - 1)} className="btn-outline" rel="prev">← Previous</Link> : <span className="btn-outline pointer-events-none opacity-40" aria-hidden="true">← Previous</span>}
+              <span className="text-sm text-muted">Page {page} of {pages}</span>
+              {page < pages ? <Link href={pageHref(page + 1)} className="btn-outline" rel="next">Next →</Link> : <span className="btn-outline pointer-events-none opacity-40" aria-hidden="true">Next →</span>}
+            </nav>
+          )}
         </>
       ) : (
         <div className="mt-10 rounded-2xl border border-dashed border-line p-10 text-center">

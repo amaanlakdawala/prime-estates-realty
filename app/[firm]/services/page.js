@@ -4,6 +4,11 @@ import { requireSite } from '@/lib/firm';
 import { href, localityList } from '@/lib/site';
 
 export const metadata = { title: 'Services' };
+// Cached like the home page (rebuilt every 5 minutes or after the firm's profile changes).
+export const revalidate = 300;
+export async function generateStaticParams() {
+  return [];
+}
 
 const services = (site) => [
   {

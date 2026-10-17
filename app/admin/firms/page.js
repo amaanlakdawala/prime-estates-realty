@@ -8,20 +8,20 @@ import NewFirmForm from '@/components/admin/NewFirmForm';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Firms' };
 
-const countBy = (rows) => rows.reduce((acc, r) => ({ ...acc, [r.firm_id]: (acc[r.firm_id] ?? 0) + 1 }), {});
 
 export default async function FirmsPage() {
   const ctx = await getAdminContext();
   if (!ctx?.isPlatformAdmin) redirect('/admin');
 
   const db = createAdminClient();
-  const [{ data: firms, error }, { data: listings }, { data: logins }] = await Promise.all([
+  // Counted in the database (supabase/scale.sql): reading every listing to count them breaks past 1,000 rows.
+  const [{ data: firms, error }, { data: counts }] = await Promise.all([
     db.from('firms').select('*').order('created_at', { ascending: false }),
-    db.from('listings').select('firm_id'),
-    db.from('firm_users').select('firm_id'),
+    db.rpc('firm_counts'),
   ]);
-  const listingCount = countBy(listings ?? []);
-  const loginCount = countBy(logins ?? []);
+  const byFirm = Object.fromEntries((counts ?? []).map((c) => [c.firm_id, c]));
+  const listingCount = Object.fromEntries(Object.entries(byFirm).map(([id, c]) => [id, Number(c.listings)]));
+  const loginCount = Object.fromEntries(Object.entries(byFirm).map(([id, c]) => [id, Number(c.logins)]));
 
   return (
     <div>

@@ -49,7 +49,7 @@ Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY
 
 You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Netlify account.
 
-1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, `supabase/auto_call.sql`, then `supabase/inventory.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Optionally run `supabase/seed.sql` after the first for 5 sample listings.
+1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql`, `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, `supabase/auto_call.sql`, then `supabase/inventory.sql`, then `supabase/scale.sql` (indexes and spam protection; run it after the enquiry form that uses `app/actions/enquiry.js` is live), then `features/knowledge-base/schema.sql` and `seed.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Optionally run `supabase/seed.sql` after the first for 5 sample listings.
 2. **Lock sign-ups.** **Authentication → Sign In / Providers → Email**: turn off "Allow new users to sign up".
 3. **Settings.** Copy `.env.example` to `.env.local` and fill in the Supabase URL, anon key and secret key.
 4. **Your admin login.** `npm install`, then `npm run set-admin -- you@example.com 'YourPassword'`.
@@ -57,6 +57,30 @@ You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Ne
 6. **Deploy.** Push to GitHub and import the repository in Netlify. Add the three Supabase variables under **Environment variables**. Every push to `main` redeploys.
 
 Locked out of every admin login? Run `npm run set-admin -- <email> '<new password>'` in this folder. It creates or resets a platform admin.
+
+## Running at scale
+
+What keeps the platform fast, cheap and safe as firms and visitors grow:
+
+- **Cached firm websites.** Home, property, about, services and contact pages are cached and rebuilt at most every 5 minutes, or straight after the firm changes a listing or its profile (`app/actions/site.js`). Visitors get a ready page instead of a database round trip each.
+- **Paginated listings.** The public Properties page shows 24 at a time.
+- **Spam-proof enquiries.** Enquiries are saved only by the server (`app/actions/enquiry.js`), never directly from the browser, because each one can queue an automatic AI call:
+  - a hidden trap field and a minimum fill time stop simple bots;
+  - limits: 5 enquiries per visitor per hour and 40 per firm per hour;
+  - the same number twice within 10 minutes is saved once.
+- **Indexes** for the busiest queries, and counts done in the database (`supabase/scale.sql`).
+- **Security headers** on every page (`next.config.mjs`).
+- **Automatic calls** are claimed one at a time, so no number is called twice; at most 5 calls start per minute, one per firm at a time (`app/api/voice/process-queue/route.js`).
+
+Before many paying firms are live:
+
+| Service | Do this | Why |
+| --- | --- | --- |
+| Supabase | Pro plan; turn on point-in-time recovery | No pausing, daily backups, more storage for photos |
+| Netlify | Paid plan with auto-recharge | The free plan stops deploying when credits run out |
+| Twilio | Upgrade from the trial | The trial calls verified numbers only |
+| ElevenLabs | A plan with enough concurrent calls | Each firm's calls run one at a time, but firms run in parallel |
+| Monitoring | An error tracker (e.g. Sentry) and an uptime check on the home page | To hear about failures before clients do |
 
 ## Free tier limits
 

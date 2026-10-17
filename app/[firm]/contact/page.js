@@ -4,6 +4,11 @@ import { requireSite } from '@/lib/firm';
 import { whatsappLink } from '@/lib/format';
 
 export const metadata = { title: 'Contact us' };
+// Cached like the home page (rebuilt every 5 minutes or after the firm's profile changes).
+export const revalidate = 300;
+export async function generateStaticParams() {
+  return [];
+}
 
 export default async function ContactPage({ params }) {
   const site = await requireSite(params);

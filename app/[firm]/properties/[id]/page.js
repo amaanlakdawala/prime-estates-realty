@@ -10,7 +10,13 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { href } from '@/lib/site';
 import { formatPrice, typeLabel, whatsappLink } from '@/lib/format';
 
-export const dynamic = 'force-dynamic';
+// Cached and rebuilt at most every 5 minutes, or straight after the firm changes a listing or its profile
+// (app/actions/site.js): visitors get a ready page instead of a database round trip per visit.
+export const revalidate = 300;
+export const dynamicParams = true;
+export async function generateStaticParams() {
+  return []; // pages are built on their first visit, then cached
+}
 
 // Only an available listing that belongs to this firm: another firm's listing id gives "not found".
 async function getListing(site, id) {

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect, useRef, useState } from 'react';
+import { submitEnquiry } from '@/app/actions/enquiry';
 
 // firmId: the firm whose website this is. The enquiry lands in that firm's admin panel only.
 export default function EnquiryForm({ firmId, listingId = null, source = 'website', defaultMessage = '', submitLabel = 'Send enquiry', compact = false }) {
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: defaultMessage });
   const [state, setState] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState('');
+  const startedAt = useRef(0); // when the form appeared: instant submissions are bots
+  useEffect(() => { startedAt.current = Date.now(); }, []);
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -19,19 +21,12 @@ export default function EnquiryForm({ firmId, listingId = null, source = 'websit
     if (digits.length < 10) return setError('Enter a 10-digit mobile number.');
 
     setState('sending');
-    const supabase = createClient();
-    const { error: dbError } = await supabase.from('enquiries').insert({
-      firm_id: firmId,
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim() || null,
-      message: form.message.trim() || null,
-      listing_id: listingId,
-      source,
-    });
-    if (dbError) {
+    // Saved on the server, which checks for spam and rate limits (app/actions/enquiry.js).
+    const result = await submitEnquiry({ ...form, firmId, listingId, source, startedAt: startedAt.current, website: e.currentTarget.elements.website?.value })
+      .catch(() => ({ error: 'Your enquiry could not be sent. Check your connection and try again, or call us directly.' }));
+    if (result?.error) {
       setState('error');
-      setError('Your enquiry could not be sent. Check your connection and try again, or call us directly.');
+      setError(result.error);
       return;
     }
     setState('sent');
@@ -48,6 +43,10 @@ export default function EnquiryForm({ firmId, listingId = null, source = 'websit
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-3.5">
+      {/* Hidden from people (and screen readers); bots that fill every field are ignored. */}
+      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        <label>Website <input name="website" tabIndex={-1} autoComplete="off" defaultValue="" /></label>
+      </div>
       <div className={compact ? 'space-y-3.5' : 'grid gap-3.5 sm:grid-cols-2'}>
         <label className="block">
           <span className="field-label">Name</span>
