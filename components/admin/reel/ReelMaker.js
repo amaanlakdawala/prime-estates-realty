@@ -7,7 +7,7 @@ import {
 } from '@/lib/reel';
 
 const PREVIEW_SCALE = 0.5; // the preview canvas is drawn at half size; the video at full 1080x1920
-const FONTS = ['700 88px "Bricolage Grotesque"', '500 38px "Public Sans"', '600 46px "Public Sans"', '700 30px "Public Sans"', '800 32px "Public Sans"'];
+const FONTS = ['700 88px "Plus Jakarta Sans"', '500 38px Inter', '600 46px Inter', '700 30px Inter', '700 32px Inter'];
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
 
 export default function ReelMaker({ listing, site, listingPath }) {
@@ -162,7 +162,7 @@ export default function ReelMaker({ listing, site, listingPath }) {
     <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,340px)_1fr]">
       {/* Preview */}
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <div className="relative mx-auto w-full max-w-[320px] overflow-hidden rounded-[28px] border-[6px] border-basalt bg-basalt shadow-lg">
+        <div className="relative mx-auto w-full max-w-[320px] overflow-hidden rounded-[28px] border-[6px] border-ink bg-ink shadow-lg">
           <canvas
             ref={canvasRef}
             width={REEL.width * PREVIEW_SCALE}
@@ -197,10 +197,10 @@ export default function ReelMaker({ listing, site, listingPath }) {
                     disabled={bad || rendering}
                     aria-pressed={order >= 0}
                     aria-label={bad ? 'Photo could not be loaded' : order >= 0 ? `Photo ${order + 1} in the reel, tap to remove` : 'Add photo to the reel'}
-                    className={`relative block aspect-square w-full overflow-hidden rounded-lg border-2 ${order >= 0 ? 'border-teal' : 'border-transparent opacity-60 hover:opacity-100'} disabled:cursor-not-allowed`}
+                    className={`relative block aspect-square w-full overflow-hidden rounded-lg border-2 ${order >= 0 ? 'border-brand' : 'border-transparent opacity-60 hover:opacity-100'} disabled:cursor-not-allowed`}
                   >
                     <img src={url} alt="" className="h-full w-full object-cover" />
-                    {order >= 0 && <span className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-teal text-xs font-bold text-white">{order + 1}</span>}
+                    {order >= 0 && <span className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">{order + 1}</span>}
                     {bad && <span className="absolute inset-0 flex items-center justify-center bg-white/80 text-xs font-semibold text-red-700">Can&apos;t use</span>}
                   </button>
                 </li>
@@ -226,7 +226,7 @@ export default function ReelMaker({ listing, site, listingPath }) {
             <legend className="field-label">Speed</legend>
             <div className="flex gap-2">
               {Object.keys(SPEEDS).map((s) => (
-                <label key={s} className={`flex-1 cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-medium capitalize ${speed === s ? 'border-teal bg-teal-light text-teal-dark' : 'border-line'}`}>
+                <label key={s} className={`flex-1 cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-medium capitalize ${speed === s ? 'border-brand bg-brand-light text-brand-dark' : 'border-line'}`}>
                   <input type="radio" name="speed" value={s} checked={speed === s} onChange={() => setSpeed(s)} className="sr-only" disabled={rendering} />
                   {s}
                 </label>
@@ -237,7 +237,7 @@ export default function ReelMaker({ listing, site, listingPath }) {
             <legend className="field-label">Photo style</legend>
             <div className="flex gap-2">
               {[['full', 'Full screen', 'Photos fill the screen and pan slowly'], ['framed', 'Framed', 'Whole photo on a soft background']].map(([value, label, hint]) => (
-                <label key={value} className={`flex-1 cursor-pointer rounded-lg border px-3 py-2 text-sm ${style === value ? 'border-teal bg-teal-light text-teal-dark' : 'border-line'}`}>
+                <label key={value} className={`flex-1 cursor-pointer rounded-lg border px-3 py-2 text-sm ${style === value ? 'border-brand bg-brand-light text-brand-dark' : 'border-line'}`}>
                   <input type="radio" name="style" value={value} checked={style === value} onChange={() => setStyle(value)} className="sr-only" disabled={rendering} />
                   <span className="block font-medium">{label}</span>
                   <span className="block text-xs text-muted">{hint}</span>
@@ -261,8 +261,8 @@ export default function ReelMaker({ listing, site, listingPath }) {
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 {rendering ? (
                   <>
-                    <div className="h-3 w-56 overflow-hidden rounded-full bg-stone" role="progressbar" aria-valuenow={Math.round(job.progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Creating video">
-                      <div className="h-full bg-teal transition-all" style={{ width: `${Math.round(job.progress * 100)}%` }} />
+                    <div className="h-3 w-56 overflow-hidden rounded-full bg-mist" role="progressbar" aria-valuenow={Math.round(job.progress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Creating video">
+                      <div className="h-full bg-brand transition-all" style={{ width: `${Math.round(job.progress * 100)}%` }} />
                     </div>
                     <span className="text-sm text-muted">{Math.round(job.progress * 100)}%</span>
                     <button type="button" className="btn-outline py-2" onClick={() => { cancelRef.current = true; }}>Cancel</button>
@@ -280,7 +280,7 @@ export default function ReelMaker({ listing, site, listingPath }) {
                 )}
               </div>
               {job.state === 'error' && <p className="mt-3 text-sm text-red-700" role="alert">{job.message}</p>}
-              {job.state === 'done' && <p className="mt-3 text-sm text-teal-dark" role="status">Your reel is ready. On a phone, use Share to send it straight to Instagram.</p>}
+              {job.state === 'done' && <p className="mt-3 text-sm text-brand-dark" role="status">Your reel is ready. On a phone, use Share to send it straight to Instagram.</p>}
             </>
           )}
         </section>

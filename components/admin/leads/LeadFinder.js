@@ -107,7 +107,7 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
               </select>
             </label>
             <label className="flex items-center gap-3 self-end rounded-lg border border-line px-4 py-3 text-[15px]">
-              <input type="checkbox" checked={requireCity} onChange={(e) => setRequireCity(e.target.checked)} disabled={running} className="h-4 w-4 accent-teal" />
+              <input type="checkbox" checked={requireCity} onChange={(e) => setRequireCity(e.target.checked)} disabled={running} className="h-4 w-4 accent-brand" />
               Only keep firms whose address is in {city || 'this city'}
             </label>
           </div>
@@ -119,12 +119,12 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
               <button type="button" className="btn-primary" onClick={run} disabled={!keyConfigured || !queryList.length || remaining === 0}>Find leads</button>
             )}
             <p className="text-sm text-muted">
-              Up to <span className="font-semibold text-basalt">{maxRequests}</span> Google requests · {remaining} left this month
+              Up to <span className="font-semibold text-ink">{maxRequests}</span> Google requests · {remaining} left this month
             </p>
           </div>
 
           {totals && (
-            <div className="mt-5 rounded-lg bg-stone p-4">
+            <div className="mt-5 rounded-lg bg-mist p-4">
               <p className="text-sm font-semibold" role="status">
                 {running ? 'Searching… ' : 'Done. '}
                 {totals.found} found, {totals.added} new leads, {totals.requests} requests used

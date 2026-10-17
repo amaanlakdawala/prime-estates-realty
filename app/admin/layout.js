@@ -29,8 +29,8 @@ export default async function AdminLayout({ children }) {
   else if (!isPlatformAdmin && !firm.active) blocked = <Notice title="Account paused">Your website and admin access are paused. Please contact us to restart them.</Notice>;
 
   return (
-    <div className="min-h-screen bg-stone">
-      <header className="bg-basalt text-white">
+    <div className="min-h-screen bg-mist">
+      <header className="bg-ink text-white">
         <div className="page flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href={isPlatformAdmin && !firm ? '/admin/firms' : '/admin'} className="font-display text-lg font-semibold">
@@ -48,13 +48,13 @@ export default async function AdminLayout({ children }) {
       </header>
 
       {isPlatformAdmin && firm && (
-        <div className="border-b border-marigold/40 bg-marigold/15">
+        <div className="border-b border-accent/40 bg-accent/15">
           <form action={stopManagingFirm} className="page flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
             <p>
               Managing <span className="font-semibold">{firm.name}</span>
-              {!firm.active && <span className="ml-2 rounded bg-basalt px-1.5 py-0.5 text-xs font-semibold text-white">Paused</span>}
+              {!firm.active && <span className="ml-2 rounded bg-ink px-1.5 py-0.5 text-xs font-semibold text-white">Paused</span>}
             </p>
-            <button type="submit" className="font-medium text-teal-dark underline">Back to all firms</button>
+            <button type="submit" className="font-medium text-brand-dark underline">Back to all firms</button>
           </form>
         </div>
       )}

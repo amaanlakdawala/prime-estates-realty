@@ -18,7 +18,7 @@ export default async function ProfilePage() {
     <div>
       <h1 className="text-3xl font-semibold">Firm profile</h1>
       <p className="mt-1 text-muted">
-        Your firm&apos;s details as shown on <Link href={href(firm)} target="_blank" className="text-teal underline">your website</Link>.
+        Your firm&apos;s details as shown on <Link href={href(firm)} target="_blank" className="text-brand underline">your website</Link>.
       </p>
       <section className="mt-6 rounded-xl border border-line bg-white p-5 sm:p-6">
         <FirmForm firm={firm} adminFields={ctx.isPlatformAdmin} />

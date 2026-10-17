@@ -1,10 +1,10 @@
 import { formatPrice } from '@/lib/format';
 
 const STATUS = {
-  queued: ['Starting', 'bg-stone'],
-  in_progress: ['In progress', 'bg-marigold/40'],
-  done: ['Completed', 'bg-teal-light text-teal-dark'],
-  no_answer: ['No answer', 'bg-basalt/10 text-muted'],
+  queued: ['Starting', 'bg-mist'],
+  in_progress: ['In progress', 'bg-accent/40'],
+  done: ['Completed', 'bg-brand-light text-brand-dark'],
+  no_answer: ['No answer', 'bg-ink/10 text-muted'],
   failed: ['Failed', 'bg-red-100 text-red-800'],
 };
 
@@ -27,7 +27,7 @@ function facts(r) {
 }
 
 export default function CallResult({ call, when }) {
-  const [label, style] = STATUS[call.status] ?? [call.status, 'bg-stone'];
+  const [label, style] = STATUS[call.status] ?? [call.status, 'bg-mist'];
   const who = call.call_contacts?.name || call.call_contacts?.phone || 'Deleted contact';
   const list = facts(call.result);
   return (
@@ -40,18 +40,18 @@ export default function CallResult({ call, when }) {
       {list.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-2">
           {list.map(([k, v]) => (
-            <li key={k} className={`rounded-md px-2 py-1 ${k === 'Asked not to be called' ? 'bg-red-50 text-red-800' : 'bg-stone'}`}>
+            <li key={k} className={`rounded-md px-2 py-1 ${k === 'Asked not to be called' ? 'bg-red-50 text-red-800' : 'bg-mist'}`}>
               {v === true ? k : <><span className="text-muted">{k}:</span> {v}</>}
             </li>
           ))}
         </ul>
       )}
-      {call.summary && <p className="mt-2 text-basalt/80">{call.summary}</p>}
+      {call.summary && <p className="mt-2 text-ink/80">{call.summary}</p>}
       {call.error && <p className="mt-2 text-red-700">{call.error}</p>}
       {call.transcript?.length > 0 && (
         <details className="mt-2">
-          <summary className="cursor-pointer font-medium text-teal">Read the conversation</summary>
-          <ol className="mt-2 space-y-1.5 rounded-lg bg-stone p-3">
+          <summary className="cursor-pointer font-medium text-brand">Read the conversation</summary>
+          <ol className="mt-2 space-y-1.5 rounded-lg bg-mist p-3">
             {call.transcript.map((t, i) => (
               <li key={i}><span className="font-semibold">{t.role === 'agent' ? 'Riya' : 'Client'}:</span> {t.text}</li>
             ))}

@@ -61,7 +61,7 @@ export default function FirmLoginForm({ firmId }) {
 
       {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>}
       {created && (
-        <p className="rounded-lg border border-teal/30 bg-teal-light p-3 text-sm text-teal-dark" role="status">
+        <p className="rounded-lg border border-brand/30 bg-brand-light p-3 text-sm text-brand-dark" role="status">
           Login created for {created.email}. Password: <span className="font-semibold">{created.password}</span>
         </p>
       )}

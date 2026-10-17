@@ -29,7 +29,7 @@ function ProjectForm({ project, areas, onDone }) {
     });
   };
   return (
-    <form onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget)); }} className="grid gap-3 rounded-lg border border-line bg-stone/60 p-4 sm:grid-cols-2">
+    <form onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget)); }} className="grid gap-3 rounded-lg border border-line bg-mist/60 p-4 sm:grid-cols-2">
       <label className="block"><span className="field-label">Tower or project</span>
         <input name="name" className="field" defaultValue={project?.name} required placeholder="Lodha Park" /></label>
       <label className="block"><span className="field-label">Area</span>
@@ -74,7 +74,7 @@ function AreaForm({ onDone }) {
     onDone();
   });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget)); }} className="mt-4 grid gap-3 rounded-lg border border-line bg-stone/60 p-4 sm:grid-cols-2">
+    <form onSubmit={(e) => { e.preventDefault(); submit(new FormData(e.currentTarget)); }} className="mt-4 grid gap-3 rounded-lg border border-line bg-mist/60 p-4 sm:grid-cols-2">
       <label className="block"><span className="field-label">Area name</span><input name="name" className="field" required placeholder="Chandivali" /></label>
       <label className="block"><span className="field-label">Region</span>
         <select name="zone" className="field" defaultValue="" required>
@@ -123,7 +123,7 @@ export default function KnowledgeAdmin({ projects, areas }) {
         {editing === 'new' && <div className="mt-4"><ProjectForm areas={areas} onDone={() => setEditing(null)} /></div>}
         <div className="mt-4 overflow-x-auto rounded-xl border border-line">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-line bg-stone text-muted">
+            <thead className="border-b border-line bg-mist text-muted">
               <tr>
                 <th scope="col" className="px-4 py-3 font-medium">Tower</th>
                 <th scope="col" className="px-4 py-3 font-medium">Area</th>
@@ -136,7 +136,7 @@ export default function KnowledgeAdmin({ projects, areas }) {
               {shown.map((p) => (editing === p.id ? (
                 <tr key={p.id}><td colSpan={5} className="p-3"><ProjectForm project={p} areas={areas} onDone={() => setEditing(null)} /></td></tr>
               ) : (
-                <tr key={p.id} className="hover:bg-stone/60">
+                <tr key={p.id} className="hover:bg-mist/60">
                   <td className="px-4 py-3">
                     <span className="font-semibold">{p.name}</span>
                     {p.aliases?.length > 0 && <span className="block text-xs text-muted">also: {p.aliases.join(', ')}</span>}
@@ -146,10 +146,10 @@ export default function KnowledgeAdmin({ projects, areas }) {
                   <td className="px-4 py-3">
                     {rateText(p)}
                     {p.price_min_psf > 0 && (p.price_verified
-                      ? <span className="ml-2 rounded bg-teal-light px-1.5 py-0.5 text-xs font-semibold text-teal-dark">Checked</span>
-                      : <span className="ml-2 rounded bg-marigold/30 px-1.5 py-0.5 text-xs font-semibold">Not checked</span>)}
+                      ? <span className="ml-2 rounded bg-brand-light px-1.5 py-0.5 text-xs font-semibold text-brand-dark">Checked</span>
+                      : <span className="ml-2 rounded bg-accent/30 px-1.5 py-0.5 text-xs font-semibold">Not checked</span>)}
                   </td>
-                  <td className="px-4 py-3 text-right"><button type="button" className="font-medium text-teal underline" onClick={() => setEditing(p.id)}>Edit</button></td>
+                  <td className="px-4 py-3 text-right"><button type="button" className="font-medium text-brand underline" onClick={() => setEditing(p.id)}>Edit</button></td>
                 </tr>
               )))}
               {!shown.length && <tr><td colSpan={5} className="px-4 py-6 text-center text-muted">No towers match.</td></tr>}

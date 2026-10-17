@@ -46,7 +46,7 @@ export default async function LeadsPage() {
           <p className="text-muted">Google searches this month</p>
           <p className="font-semibold">{used} of {MONTHLY_LIMIT}</p>
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
-            <div className={`h-full ${used / MONTHLY_LIMIT > 0.8 ? 'bg-red-600' : 'bg-teal'}`} style={{ width: `${Math.min(100, (used / MONTHLY_LIMIT) * 100)}%` }} />
+            <div className={`h-full ${used / MONTHLY_LIMIT > 0.8 ? 'bg-red-600' : 'bg-brand'}`} style={{ width: `${Math.min(100, (used / MONTHLY_LIMIT) * 100)}%` }} />
           </div>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default async function LeadsPage() {
           <dt className="text-xs text-muted">All leads</dt>
           <dd className="font-display text-2xl font-semibold">{all.length}</dd>
         </div>
-        <div className={`rounded-xl border p-3 ${dueToday ? 'border-marigold bg-marigold/15' : 'border-line bg-white'}`}>
+        <div className={`rounded-xl border p-3 ${dueToday ? 'border-accent bg-accent/15' : 'border-line bg-white'}`}>
           <dt className="text-xs text-muted">Follow-ups due</dt>
           <dd className="font-display text-2xl font-semibold">{dueToday}</dd>
         </div>

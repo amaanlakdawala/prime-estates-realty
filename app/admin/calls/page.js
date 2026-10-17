@@ -51,7 +51,7 @@ export default async function CallsPage() {
       </div>
 
       {!firm.ai_calls_enabled && (
-        <p className="rounded-xl border border-marigold bg-marigold/15 p-4 text-sm" role="status">
+        <p className="rounded-xl border border-accent bg-accent/15 p-4 text-sm" role="status">
           AI calling isn&apos;t switched on for this firm yet, so calls can&apos;t be placed. You can still add and upload contacts.{' '}
           {ctx.isPlatformAdmin
             ? <>Switch it on under <Link href={`/admin/firms/${firmId}`} className="font-semibold underline">Firms → this firm</Link>.</>

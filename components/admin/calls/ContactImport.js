@@ -93,23 +93,23 @@ export default function ContactImport() {
     <div className="space-y-3 text-sm">
       <p className="text-muted">
         A CSV file with a <span className="font-semibold">phone</span> column, plus optional name, why you&apos;re calling and what they&apos;re looking for.
-        In Excel use File → Save As → CSV. <a href={templateHref} download="ai-call-contacts.csv" className="font-medium text-teal underline">Download a template</a>.
+        In Excel use File → Save As → CSV. <a href={templateHref} download="ai-call-contacts.csv" className="font-medium text-brand underline">Download a template</a>.
       </p>
       <label className="btn-outline cursor-pointer">
         Choose CSV file
         <input type="file" accept=".csv,text/csv" className="sr-only" onChange={onFile} />
       </label>
       {contacts && (
-        <div className="space-y-3 rounded-lg bg-stone p-3">
+        <div className="space-y-3 rounded-lg bg-mist p-3">
           <p><span className="font-semibold">{fileName}</span>: {contacts.length} rows found.</p>
           <label className="flex items-start gap-2.5">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-teal" />
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-brand" />
             <span>Everyone in this file asked us to contact them or is our client.</span>
           </label>
           <button type="button" className="btn-primary" onClick={upload} disabled={!consent || pending}>{pending ? 'Uploading…' : `Add ${contacts.length} contacts`}</button>
         </div>
       )}
-      {message && <p className={message.error ? 'text-red-700' : 'text-teal-dark'} role="status">{message.text}</p>}
+      {message && <p className={message.error ? 'text-red-700' : 'text-brand-dark'} role="status">{message.text}</p>}
     </div>
   );
 }

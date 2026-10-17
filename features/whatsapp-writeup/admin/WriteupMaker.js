@@ -83,7 +83,7 @@ export default function WriteupMaker({ listings, site, me, preselect = [], aiRea
   const canMake = contactOk && (mode === 'listings' ? selected.length > 0 : pasted.trim().length >= 15);
   const opt = (key, label) => (
     <label className="flex items-center gap-2 text-sm">
-      <input type="checkbox" checked={opts[key]} onChange={(e) => setOpts((o) => ({ ...o, [key]: e.target.checked }))} className="h-4 w-4 accent-teal" />
+      <input type="checkbox" checked={opts[key]} onChange={(e) => setOpts((o) => ({ ...o, [key]: e.target.checked }))} className="h-4 w-4 accent-brand" />
       {label}
     </label>
   );
@@ -108,7 +108,7 @@ export default function WriteupMaker({ listings, site, me, preselect = [], aiRea
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button type="button" className="btn-outline py-1.5 text-sm" onClick={saveAsMine} disabled={!contactOk || pending}>Save as my details</button>
             {!contactOk && <span className="text-sm text-red-700">Enter your mobile number to make a write-up.</span>}
-            {contactNote && <span className="text-sm text-teal-dark" role="status">{contactNote}</span>}
+            {contactNote && <span className="text-sm text-brand-dark" role="status">{contactNote}</span>}
           </div>
         </section>
 
@@ -118,7 +118,7 @@ export default function WriteupMaker({ listings, site, me, preselect = [], aiRea
           <div className="mt-3 flex gap-2" role="tablist">
             {[['listings', 'From my listings'], ['paste', 'Paste a description']].map(([m, label]) => (
               <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => { setMode(m); setOutput(''); setError(''); }}
-                className={`rounded-full border px-4 py-1.5 text-sm font-medium ${mode === m ? 'border-teal bg-teal text-white' : 'border-line'}`}>{label}</button>
+                className={`rounded-full border px-4 py-1.5 text-sm font-medium ${mode === m ? 'border-brand bg-brand text-white' : 'border-line'}`}>{label}</button>
             ))}
           </div>
 
@@ -128,8 +128,8 @@ export default function WriteupMaker({ listings, site, me, preselect = [], aiRea
               <ul className="mt-3 max-h-80 divide-y divide-line overflow-y-auto rounded-lg border border-line">
                 {filtered.map((l) => (
                   <li key={l.id}>
-                    <label className="flex cursor-pointer items-start gap-3 px-3 py-2.5 hover:bg-stone">
-                      <input type="checkbox" checked={selected.includes(l.id)} onChange={() => toggle(l.id)} className="mt-1 h-4 w-4 accent-teal" />
+                    <label className="flex cursor-pointer items-start gap-3 px-3 py-2.5 hover:bg-mist">
+                      <input type="checkbox" checked={selected.includes(l.id)} onChange={() => toggle(l.id)} className="mt-1 h-4 w-4 accent-brand" />
                       <span className="min-w-0 text-sm">
                         <span className="block font-medium">{l.title}</span>
                         <span className="text-muted">{l.locality} · {formatPrice(l.price, l.deal_type)}{l.show_on_website === false ? ' · Private' : ''}</span>
@@ -143,7 +143,7 @@ export default function WriteupMaker({ listings, site, me, preselect = [], aiRea
             </div>
           ) : (
             <div className="mt-4">
-              {!aiReady && <p className="mb-3 rounded-lg bg-marigold/15 p-3 text-sm">AI tidy-up is not switched on yet. Ask the platform admin to add the AI key.</p>}
+              {!aiReady && <p className="mb-3 rounded-lg bg-accent/15 p-3 text-sm">AI tidy-up is not switched on yet. Ask the platform admin to add the AI key.</p>}
               <textarea className="field min-h-[200px]" value={pasted} onChange={(e) => { setPasted(e.target.value); setTidied(null); }}
                 placeholder={'Paste any property message, e.g.\n2bhk lodha park lower parel 1050 carpet 22nd flr SF sea view 2.1cr nego call 98xxxxxx'} />
               <p className="mt-2 text-sm text-muted">The AI only organises what you paste. It removes phone numbers and agent names from the text and never adds details.</p>

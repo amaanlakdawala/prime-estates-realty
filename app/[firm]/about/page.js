@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 import { requireSite } from '@/lib/firm';
 import { href, localityList } from '@/lib/site';
 
@@ -18,7 +19,7 @@ export default async function AboutPage({ params }) {
   return (
     <>
       <section className="page py-14 sm:py-20">
-        <h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">
+        <h1 className="max-w-3xl animate-fade-up text-4xl font-bold leading-tight sm:text-5xl">
           A {site.city ? `${site.city} ` : ''}brokerage built on referrals{site.foundedYear ? ` since ${site.foundedYear}` : ''}.
         </h1>
         <div className="mt-10 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
@@ -38,7 +39,7 @@ export default async function AboutPage({ params }) {
               </p>
             )}
           </div>
-          <div className="rounded-xl bg-stone p-6">
+          <Reveal className="rounded-2xl border border-line bg-mist p-6">
             <h2 className="text-xl font-semibold">How we work</h2>
             <ol className="mt-4 space-y-4 text-[15px] leading-relaxed">
               <li><span className="font-semibold">1. Understand your needs.</span> Budget, locality, commute, schools, timelines.</li>
@@ -46,18 +47,18 @@ export default async function AboutPage({ params }) {
               <li><span className="font-semibold">3. Negotiate.</span> Based on recent deals in the same building or area.</li>
               <li><span className="font-semibold">4. Close.</span> Loan, agreement registration and handover support.</li>
             </ol>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {site.demoContent && (
-        <section className="bg-stone">
+        <section className="bg-mist">
           <div className="page py-14 sm:py-20">
             <h2 className="section-title">Our team</h2>
             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {TEAM.map((m) => (
-                <li key={m.name} className="rounded-xl bg-white p-6">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal font-display text-xl font-semibold text-white" aria-hidden="true">
+                <li key={m.name} className="rounded-2xl border border-line bg-white p-6 shadow-card transition duration-500 hover:-translate-y-1 hover:shadow-lift">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark font-display text-xl font-bold text-white" aria-hidden="true">
                     {m.initials}
                   </div>
                   <p className="mt-4 font-semibold">{m.name}</p>

@@ -44,12 +44,12 @@ export default function AddContactForm() {
         <input name="notes" className="field" placeholder="2 BHK in Powai, budget around 2 crore" />
       </label>
       <label className="flex items-start gap-2.5 text-sm">
-        <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 accent-teal" />
+        <input type="checkbox" name="consent" required className="mt-0.5 h-4 w-4 accent-brand" />
         <span>This person asked us to contact them or is our client.</span>
       </label>
       <div className="flex items-center gap-3">
         <button type="submit" className="btn-primary" disabled={pending}>{pending ? 'Adding…' : 'Add client'}</button>
-        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-teal-dark'}`} role="status">{message.text}</p>}
+        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}
       </div>
     </form>
   );

@@ -23,18 +23,18 @@ export default function TemplateEditor({ initial }) {
     <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
       <h2 className="text-lg font-semibold">WhatsApp message</h2>
       <p className="mt-1 text-sm text-muted">
-        Used on every lead&apos;s page. These are filled in for each lead: <code className="rounded bg-stone px-1">{'{name}'}</code> (short business name),{' '}
-        <code className="rounded bg-stone px-1">{'{firm}'}</code> (same), <code className="rounded bg-stone px-1">{'{city}'}</code> and{' '}
-        <code className="rounded bg-stone px-1">{'{demo_link}'}</code> (their demo website, once created).
+        Used on every lead&apos;s page. These are filled in for each lead: <code className="rounded bg-mist px-1">{'{name}'}</code> (short business name),{' '}
+        <code className="rounded bg-mist px-1">{'{firm}'}</code> (same), <code className="rounded bg-mist px-1">{'{city}'}</code> and{' '}
+        <code className="rounded bg-mist px-1">{'{demo_link}'}</code> (their demo website, once created).
       </p>
       <p className="mt-2 text-sm text-muted">
-        Write <code className="rounded bg-stone px-1">{'{Hello|Namaste|Hi}'}</code> to vary the wording: each lead gets one of the options, so your messages
+        Write <code className="rounded bg-mist px-1">{'{Hello|Namaste|Hi}'}</code> to vary the wording: each lead gets one of the options, so your messages
         aren&apos;t all identical. If the message has no line with “STOP”, an opt-out line is added automatically.
       </p>
       <textarea className="field mt-4 min-h-[150px]" value={body} onChange={(e) => setBody(e.target.value)} />
       <div className="mt-3 flex items-center gap-3">
         <button type="button" className="btn-primary" onClick={save} disabled={pending || body === initial}>{pending ? 'Saving…' : 'Save message'}</button>
-        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-teal-dark'}`} role="status">{message.text}</p>}
+        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}
       </div>
     </section>
   );

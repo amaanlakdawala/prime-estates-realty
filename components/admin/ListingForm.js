@@ -253,7 +253,7 @@ export default function ListingForm({ firm, initial = null }) {
             <legend className="field-label">Listed for</legend>
             <div className="flex gap-2">
               {[['buy', 'Sale'], ['rent', 'Rent']].map(([v, label]) => (
-                <label key={v} className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-4 py-2.5 text-[15px] font-medium ${form.deal_type === v ? 'border-teal bg-teal-light text-teal-dark' : 'border-line'}`}>
+                <label key={v} className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-4 py-2.5 text-[15px] font-medium ${form.deal_type === v ? 'border-brand bg-brand-light text-brand-dark' : 'border-line'}`}>
                   <input type="radio" name="deal_type" value={v} checked={form.deal_type === v} onChange={set('deal_type')} className="sr-only" />
                   {label}
                 </label>
@@ -331,8 +331,8 @@ export default function ListingForm({ firm, initial = null }) {
             <legend className="field-label">Amenities</legend>
             <div className="mt-1 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {AMENITIES.map((a) => (
-                <label key={a} className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-line px-3 py-2.5 text-[15px] has-[:checked]:border-teal has-[:checked]:bg-teal-light">
-                  <input type="checkbox" checked={form.amenities.includes(a)} onChange={() => toggleAmenity(a)} className="h-4 w-4 accent-teal" />
+                <label key={a} className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-line px-3 py-2.5 text-[15px] has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+                  <input type="checkbox" checked={form.amenities.includes(a)} onChange={() => toggleAmenity(a)} className="h-4 w-4 accent-brand" />
                   {a}
                 </label>
               ))}
@@ -360,20 +360,20 @@ export default function ListingForm({ firm, initial = null }) {
           <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {photos.map((p, i) => (
               <li key={p.url ?? p.preview} className="overflow-hidden rounded-lg border border-line">
-                <div className="relative aspect-[4/3] bg-stone">
+                <div className="relative aspect-[4/3] bg-mist">
                   <img src={p.url ?? p.preview} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
-                  {i === 0 && <span className="absolute left-2 top-2 rounded bg-basalt px-2 py-0.5 text-xs font-semibold text-white">Cover</span>}
-                  {p.file && <span className="absolute right-2 top-2 rounded bg-marigold px-2 py-0.5 text-xs font-semibold text-basalt">New</span>}
+                  {i === 0 && <span className="absolute left-2 top-2 rounded bg-ink px-2 py-0.5 text-xs font-semibold text-white">Cover</span>}
+                  {p.file && <span className="absolute right-2 top-2 rounded bg-accent px-2 py-0.5 text-xs font-semibold text-ink">New</span>}
                 </div>
                 <div className="flex text-xs font-medium">
-                  {i !== 0 && <button type="button" onClick={() => makeCover(i)} className="flex-1 border-r border-line py-2 hover:bg-stone">Make cover</button>}
+                  {i !== 0 && <button type="button" onClick={() => makeCover(i)} className="flex-1 border-r border-line py-2 hover:bg-mist">Make cover</button>}
                   <button type="button" onClick={() => removePhoto(i)} className="flex-1 py-2 text-red-700 hover:bg-red-50">Remove</button>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <button type="button" onClick={() => photoInput.current?.click()} className="mt-5 flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-line py-10 text-muted hover:border-teal hover:text-teal">
+          <button type="button" onClick={() => photoInput.current?.click()} className="mt-5 flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-line py-10 text-muted hover:border-brand hover:text-brand">
             <span className="font-semibold">No photos yet</span>
             <span className="text-sm">Select to add photos. Listings with photos get far more enquiries.</span>
           </button>
@@ -383,7 +383,7 @@ export default function ListingForm({ firm, initial = null }) {
           <h3 className="font-display text-lg font-semibold">Floor plan <span className="font-sans text-sm font-normal text-muted">(optional)</span></h3>
           <div className="mt-3 flex flex-wrap items-center gap-4">
             {floorPlan && (
-              <div className="h-24 w-32 overflow-hidden rounded-lg border border-line bg-stone">
+              <div className="h-24 w-32 overflow-hidden rounded-lg border border-line bg-mist">
                 <img src={floorPlan.url ?? floorPlan.preview} alt="Floor plan preview" className="h-full w-full object-contain" />
               </div>
             )}
@@ -413,8 +413,8 @@ export default function ListingForm({ firm, initial = null }) {
             </select>
           </label>
           {firm.websiteEnabled !== false && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
-              <input type="checkbox" checked={form.show_on_website} onChange={set('show_on_website')} className="mt-1 h-4 w-4 accent-teal" />
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+              <input type="checkbox" checked={form.show_on_website} onChange={set('show_on_website')} className="mt-1 h-4 w-4 accent-brand" />
               <span>
                 <span className="block font-medium">Show on the website</span>
                 <span className="text-sm text-muted">Untick to keep it private: only your team and your AI calling assistant will see it.</span>
@@ -422,8 +422,8 @@ export default function ListingForm({ firm, initial = null }) {
             </label>
           )}
           {firm.websiteEnabled !== false && form.show_on_website && (
-            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
-              <input type="checkbox" checked={form.featured} onChange={set('featured')} className="mt-1 h-4 w-4 accent-teal" />
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+              <input type="checkbox" checked={form.featured} onChange={set('featured')} className="mt-1 h-4 w-4 accent-brand" />
               <span>
                 <span className="block font-medium">Feature on the home page</span>
                 <span className="text-sm text-muted">Up to 6 featured listings are shown, newest first.</span>
@@ -434,7 +434,7 @@ export default function ListingForm({ firm, initial = null }) {
       </section>
 
       {/* Actions */}
-      <div className="sticky bottom-0 -mx-5 flex flex-wrap items-center justify-end gap-3 border-t border-line bg-stone/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8">
+      <div className="sticky bottom-0 -mx-5 flex flex-wrap items-center justify-end gap-3 border-t border-line bg-mist/95 px-5 py-4 backdrop-blur sm:-mx-8 sm:px-8">
         {formError && <p className="mr-auto text-sm font-medium text-red-700" role="alert">{formError}</p>}
         {saving && progress && <p className="mr-auto text-sm text-muted" role="status">{progress}</p>}
         <button type="button" className="btn-outline" onClick={() => router.push('/admin')} disabled={saving}>Cancel</button>

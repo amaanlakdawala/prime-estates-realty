@@ -53,10 +53,10 @@ export default async function EnquiriesPage() {
                 </div>
               </div>
               {q.listings && (
-                <p className="mt-3 text-sm">Property: <Link href={`/admin/${q.listings.id}/edit`} className="font-medium text-teal underline">{q.listings.title}</Link></p>
+                <p className="mt-3 text-sm">Property: <Link href={`/admin/${q.listings.id}/edit`} className="font-medium text-brand underline">{q.listings.title}</Link></p>
               )}
-              {q.email && <p className="mt-1 text-sm">Email: <a href={`mailto:${q.email}`} className="text-teal underline">{q.email}</a></p>}
-              {q.message && <p className="mt-3 whitespace-pre-line rounded-lg bg-stone p-3 text-[15px]">{q.message}</p>}
+              {q.email && <p className="mt-1 text-sm">Email: <a href={`mailto:${q.email}`} className="text-brand underline">{q.email}</a></p>}
+              {q.message && <p className="mt-3 whitespace-pre-line rounded-lg bg-mist p-3 text-[15px]">{q.message}</p>}
             </li>
           );
         })}

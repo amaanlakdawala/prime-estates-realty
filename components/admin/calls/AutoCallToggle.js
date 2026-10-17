@@ -37,7 +37,7 @@ export default function AutoCallToggle({ enabled, canCall }) {
         aria-checked={on}
         onClick={toggle}
         disabled={pending}
-        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition ${on ? 'bg-teal' : 'bg-line'} disabled:opacity-60`}
+        className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition ${on ? 'bg-brand' : 'bg-line'} disabled:opacity-60`}
       >
         <span className="sr-only">Call new website enquiries automatically</span>
         <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${on ? 'translate-x-6' : 'translate-x-1'}`} />

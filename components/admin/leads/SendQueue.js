@@ -128,7 +128,7 @@ export default function SendQueue({ leads, template, sentToday }) {
             <Link href="/admin/leads" className="btn-primary mt-5">Back to leads</Link>
           </div>
         ) : limitReached ? (
-          <div className="rounded-xl border border-marigold bg-marigold/15 p-8 text-center">
+          <div className="rounded-xl border border-accent bg-accent/15 p-8 text-center">
             <p className="text-lg font-semibold">You&apos;ve reached today&apos;s limit of {settings.dailyLimit} messages.</p>
             <p className="mx-auto mt-2 max-w-md text-muted">
               Messaging many new people in one day is what gets WhatsApp numbers banned. {queue.length} leads are waiting for tomorrow.
@@ -147,13 +147,13 @@ export default function SendQueue({ leads, template, sentToday }) {
                   {!lead.website && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800">No website</span>}
                 </p>
               </div>
-              <Link href={`/admin/leads/${lead.id}`} target="_blank" className="text-sm font-medium text-teal underline">Open lead</Link>
+              <Link href={`/admin/leads/${lead.id}`} target="_blank" className="text-sm font-medium text-brand underline">Open lead</Link>
             </div>
 
-            <div className="mt-4 rounded-lg bg-stone/60 px-4 py-3 text-sm">
+            <div className="mt-4 rounded-lg bg-mist/60 px-4 py-3 text-sm">
               <span className="font-semibold">Demo website: </span>
               {demoState === 'creating' ? 'creating…'
-                : demoLink ? <a href={demoLink} target="_blank" rel="noopener noreferrer" className="break-all text-teal underline">{demoLink}</a>
+                : demoLink ? <a href={demoLink} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline">{demoLink}</a>
                 : settings.autoDemo ? 'not created' : 'off (tick “Create a demo website” to include one)'}
             </div>
 
@@ -187,7 +187,7 @@ export default function SendQueue({ leads, template, sentToday }) {
           <p className="text-sm text-muted">Sent today</p>
           <p className="font-display text-3xl font-semibold">{sentCount}<span className="text-lg text-muted"> / {settings.dailyLimit}</span></p>
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-line">
-            <div className={`h-full ${sentCount >= settings.dailyLimit ? 'bg-marigold' : 'bg-[#1E8E4E]'}`} style={{ width: `${Math.min(100, (sentCount / settings.dailyLimit) * 100)}%` }} />
+            <div className={`h-full ${sentCount >= settings.dailyLimit ? 'bg-accent' : 'bg-[#1E8E4E]'}`} style={{ width: `${Math.min(100, (sentCount / settings.dailyLimit) * 100)}%` }} />
           </div>
         </div>
         <label className="block">
@@ -202,11 +202,11 @@ export default function SendQueue({ leads, template, sentToday }) {
           </select>
         </label>
         <label className="flex items-start gap-2.5 text-[15px]">
-          <input type="checkbox" className="mt-1 h-4 w-4 accent-teal" checked={settings.autoDemo} onChange={(e) => saveSetting('autoDemo', e.target.checked)} />
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-brand" checked={settings.autoDemo} onChange={(e) => saveSetting('autoDemo', e.target.checked)} />
           <span>Create a demo website for each lead and put its link in the message</span>
         </label>
         <label className="flex items-start gap-2.5 text-[15px]">
-          <input type="checkbox" className="mt-1 h-4 w-4 accent-teal" checked={settings.includeWithWebsite} onChange={(e) => saveSetting('includeWithWebsite', e.target.checked)} />
+          <input type="checkbox" className="mt-1 h-4 w-4 accent-brand" checked={settings.includeWithWebsite} onChange={(e) => saveSetting('includeWithWebsite', e.target.checked)} />
           <span>Include leads that have a website</span>
         </label>
       </aside>

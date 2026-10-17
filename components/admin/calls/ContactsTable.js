@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { deleteContact, markDoNotCall, refreshCalls, startCall } from '@/app/admin/calls/actions';
 
 export const CONTACT_STATUS = {
-  new: ['Not called', 'bg-stone'],
-  calling: ['Calling…', 'bg-marigold/40'],
-  called: ['Called', 'bg-teal-light text-teal-dark'],
-  no_answer: ['No answer', 'bg-basalt/10 text-muted'],
+  new: ['Not called', 'bg-mist'],
+  calling: ['Calling…', 'bg-accent/40'],
+  called: ['Called', 'bg-brand-light text-brand-dark'],
+  no_answer: ['No answer', 'bg-ink/10 text-muted'],
   failed: ['Call failed', 'bg-red-100 text-red-800'],
   do_not_call: ['Do not call', 'bg-red-100 text-red-800'],
 };
@@ -106,21 +106,21 @@ export default function ContactsTable({ contacts, canCall }) {
       </div>
 
       {queue && (
-        <p className="mt-3 rounded-lg bg-marigold/15 px-4 py-2.5 text-sm" role="status">
+        <p className="mt-3 rounded-lg bg-accent/15 px-4 py-2.5 text-sm" role="status">
           Calling {queue.current} ({queue.done + 1} of {queue.total})… The next call starts when this one ends.
         </p>
       )}
-      {notice && <p className={`mt-3 rounded-lg px-4 py-2.5 text-sm ${notice.error ? 'bg-red-50 text-red-800' : 'bg-teal-light text-teal-dark'}`} role="status">{notice.text}</p>}
+      {notice && <p className={`mt-3 rounded-lg px-4 py-2.5 text-sm ${notice.error ? 'bg-red-50 text-red-800' : 'bg-brand-light text-brand-dark'}`} role="status">{notice.text}</p>}
 
       {!shown.length ? (
         <p className="mt-4 text-sm text-muted">{contacts.length ? 'Nobody in this view.' : 'No contacts yet. Add a client or upload a list above.'}</p>
       ) : (
         <div className="mt-4 overflow-x-auto rounded-xl border border-line">
           <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="border-b border-line bg-stone text-muted">
+            <thead className="border-b border-line bg-mist text-muted">
               <tr>
                 <th scope="col" className="w-10 px-4 py-3">
-                  <input type="checkbox" aria-label="Select all" className="h-4 w-4 accent-teal" checked={allShownSelected} disabled={!!queue}
+                  <input type="checkbox" aria-label="Select all" className="h-4 w-4 accent-brand" checked={allShownSelected} disabled={!!queue}
                     onChange={(e) => setSelected(e.target.checked ? new Set(shown.filter(callable).map((c) => c.id)) : new Set())} />
                 </th>
                 <th scope="col" className="px-4 py-3 font-medium">Client</th>
@@ -131,11 +131,11 @@ export default function ContactsTable({ contacts, canCall }) {
             </thead>
             <tbody className="divide-y divide-line">
               {shown.slice(0, 300).map((c) => {
-                const [label, style] = CONTACT_STATUS[c.status] ?? [c.status, 'bg-stone'];
+                const [label, style] = CONTACT_STATUS[c.status] ?? [c.status, 'bg-mist'];
                 return (
                   <tr key={c.id}>
                     <td className="px-4 py-3">
-                      <input type="checkbox" aria-label={`Select ${c.name || c.phone}`} className="h-4 w-4 accent-teal" checked={selected.has(c.id)} disabled={!callable(c) || !!queue} onChange={() => toggle(c.id)} />
+                      <input type="checkbox" aria-label={`Select ${c.name || c.phone}`} className="h-4 w-4 accent-brand" checked={selected.has(c.id)} disabled={!callable(c) || !!queue} onChange={() => toggle(c.id)} />
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-semibold">{c.name || '—'}</p>
@@ -151,12 +151,12 @@ export default function ContactsTable({ contacts, canCall }) {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
-                        <button type="button" className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt disabled:opacity-50"
+                        <button type="button" className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink disabled:opacity-50"
                           disabled={!canCall || !callable(c) || !!busy || !!queue} onClick={() => callOne(c)}>
                           {busy === c.id ? 'Calling…' : 'Call'}
                         </button>
                         {c.status !== 'do_not_call' && (
-                          <button type="button" className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt disabled:opacity-50"
+                          <button type="button" className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink disabled:opacity-50"
                             disabled={!!busy || !!queue} onClick={() => act(markDoNotCall, c, `${c.name || c.phone} won't be called again.`)}>Do not call</button>
                         )}
                         <button type="button" className="rounded-md border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:border-red-700 disabled:opacity-50"

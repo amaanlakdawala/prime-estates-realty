@@ -21,21 +21,21 @@ export default function EmiCalculator({ price }) {
       <div className="mt-5 space-y-5">
         <label className="block">
           <span className="flex justify-between text-sm font-medium"><span>Loan amount</span><span>{inr(loan)}</span></span>
-          <input type="range" className="mt-2 w-full accent-teal" min={500000} max={Math.max(price, 10000000)} step={100000} value={loan} onChange={(e) => setLoan(Number(e.target.value))} />
+          <input type="range" className="mt-2 w-full accent-brand" min={500000} max={Math.max(price, 10000000)} step={100000} value={loan} onChange={(e) => setLoan(Number(e.target.value))} />
         </label>
         <label className="block">
           <span className="flex justify-between text-sm font-medium"><span>Interest rate</span><span>{rate.toFixed(1)}% a year</span></span>
-          <input type="range" className="mt-2 w-full accent-teal" min={6} max={14} step={0.1} value={rate} onChange={(e) => setRate(Number(e.target.value))} />
+          <input type="range" className="mt-2 w-full accent-brand" min={6} max={14} step={0.1} value={rate} onChange={(e) => setRate(Number(e.target.value))} />
         </label>
         <label className="block">
           <span className="flex justify-between text-sm font-medium"><span>Loan tenure</span><span>{years} years</span></span>
-          <input type="range" className="mt-2 w-full accent-teal" min={5} max={30} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} />
+          <input type="range" className="mt-2 w-full accent-brand" min={5} max={30} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} />
         </label>
       </div>
-      <dl className="mt-6 grid grid-cols-2 gap-4 rounded-lg bg-stone p-4">
+      <dl className="mt-6 grid grid-cols-2 gap-4 rounded-lg bg-mist p-4">
         <div>
           <dt className="text-sm text-muted">Monthly EMI</dt>
-          <dd className="font-display text-2xl font-semibold text-teal">{inr(emi)}</dd>
+          <dd className="font-display text-2xl font-semibold text-brand">{inr(emi)}</dd>
         </div>
         <div>
           <dt className="text-sm text-muted">Total interest</dt>

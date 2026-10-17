@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import EmiCalculator from '@/components/EmiCalculator';
@@ -52,18 +53,18 @@ export default async function PropertyPage({ params }) {
   return (
     <div className="page py-8 sm:py-12">
       <nav className="text-sm text-muted" aria-label="Breadcrumb">
-        <Link href={href(site, '/properties')} className="hover:text-basalt">Properties</Link>
+        <Link href={href(site, '/properties')} className="hover:text-ink">Properties</Link>
         <span className="mx-2">/</span>
-        <Link href={href(site, `/properties?locality=${encodeURIComponent(listing.locality)}`)} className="hover:text-basalt">{listing.locality}</Link>
+        <Link href={href(site, `/properties?locality=${encodeURIComponent(listing.locality)}`)} className="hover:text-ink">{listing.locality}</Link>
       </nav>
 
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
+      <div className="mt-4 flex animate-fade-up flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold sm:text-4xl">{listing.title}</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{listing.title}</h1>
           <p className="mt-2 text-muted">{where}</p>
         </div>
         <div className="text-right">
-          <p className="font-display text-3xl font-semibold text-teal sm:text-4xl">{formatPrice(listing.price, listing.deal_type)}</p>
+          <p className="font-display text-3xl font-bold tracking-tight text-brand sm:text-4xl">{formatPrice(listing.price, listing.deal_type)}</p>
           <p className="text-sm text-muted">{listing.deal_type === 'rent' ? 'For rent' : 'For sale'}</p>
         </div>
       </div>
@@ -72,9 +73,9 @@ export default async function PropertyPage({ params }) {
         <div className="min-w-0 space-y-10">
           <Gallery photos={listing.photos ?? []} title={listing.title} />
 
-          <section>
+          <Reveal as="section">
             <h2 className="text-2xl font-semibold">Details</h2>
-            <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
+            <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line shadow-card sm:grid-cols-3">
               {specs.map(([k, v]) => (
                 <div key={k} className="bg-white p-4">
                   <dt className="text-sm text-muted">{k}</dt>
@@ -82,51 +83,51 @@ export default async function PropertyPage({ params }) {
                 </div>
               ))}
             </dl>
-          </section>
+          </Reveal>
 
           {listing.description && (
-            <section>
+            <Reveal as="section">
               <h2 className="text-2xl font-semibold">About this property</h2>
               <div className="prose-body mt-3 whitespace-pre-line">{listing.description}</div>
-            </section>
+            </Reveal>
           )}
 
           {listing.amenities?.length > 0 && (
-            <section>
+            <Reveal as="section">
               <h2 className="text-2xl font-semibold">Amenities</h2>
               <ul className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {listing.amenities.map((a) => (
                   <li key={a} className="flex items-center gap-2.5 text-[15px]">
-                    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5l3 3 7-7" stroke="#0F5C5A" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5l3 3 7-7" stroke="#2B59E8" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     {a}
                   </li>
                 ))}
               </ul>
-            </section>
+            </Reveal>
           )}
 
           {listing.floor_plan && (
-            <section>
+            <Reveal as="section">
               <h2 className="text-2xl font-semibold">Floor plan</h2>
               <a href={listing.floor_plan} target="_blank" rel="noopener noreferrer" className="mt-4 block overflow-hidden rounded-xl border border-line bg-white p-3">
                 <img src={listing.floor_plan} alt={`Floor plan of ${listing.title}`} className="mx-auto max-h-[520px] w-auto" />
               </a>
               <p className="mt-2 text-sm text-muted">Select the plan to open it full size.</p>
-            </section>
+            </Reveal>
           )}
 
-          <section>
+          <Reveal as="section">
             <h2 className="text-2xl font-semibold">Location</h2>
-            <div className="mt-4 aspect-[16/9] overflow-hidden rounded-xl border border-line">
+            <div className="mt-4 aspect-[16/9] overflow-hidden rounded-2xl border border-line">
               <iframe title={`Map showing ${listing.title}`} src={mapSrc} className="h-full w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
             </div>
-          </section>
+          </Reveal>
 
           {listing.deal_type === 'buy' && <EmiCalculator price={Number(listing.price)} />}
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-xl border border-line p-5">
+          <div className="animate-fade-up rounded-3xl border border-line bg-white p-6 shadow-lift [animation-delay:0.15s]">
             <h2 className="font-display text-xl font-semibold">Interested in this property?</h2>
             <p className="mt-1 text-sm text-muted">Ask a question or book a site visit.</p>
             <div className="mt-4 grid gap-2">

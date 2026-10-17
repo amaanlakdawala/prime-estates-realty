@@ -43,7 +43,7 @@ export default async function FirmsPage() {
           ) : (
             <div className="mt-4 overflow-x-auto rounded-xl border border-line">
               <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-line bg-stone text-muted">
+                <thead className="border-b border-line bg-mist text-muted">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">Firm</th>
                     <th scope="col" className="px-4 py-3 font-medium">Website</th>
@@ -54,17 +54,17 @@ export default async function FirmsPage() {
                 </thead>
                 <tbody className="divide-y divide-line">
                   {firms.map((f) => (
-                    <tr key={f.id} className="relative hover:bg-stone/60">
+                    <tr key={f.id} className="relative hover:bg-mist/60">
                       <td className="px-4 py-3">
                         <Link href={`/admin/firms/${f.id}`} className="font-semibold after:absolute after:inset-0 hover:underline">{f.name}</Link>
-                        {!f.active && <span className="ml-2 rounded bg-basalt px-1.5 py-0.5 text-xs font-semibold text-white">Paused</span>}
-                        {f.demo_content && <span className="ml-2 rounded bg-marigold/30 px-1.5 py-0.5 text-xs font-semibold">Demo</span>}
+                        {!f.active && <span className="ml-2 rounded bg-ink px-1.5 py-0.5 text-xs font-semibold text-white">Paused</span>}
+                        {f.demo_content && <span className="ml-2 rounded bg-accent/30 px-1.5 py-0.5 text-xs font-semibold">Demo</span>}
                         <span className="block text-muted">/{f.slug}{f.city ? ` · ${f.city}` : ''}</span>
                       </td>
                       <td className="px-4 py-3">
                         {/* z-10 lifts the link above the row-wide link to the firm's page. */}
                         {f.active && f.website_enabled !== false
-                          ? <Link href={`/${f.slug}`} target="_blank" className="relative z-10 font-medium text-teal underline">Visit ↗</Link>
+                          ? <Link href={`/${f.slug}`} target="_blank" className="relative z-10 font-medium text-brand underline">Visit ↗</Link>
                           : <span className="text-muted">{f.active ? 'Switched off' : 'Offline'}</span>}
                       </td>
                       <td className="px-4 py-3">{listingCount[f.id] ?? 0}</td>

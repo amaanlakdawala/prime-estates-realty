@@ -3,9 +3,9 @@ import { formatDate, formatDateTime } from '@/lib/format';
 
 export function RoleBadge({ employee }) {
   return employee.role === 'admin' ? (
-    <span className="rounded-full bg-basalt px-2.5 py-1 text-xs font-semibold text-white">Platform admin</span>
+    <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-white">Platform admin</span>
   ) : (
-    <span className="rounded-full bg-teal-light px-2.5 py-1 text-xs font-semibold text-teal-dark">{employee.firm?.name ?? 'No firm'}</span>
+    <span className="rounded-full bg-brand-light px-2.5 py-1 text-xs font-semibold text-brand-dark">{employee.firm?.name ?? 'No firm'}</span>
   );
 }
 
@@ -18,7 +18,7 @@ export default function UsersTable({ employees, currentUserId }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-line">
       <table className="w-full min-w-[560px] text-left text-sm">
-        <thead className="border-b border-line bg-stone text-muted">
+        <thead className="border-b border-line bg-mist text-muted">
           <tr>
             <th scope="col" className="px-4 py-3 font-medium">Person</th>
             <th scope="col" className="px-4 py-3 font-medium">Access</th>
@@ -28,7 +28,7 @@ export default function UsersTable({ employees, currentUserId }) {
         </thead>
         <tbody className="divide-y divide-line">
           {employees.map((emp) => (
-            <tr key={emp.id} className="relative hover:bg-stone/60">
+            <tr key={emp.id} className="relative hover:bg-mist/60">
               <td className="px-4 py-3">
                 {/* The link's ::after covers the whole row, so anywhere on it is clickable. */}
                 <Link href={`/admin/users/${emp.id}`} className="font-semibold after:absolute after:inset-0 hover:underline">

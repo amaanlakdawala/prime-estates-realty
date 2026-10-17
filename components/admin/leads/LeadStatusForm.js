@@ -45,17 +45,17 @@ export default function LeadStatusForm({ lead, demoFirm }) {
         </label>
         <div className="mt-2 flex flex-wrap gap-2 text-sm">
           {[['Tomorrow', 1], ['In 3 days', 3], ['Next week', 7]].map(([label, n]) => (
-            <button key={label} type="button" onClick={() => setFollowUp(inDays(n))} className="rounded-md border border-line px-2.5 py-1 hover:border-basalt">{label}</button>
+            <button key={label} type="button" onClick={() => setFollowUp(inDays(n))} className="rounded-md border border-line px-2.5 py-1 hover:border-ink">{label}</button>
           ))}
           {followUp && <button type="button" onClick={() => setFollowUp('')} className="px-1 text-muted underline">Clear</button>}
         </div>
       </div>
       <div className="flex items-center gap-3">
         <button type="button" className="btn-primary" onClick={save} disabled={pending || !changed}>{pending ? 'Saving…' : 'Save'}</button>
-        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-teal-dark'}`} role="status">{message.text}</p>}
+        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}
       </div>
       {lead.status === 'won' && demoFirm && (
-        <p className="rounded-lg border border-teal/30 bg-teal-light p-3 text-sm text-teal-dark">
+        <p className="rounded-lg border border-brand/30 bg-brand-light p-3 text-sm text-brand-dark">
           Won. To make their site real: open <Link href={`/admin/firms/${demoFirm.id}`} className="font-semibold underline">their firm</Link>,
           {demoFirm.demo_content ? ' untick “Demo firm”, ' : ' '}check their details, and create their login.
         </p>

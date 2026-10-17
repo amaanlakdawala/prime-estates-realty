@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 import { requireSite } from '@/lib/firm';
 import { href, localityList } from '@/lib/site';
 
@@ -46,11 +47,11 @@ export default async function ServicesPage({ params }) {
   const site = await requireSite(params);
   return (
     <div className="page py-14 sm:py-20">
-      <h1 className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl">Services</h1>
+      <h1 className="max-w-2xl animate-fade-up text-4xl font-bold leading-tight sm:text-5xl">Services</h1>
       <p className="mt-4 max-w-xl text-lg text-muted">Everything from the first site visit to the day you get the keys.</p>
       <div className="mt-12 divide-y divide-line border-y border-line">
         {services(site).map((s) => (
-          <section key={s.id} id={s.id} className="grid scroll-mt-24 gap-6 py-10 md:grid-cols-[1fr_1.3fr]">
+          <Reveal as="section" key={s.id} id={s.id} className="grid scroll-mt-24 gap-6 py-10 md:grid-cols-[1fr_1.3fr]">
             <div>
               <h2 className="text-2xl font-semibold sm:text-3xl">{s.title}</h2>
               <p className="mt-3 max-w-md text-muted">{s.intro}</p>
@@ -59,12 +60,12 @@ export default async function ServicesPage({ params }) {
             <ul className="space-y-3 self-center">
               {s.points.map((p) => (
                 <li key={p} className="flex gap-3 text-[16px]">
-                  <svg className="mt-1 flex-none" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5l3 3 7-7" stroke="#0F5C5A" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <svg className="mt-1 flex-none" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5l3 3 7-7" stroke="#2B59E8" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {p}
                 </li>
               ))}
             </ul>
-          </section>
+          </Reveal>
         ))}
       </div>
     </div>

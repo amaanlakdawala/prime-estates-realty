@@ -47,8 +47,8 @@ export default function FirmForm({ firm, adminFields = false }) {
       {field('logo_url', 'Logo image link', firm.logoUrl, { optional: true, placeholder: 'https://…/logo.png' })}
       {field('hero_url', 'Home page photo or video link', firm.heroUrl, { optional: true, wide: true, placeholder: 'https://…/building.jpg or …/tour.mp4', hint: 'Shown behind the headline. Empty = sample photo collage.' })}
       {adminFields && (
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-teal has-[:checked]:bg-teal-light">
-          <input type="checkbox" name="website_enabled" defaultChecked={firm.websiteEnabled} className="mt-1 h-4 w-4 accent-teal" />
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+          <input type="checkbox" name="website_enabled" defaultChecked={firm.websiteEnabled} className="mt-1 h-4 w-4 accent-brand" />
           <span>
             <span className="block font-medium">Public website is live</span>
             <span className="text-sm text-muted">Untick for firms that only use AI calling. Their website is hidden, but their admin panel works and the AI assistant still offers their listings to callers.</span>
@@ -59,7 +59,7 @@ export default function FirmForm({ firm, adminFields = false }) {
         <fieldset className="rounded-lg border border-line p-4 sm:col-span-2">
           <legend className="px-1 font-medium">AI calling</legend>
           <label className="flex cursor-pointer items-start gap-3">
-            <input type="checkbox" name="ai_calls_enabled" defaultChecked={firm.aiCallsEnabled} className="mt-1 h-4 w-4 accent-teal" />
+            <input type="checkbox" name="ai_calls_enabled" defaultChecked={firm.aiCallsEnabled} className="mt-1 h-4 w-4 accent-brand" />
             <span>
               <span className="block font-medium">Allow this firm to place AI calls</span>
               <span className="text-sm text-muted">Calls are billed to your ElevenLabs and Twilio accounts.</span>
@@ -81,8 +81,8 @@ export default function FirmForm({ firm, adminFields = false }) {
         </fieldset>
       )}
       {adminFields && (
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-marigold has-[:checked]:bg-marigold/10">
-          <input type="checkbox" name="demo_content" defaultChecked={firm.demoContent} className="mt-1 h-4 w-4 accent-teal" />
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-accent has-[:checked]:bg-accent/10">
+          <input type="checkbox" name="demo_content" defaultChecked={firm.demoContent} className="mt-1 h-4 w-4 accent-brand" />
           <span>
             <span className="block font-medium">Demo firm: show sample testimonials and team</span>
             <span className="text-sm text-muted">Only for your own demo sites. Never tick this for a real client, or invented reviews appear on their site.</span>
@@ -91,7 +91,7 @@ export default function FirmForm({ firm, adminFields = false }) {
       )}
       <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
         <button type="submit" className="btn-primary" disabled={pending}>{pending ? 'Saving…' : 'Save details'}</button>
-        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-teal-dark'}`} role="status">{message.text}</p>}
+        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}
       </div>
     </form>
   );

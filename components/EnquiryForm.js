@@ -39,9 +39,9 @@ export default function EnquiryForm({ firmId, listingId = null, source = 'websit
 
   if (state === 'sent') {
     return (
-      <div className="rounded-xl border border-teal/30 bg-teal-light p-5" role="status">
-        <p className="font-semibold text-teal-dark">Enquiry sent.</p>
-        <p className="mt-1 text-sm text-basalt/80">Our team will call you on {form.phone} within one working day.</p>
+      <div className="rounded-xl border border-brand/30 bg-brand-light p-5" role="status">
+        <p className="font-semibold text-brand-dark">Enquiry sent.</p>
+        <p className="mt-1 text-sm text-ink/80">Our team will call you on {form.phone} within one working day.</p>
       </div>
     );
   }

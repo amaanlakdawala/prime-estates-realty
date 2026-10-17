@@ -38,7 +38,7 @@ export default async function LoginDetailPage({ params }) {
   const details = [
     ['Email', employee.email],
     ['Access', employee.firm
-      ? <Link key="firm" href={`/admin/firms/${employee.firm.id}`} className="font-medium text-teal underline">{employee.firm.name}</Link>
+      ? <Link key="firm" href={`/admin/firms/${employee.firm.id}`} className="font-medium text-brand underline">{employee.firm.name}</Link>
       : <RoleBadge key="role" employee={employee} />],
     ['Added', formatDateTime(employee.created_at)],
     ['Last sign-in', employee.last_sign_in_at ? formatDateTime(employee.last_sign_in_at) : 'Never signed in'],
@@ -48,7 +48,7 @@ export default async function LoginDetailPage({ params }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href={employee.firm ? `/admin/firms/${employee.firm.id}` : '/admin/users'} className="text-sm font-medium text-teal hover:underline">
+        <Link href={employee.firm ? `/admin/firms/${employee.firm.id}` : '/admin/users'} className="text-sm font-medium text-brand hover:underline">
           ← {employee.firm ? employee.firm.name : 'Logins'}
         </Link>
         <h1 className="mt-2 text-2xl font-semibold">
@@ -84,7 +84,7 @@ export default async function LoginDetailPage({ params }) {
           Listings added {listings && <span className="font-normal text-muted">({listings.length})</span>}
         </h2>
         {ownerColumnMissing ? (
-          <p className="mt-3 rounded-lg border border-marigold/40 bg-marigold/10 p-4 text-sm">
+          <p className="mt-3 rounded-lg border border-accent/40 bg-accent/10 p-4 text-sm">
             Listings aren&apos;t linked to who added them yet. Run <code>supabase/add_listing_owner.sql</code> once in the Supabase SQL Editor; listings added after that will show here.
           </p>
         ) : listingsError ? (
@@ -94,7 +94,7 @@ export default async function LoginDetailPage({ params }) {
         ) : (
           <div className="mt-4 overflow-x-auto rounded-xl border border-line">
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="border-b border-line bg-stone text-muted">
+              <thead className="border-b border-line bg-mist text-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium">Property</th>
                   <th scope="col" className="px-4 py-3 font-medium">Price</th>

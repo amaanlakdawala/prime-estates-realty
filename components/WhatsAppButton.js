@@ -8,6 +8,8 @@ export function WhatsAppIcon({ size = 22 }) {
   );
 }
 
+// Floating WhatsApp button with a soft pulse. It sits above the bottom-right corner, where Netlify's
+// "Powered by Netlify" badge appears on the live site.
 export default function WhatsAppButton({ site }) {
   if (!site.whatsapp) return null;
   return (
@@ -15,10 +17,11 @@ export default function WhatsAppButton({ site }) {
       href={whatsappLink(site.whatsapp, `Hello ${site.name}, I'm looking for a property${site.city ? ` in ${site.city}` : ''}.`)}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1E8E4E] text-white shadow-lg hover:bg-[#177540]"
+      className="group fixed bottom-20 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#1E8E4E] text-white shadow-[0_10px_30px_-6px_rgb(30_142_78_/_0.6)] transition duration-300 hover:-translate-y-1 hover:bg-[#177540]"
       aria-label="Chat with us on WhatsApp"
     >
-      <WhatsAppIcon size={28} />
+      <span className="absolute inset-0 animate-ping-slow rounded-full bg-[#1E8E4E]/40" aria-hidden="true" />
+      <span className="relative"><WhatsAppIcon size={28} /></span>
     </a>
   );
 }

@@ -3,25 +3,48 @@
 @tailwind utilities;
 
 @layer base {
-  html { -webkit-text-size-adjust: 100%; }
-  body { @apply bg-white text-basalt font-sans antialiased; }
-  h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.015em; }
-  :focus-visible { outline: 3px solid #F2B632; outline-offset: 2px; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { @apply bg-white text-ink font-sans antialiased; }
+  h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.025em; text-wrap: balance; }
+  :focus-visible { outline: 3px solid #2B59E8; outline-offset: 2px; }
 }
 
 @layer components {
   .page { @apply mx-auto w-full max-w-page px-5 sm:px-8; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60; }
-  .btn-primary { @apply btn bg-teal text-white hover:bg-teal-dark; }
-  .btn-outline { @apply btn border border-line bg-white text-basalt hover:border-basalt; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition duration-300 ease-out disabled:cursor-not-allowed disabled:opacity-60; }
+  .btn-primary { @apply btn bg-brand text-white shadow-[0_8px_20px_-8px_rgb(43_89_232_/_0.6)] hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-[0_12px_24px_-8px_rgb(43_89_232_/_0.7)] active:translate-y-0; }
+  .btn-outline { @apply btn border border-line bg-white text-ink hover:-translate-y-0.5 hover:border-ink/40 hover:shadow-card active:translate-y-0; }
+  .btn-ghost-light { @apply btn border border-white/25 text-white backdrop-blur hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/10 active:translate-y-0; }
   .btn-danger { @apply btn bg-red-700 text-white hover:bg-red-800; }
   .btn-whatsapp { @apply btn bg-[#1E8E4E] text-white hover:bg-[#177540]; }
-  .field-label { @apply mb-1.5 block text-sm font-medium text-basalt; }
-  .field { @apply w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-[15px] text-basalt placeholder:text-muted/70 focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20; }
-  .section-title { @apply font-display text-3xl font-semibold sm:text-4xl; }
-  .prose-body { @apply max-w-[68ch] text-[17px] leading-relaxed text-basalt/85; }
+  .field-label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .field { @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink transition placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15; }
+  .section-title { @apply font-display text-3xl font-bold sm:text-4xl; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.18em] text-brand; }
+  .prose-body { @apply max-w-[68ch] text-[17px] leading-relaxed text-ink/80; }
+  /* A link whose arrow slides on hover: <a class="link-arrow">View all <span aria-hidden>→</span></a> */
+  .link-arrow { @apply inline-flex items-center gap-1.5 font-semibold text-brand; }
+  .link-arrow > span { @apply transition-transform duration-300; }
+  .link-arrow:hover > span { @apply translate-x-1; }
 }
 
+/* Scroll reveal (components/Reveal.js). Hidden only once JavaScript is running, so the page never stays blank
+   without it; the "js" class is set by a tiny script in app/layout.js before anything is painted. */
+.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--reveal-delay, 0ms); }
+.js .reveal.reveal-fade { transform: none; }
+.js .reveal.reveal-zoom { transform: scale(0.96); }
+.js .reveal.is-visible { opacity: 1; transform: none; }
+
+/* Hero entrance: children rise in one after another. */
+.stagger > * { animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.2s; }
+.stagger > *:nth-child(4) { animation-delay: 0.3s; }
+.stagger > *:nth-child(5) { animation-delay: 0.4s; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
 }

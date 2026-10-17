@@ -14,7 +14,7 @@ function csvCell(value) {
 }
 
 export function StatusBadge({ status }) {
-  const style = LEAD_STATUSES.find((s) => s.value === status)?.style ?? 'bg-stone';
+  const style = LEAD_STATUSES.find((s) => s.value === status)?.style ?? 'bg-mist';
   return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${style}`}>{statusLabel(status)}</span>;
 }
 
@@ -101,14 +101,14 @@ export default function LeadsTable({ leads, today }) {
         </label>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 sm:col-span-2 lg:col-span-4">
           <label className="flex items-center gap-2 text-[15px]">
-            <input type="checkbox" checked={noWebsite} onChange={(e) => { setNoWebsite(e.target.checked); setShown(PAGE); }} className="h-4 w-4 accent-teal" />
+            <input type="checkbox" checked={noWebsite} onChange={(e) => { setNoWebsite(e.target.checked); setShown(PAGE); }} className="h-4 w-4 accent-brand" />
             No website only
           </label>
           <label className="flex items-center gap-2 text-[15px]">
-            <input type="checkbox" checked={dueOnly} onChange={(e) => { setDueOnly(e.target.checked); setShown(PAGE); }} className="h-4 w-4 accent-teal" />
+            <input type="checkbox" checked={dueOnly} onChange={(e) => { setDueOnly(e.target.checked); setShown(PAGE); }} className="h-4 w-4 accent-brand" />
             Follow-up due
           </label>
-          <button type="button" onClick={exportCsv} className="ml-auto text-sm font-medium text-teal underline" disabled={!filtered.length}>
+          <button type="button" onClick={exportCsv} className="ml-auto text-sm font-medium text-brand underline" disabled={!filtered.length}>
             Download these {filtered.length} as CSV
           </button>
         </div>
@@ -118,7 +118,7 @@ export default function LeadsTable({ leads, today }) {
 
       <div className="overflow-x-auto rounded-xl border border-line bg-white">
         <table className="w-full min-w-[820px] text-left text-sm">
-          <thead className="border-b border-line bg-stone text-muted">
+          <thead className="border-b border-line bg-mist text-muted">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">Brokerage</th>
               <th scope="col" className="px-4 py-3 font-medium">Phone</th>
@@ -133,7 +133,7 @@ export default function LeadsTable({ leads, today }) {
             {filtered.slice(0, shown).map((l) => {
               const due = l.next_follow_up && l.next_follow_up <= today && OPEN.includes(l.status);
               return (
-                <tr key={l.id} className="relative hover:bg-stone/60">
+                <tr key={l.id} className="relative hover:bg-mist/60">
                   <td className="px-4 py-3">
                     <Link href={`/admin/leads/${l.id}`} className="font-semibold after:absolute after:inset-0 hover:underline">{cleanName(l.name)}</Link>
                     <span className="block text-muted">{l.locality || l.city}</span>

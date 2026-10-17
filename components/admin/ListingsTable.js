@@ -11,9 +11,9 @@ import { formatPrice, formatDate, typeLabel } from '@/lib/format';
 import { PROPERTY_TYPES } from '@/lib/site';
 
 const STATUS_STYLES = {
-  available: 'bg-teal-light text-teal-dark',
-  sold: 'bg-basalt text-white',
-  rented: 'bg-marigold/30 text-basalt',
+  available: 'bg-brand-light text-brand-dark',
+  sold: 'bg-ink text-white',
+  rented: 'bg-accent/30 text-ink',
 };
 const STATUS_LABELS = { available: 'Available', sold: 'Sold', rented: 'Rented' };
 
@@ -102,7 +102,7 @@ export default function ListingsTable({ listings }) {
       <p className="mt-4 text-sm text-muted">
         Showing {filtered.length} of {counts.all} listings. {counts.available} live on the website.
       </p>
-      {notice && <p className="mt-3 rounded-lg border border-teal/30 bg-teal-light px-4 py-3 text-sm font-medium text-teal-dark" role="status">{notice}</p>}
+      {notice && <p className="mt-3 rounded-lg border border-brand/30 bg-brand-light px-4 py-3 text-sm font-medium text-brand-dark" role="status">{notice}</p>}
 
       {listings.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-line bg-white p-12 text-center">
@@ -115,7 +115,7 @@ export default function ListingsTable({ listings }) {
       ) : (
         <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-white">
           <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="border-b border-line bg-stone text-muted">
+            <thead className="border-b border-line bg-mist text-muted">
               <tr>
                 <th scope="col" className="px-4 py-3 font-medium">Property</th>
                 <th scope="col" className="px-4 py-3 font-medium">Location</th>
@@ -138,8 +138,8 @@ export default function ListingsTable({ listings }) {
                           <Link href={`/admin/${l.id}/edit`} className="font-semibold hover:underline">{l.title}</Link>
                           <p className="text-muted">
                             {typeLabel(l.property_type)}{l.bhk ? `, ${l.bhk} BHK` : ''}
-                            {l.featured && <span className="ml-2 rounded bg-marigold/30 px-1.5 py-0.5 text-xs font-semibold text-basalt">Featured</span>}
-                            {l.show_on_website === false && <span className="ml-2 rounded bg-basalt/10 px-1.5 py-0.5 text-xs font-semibold text-basalt" title="Not on the website. Your team and AI assistant can see it.">Private</span>}
+                            {l.featured && <span className="ml-2 rounded bg-accent/30 px-1.5 py-0.5 text-xs font-semibold text-ink">Featured</span>}
+                            {l.show_on_website === false && <span className="ml-2 rounded bg-ink/10 px-1.5 py-0.5 text-xs font-semibold text-ink" title="Not on the website. Your team and AI assistant can see it.">Private</span>}
                           </p>
                         </div>
                       </div>
@@ -153,17 +153,17 @@ export default function ListingsTable({ listings }) {
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
                         {l.status === 'available' ? (
-                          <button type="button" disabled={busy} onClick={() => setListingStatus(l, closedStatus)} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt disabled:opacity-50">
+                          <button type="button" disabled={busy} onClick={() => setListingStatus(l, closedStatus)} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink disabled:opacity-50">
                             Mark {closedStatus}
                           </button>
                         ) : (
-                          <button type="button" disabled={busy} onClick={() => setListingStatus(l, 'available')} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt disabled:opacity-50">
+                          <button type="button" disabled={busy} onClick={() => setListingStatus(l, 'available')} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink disabled:opacity-50">
                             Relist
                           </button>
                         )}
-                        <Link href={`/admin/${l.id}/edit`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt">Edit</Link>
-                        <Link href={`/admin/${l.id}/reel`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt">Make reel</Link>
-                        {l.status === 'available' && <Link href={`/admin/writeup?listing=${l.id}`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-basalt">Write-up</Link>}
+                        <Link href={`/admin/${l.id}/edit`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink">Edit</Link>
+                        <Link href={`/admin/${l.id}/reel`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink">Make reel</Link>
+                        {l.status === 'available' && <Link href={`/admin/writeup?listing=${l.id}`} className="rounded-md border border-line px-3 py-1.5 font-medium hover:border-ink">Write-up</Link>}
                         <button type="button" onClick={() => setToDelete(l)} className="rounded-md border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:border-red-700">Delete</button>
                       </div>
                     </td>

@@ -42,7 +42,7 @@ export default function UserActions({ employee, isSelf }) {
         <button type="button" className="btn-outline border-red-200 text-red-700 hover:border-red-700" disabled={isSelf || pending} onClick={() => setConfirmingRemove(true)}>Remove login</button>
       </div>
       {isSelf && <p className="mt-2 text-sm text-muted">You can&apos;t remove your own login.</p>}
-      {notice && <p className="mt-3 rounded-lg border border-line bg-stone px-4 py-2.5 text-sm" role="status">{notice}</p>}
+      {notice && <p className="mt-3 rounded-lg border border-line bg-mist px-4 py-2.5 text-sm" role="status">{notice}</p>}
 
       <SetPasswordDialog employee={settingPassword ? employee : null} busy={pending} onSubmit={savePassword} onCancel={() => setSettingPassword(false)} />
       <ConfirmDialog

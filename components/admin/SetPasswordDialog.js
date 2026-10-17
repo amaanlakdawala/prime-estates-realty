@@ -19,10 +19,10 @@ export default function SetPasswordDialog({ employee, busy, onSubmit, onCancel }
   }, [employee]);
 
   return (
-    <dialog ref={ref} onCancel={(e) => { e.preventDefault(); if (!busy) onCancel(); }} className="w-[min(92vw,26rem)] rounded-xl p-0 backdrop:bg-basalt/60">
+    <dialog ref={ref} onCancel={(e) => { e.preventDefault(); if (!busy) onCancel(); }} className="w-[min(92vw,26rem)] rounded-xl p-0 backdrop:bg-ink/60">
       <form className="p-6" onSubmit={(e) => { e.preventDefault(); onSubmit(password); }}>
         <h2 className="text-xl font-semibold">Set a new password</h2>
-        <p className="mt-2 text-[15px] text-basalt/80">For {employee?.email}. Their old password stops working straight away.</p>
+        <p className="mt-2 text-[15px] text-ink/80">For {employee?.email}. Their old password stops working straight away.</p>
         <label className="mt-4 block">
           <span className="field-label">New password</span>
           <div className="flex gap-2">

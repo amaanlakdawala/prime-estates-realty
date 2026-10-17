@@ -34,7 +34,7 @@ export default function UserProfileForm({ employee }) {
       </label>
       <div className="flex items-center gap-3 sm:col-span-2">
         <button type="submit" className="btn-primary" disabled={pending || !changed}>{pending ? 'Saving…' : 'Save details'}</button>
-        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-teal-dark'}`} role="status">{message.text}</p>}
+        {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}
       </div>
     </form>
   );

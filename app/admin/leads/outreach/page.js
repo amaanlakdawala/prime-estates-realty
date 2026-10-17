@@ -38,7 +38,7 @@ export default async function SendQueuePage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/leads" className="text-sm font-medium text-teal hover:underline">← All leads</Link>
+        <Link href="/admin/leads" className="text-sm font-medium text-brand hover:underline">← All leads</Link>
         <h1 className="mt-2 text-3xl font-semibold">Send queue</h1>
         <p className="mt-1 max-w-2xl text-muted">
           New leads with a WhatsApp number, best prospects first. You press Send in WhatsApp yourself. Sending one at a time,

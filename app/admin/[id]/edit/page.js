@@ -18,7 +18,7 @@ export default async function EditListingPage({ params }) {
 
   return (
     <>
-      <Link href="/admin" className="text-sm text-muted hover:text-basalt">← Back to listings</Link>
+      <Link href="/admin" className="text-sm text-muted hover:text-ink">← Back to listings</Link>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold">Edit listing</h1>
         {listing.photos?.length > 0 && <Link href={`/admin/${listing.id}/reel`} className="btn-outline">Make reel</Link>}

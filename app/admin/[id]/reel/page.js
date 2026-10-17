@@ -19,10 +19,10 @@ export default async function ReelPage({ params }) {
 
   return (
     <>
-      <Link href="/admin" className="text-sm text-muted hover:text-basalt">← Back to listings</Link>
+      <Link href="/admin" className="text-sm text-muted hover:text-ink">← Back to listings</Link>
       <h1 className="mt-2 text-3xl font-semibold">Make a reel</h1>
       <p className="mt-1 max-w-2xl text-muted">
-        A ready-to-post Instagram reel for <span className="font-medium text-basalt">{listing.title}</span>, made from its photos,
+        A ready-to-post Instagram reel for <span className="font-medium text-ink">{listing.title}</span>, made from its photos,
         with the price, details and your phone number on screen.
       </p>
       <ReelMaker listing={listing} site={ctx.firm} listingPath={href(ctx.firm, `/properties/${listing.id}`)} />

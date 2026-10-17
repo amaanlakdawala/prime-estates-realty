@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Reveal from '@/components/Reveal';
 import PropertyCard from '@/components/PropertyCard';
 import { getSiteBySlug, requireSite } from '@/lib/firm';
 import { createPublicClient } from '@/lib/supabase/public';
@@ -59,20 +60,20 @@ export default async function PropertiesPage(props) {
 
   return (
     <div className="page py-10 sm:py-14">
-      <h1 className="text-4xl font-semibold sm:text-5xl">
+      <h1 className="animate-fade-up text-4xl font-bold sm:text-5xl">
         {deal === 'rent' ? 'Properties for rent' : deal === 'buy' ? 'Properties for sale' : 'All properties'}
         {locality ? ` in ${locality}` : site.city ? ` in ${site.city}` : ''}
       </h1>
 
       <nav className="mt-6 flex gap-2" aria-label="Buy or rent">
         {[['', 'All'], ['buy', 'Buy'], ['rent', 'Rent']].map(([d, label]) => (
-          <Link key={label} href={tabHref(d)} className={`rounded-full border px-5 py-2 text-sm font-semibold ${deal === d ? 'border-teal bg-teal text-white' : 'border-line text-basalt hover:border-basalt'}`} aria-current={deal === d ? 'page' : undefined}>
+          <Link key={label} href={tabHref(d)} className={`rounded-full border px-5 py-2 text-sm font-semibold transition duration-300 ${deal === d ? 'border-brand bg-brand text-white shadow-[0_8px_20px_-8px_rgb(43_89_232_/_0.6)]' : 'border-line text-ink hover:-translate-y-0.5 hover:border-ink/40'}`} aria-current={deal === d ? 'page' : undefined}>
             {label}
           </Link>
         ))}
       </nav>
 
-      <form method="get" className="mt-6 grid gap-3 rounded-xl bg-stone p-4 sm:grid-cols-3 lg:grid-cols-6">
+      <form method="get" className="mt-6 grid animate-fade-up gap-3 rounded-2xl border border-line bg-white p-4 shadow-card [animation-delay:0.1s] sm:grid-cols-3 sm:p-5 lg:grid-cols-6">
         {deal && <input type="hidden" name="deal" value={deal} />}
         <label className="block">
           <span className="field-label">Locality</span>
@@ -132,11 +133,11 @@ export default async function PropertiesPage(props) {
         <>
           <p className="mt-8 text-sm text-muted">{listings.length} {listings.length === 1 ? 'property' : 'properties'} found</p>
           <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((l) => <PropertyCard key={l.id} site={site} listing={l} />)}
+            {listings.map((l, i) => <Reveal key={l.id} delay={(i % 3) * 90} className="h-full"><PropertyCard site={site} listing={l} /></Reveal>)}
           </div>
         </>
       ) : (
-        <div className="mt-10 rounded-xl border border-dashed border-line p-10 text-center">
+        <div className="mt-10 rounded-2xl border border-dashed border-line p-10 text-center">
           <p className="font-semibold">No properties match these filters.</p>
           <p className="mt-1 text-muted">Try a wider budget or another locality, or tell us what you need and we will find it.</p>
           <div className="mt-5 flex justify-center gap-3">

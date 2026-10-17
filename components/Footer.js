@@ -4,7 +4,8 @@ import { href } from '@/lib/site';
 
 export default function Footer({ site }) {
   return (
-    <footer className="bg-basalt text-white/80">
+    <footer className="relative isolate overflow-hidden bg-ink text-white/75">
+      <div className="absolute -top-40 left-1/3 -z-10 h-80 w-80 rounded-full bg-brand/25 blur-[110px]" aria-hidden="true" />
       <div className="page grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Logo site={site} light />
@@ -17,18 +18,18 @@ export default function Footer({ site }) {
         <div>
           <h2 className="font-display text-base font-semibold text-white">Explore</h2>
           <ul className="mt-3 space-y-2 text-[15px]">
-            <li><Link className="hover:text-white" href={href(site, '/properties?deal=buy')}>Properties for sale</Link></li>
-            <li><Link className="hover:text-white" href={href(site, '/properties?deal=rent')}>Properties for rent</Link></li>
-            <li><Link className="hover:text-white" href={href(site, '/services')}>Services</Link></li>
-            <li><Link className="hover:text-white" href={href(site, '/about')}>About us</Link></li>
+            <li><Link className="transition-colors hover:text-white" href={href(site, '/properties?deal=buy')}>Properties for sale</Link></li>
+            <li><Link className="transition-colors hover:text-white" href={href(site, '/properties?deal=rent')}>Properties for rent</Link></li>
+            <li><Link className="transition-colors hover:text-white" href={href(site, '/services')}>Services</Link></li>
+            <li><Link className="transition-colors hover:text-white" href={href(site, '/about')}>About us</Link></li>
           </ul>
         </div>
         <div>
           <h2 className="font-display text-base font-semibold text-white">Visit or call</h2>
           <address className="mt-3 space-y-2 text-[15px] not-italic">
             {site.address && <p>{site.address}</p>}
-            {site.phoneHref && <p><a className="hover:text-white" href={`tel:${site.phoneHref}`}>{site.phoneDisplay}</a></p>}
-            {site.email && <p><a className="hover:text-white" href={`mailto:${site.email}`}>{site.email}</a></p>}
+            {site.phoneHref && <p><a className="transition-colors hover:text-white" href={`tel:${site.phoneHref}`}>{site.phoneDisplay}</a></p>}
+            {site.email && <p><a className="transition-colors hover:text-white" href={`mailto:${site.email}`}>{site.email}</a></p>}
             {site.hours && <p className="text-white/60">{site.hours}</p>}
           </address>
         </div>

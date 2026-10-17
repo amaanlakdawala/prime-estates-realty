@@ -10,7 +10,7 @@ export default async function NewListingPage() {
 
   return (
     <>
-      <Link href="/admin" className="text-sm text-muted hover:text-basalt">← Back to listings</Link>
+      <Link href="/admin" className="text-sm text-muted hover:text-ink">← Back to listings</Link>
       <h1 className="mt-2 text-3xl font-semibold">Add listing</h1>
       <ListingForm firm={ctx.firm} />
     </>

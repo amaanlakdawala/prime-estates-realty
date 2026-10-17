@@ -41,7 +41,7 @@ export default function NewFirmForm() {
       </label>
       <label className="block">
         <span className="field-label">Web address</span>
-        <div className="flex items-center rounded-lg border border-line bg-white focus-within:border-teal focus-within:ring-2 focus-within:ring-teal/20">
+        <div className="flex items-center rounded-lg border border-line bg-white focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
           <span className="pl-3.5 text-[15px] text-muted">/</span>
           <input
             name="slug"

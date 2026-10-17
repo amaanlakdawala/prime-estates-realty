@@ -54,13 +54,13 @@ export default function LeadOutreach({ lead, template, demoFirm }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-line bg-stone/60 p-4">
+      <div className="rounded-lg border border-line bg-mist/60 p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
           <p className="text-sm font-semibold">Demo website</p>
           {demoFirm ? (
             <span className="flex gap-3 text-sm">
-              <a href={demoLink || `/${demoFirm.slug}`} target="_blank" rel="noopener noreferrer" className="font-medium text-teal underline">Open</a>
-              <Link href={`/admin/firms/${demoFirm.id}`} className="font-medium text-teal underline">Edit</Link>
+              <a href={demoLink || `/${demoFirm.slug}`} target="_blank" rel="noopener noreferrer" className="font-medium text-brand underline">Open</a>
+              <Link href={`/admin/firms/${demoFirm.id}`} className="font-medium text-brand underline">Edit</Link>
             </span>
           ) : null}
         </div>

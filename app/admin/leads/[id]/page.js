@@ -35,11 +35,11 @@ export default async function LeadPage({ params }) {
   const reasons = scoreReasons(lead);
   const details = [
     ['Phone', lead.phone || 'Not listed on Google'],
-    ['Website', lead.website ? <a key="w" href={lead.website} target="_blank" rel="noopener noreferrer" className="break-all text-teal underline">{lead.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a> : <span key="w" className="font-semibold text-red-700">None</span>],
+    ['Website', lead.website ? <a key="w" href={lead.website} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline">{lead.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a> : <span key="w" className="font-semibold text-red-700">None</span>],
     ['Address', lead.address || '—'],
     ['Google rating', lead.rating ? `${lead.rating}★ from ${lead.review_count} reviews` : 'No rating'],
     ['Found in', [lead.locality, lead.city].filter(Boolean).join(', ') || '—'],
-    ['Google listing', lead.maps_url ? <a key="m" href={lead.maps_url} target="_blank" rel="noopener noreferrer" className="text-teal underline">Open in Google Maps</a> : '—'],
+    ['Google listing', lead.maps_url ? <a key="m" href={lead.maps_url} target="_blank" rel="noopener noreferrer" className="text-brand underline">Open in Google Maps</a> : '—'],
     ['Google name', <span key="n" className="text-muted">{lead.name}</span>],
     ['Last contacted', lead.last_contacted_at ? formatDateTime(lead.last_contacted_at) : 'Not yet'],
   ];
@@ -47,11 +47,11 @@ export default async function LeadPage({ params }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/leads" className="text-sm font-medium text-teal hover:underline">← All leads</Link>
+        <Link href="/admin/leads" className="text-sm font-medium text-brand hover:underline">← All leads</Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">{cleanName(lead.name)}</h1>
           <StatusBadge status={lead.status} />
-          <span className="rounded-full bg-stone px-2.5 py-1 text-xs font-semibold">Score {lead.score}/7</span>
+          <span className="rounded-full bg-mist px-2.5 py-1 text-xs font-semibold">Score {lead.score}/7</span>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ export default async function LeadPage({ params }) {
                 {activities.map((a) => (
                   <li key={a.id} className="text-sm">
                     <p className="text-muted">
-                      <span className="font-semibold text-basalt">{ACTIVITY_LABELS[a.kind] ?? a.kind}</span> · {formatDateTime(a.created_at)}
+                      <span className="font-semibold text-ink">{ACTIVITY_LABELS[a.kind] ?? a.kind}</span> · {formatDateTime(a.created_at)}
                     </p>
                     {a.body && <p className="mt-0.5 whitespace-pre-line">{a.body}</p>}
                   </li>

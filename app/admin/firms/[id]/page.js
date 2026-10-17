@@ -40,16 +40,16 @@ export default async function FirmPage({ params }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/firms" className="text-sm font-medium text-teal hover:underline">← All firms</Link>
+        <Link href="/admin/firms" className="text-sm font-medium text-brand hover:underline">← All firms</Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">
               {firm.name}
-              {!firm.active && <span className="ml-2 rounded bg-basalt px-2 py-0.5 align-middle text-xs font-semibold text-white">Paused</span>}
+              {!firm.active && <span className="ml-2 rounded bg-ink px-2 py-0.5 align-middle text-xs font-semibold text-white">Paused</span>}
             </h1>
             <p className="mt-1 text-muted">
               {listingCount ?? 0} listings · {enquiryCount ?? 0} enquiries ·{' '}
-              {siteLive ? <Link href={href(firm)} target="_blank" className="text-teal underline">/{firm.slug}</Link>
+              {siteLive ? <Link href={href(firm)} target="_blank" className="text-brand underline">/{firm.slug}</Link>
                 : `/${firm.slug} (${firm.active ? 'website switched off' : 'offline'})`}
             </p>
           </div>
@@ -69,7 +69,7 @@ export default async function FirmPage({ params }) {
         {logins.length > 0 && (
           <ul className="mt-4 divide-y divide-line rounded-xl border border-line">
             {logins.map((u) => (
-              <li key={u.id} className="relative flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm hover:bg-stone/60">
+              <li key={u.id} className="relative flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm hover:bg-mist/60">
                 <div>
                   <Link href={`/admin/users/${u.id}`} className="font-semibold after:absolute after:inset-0 hover:underline">{u.name || u.email}</Link>
                   {u.name && <span className="ml-2 text-muted">{u.email}</span>}
