@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fromVoiceAgent } from '@/lib/voice-key';
-import { hindiAmount } from '@/lib/hindi-amount';
+import { hindiAmount, hindiSize } from '@/lib/hindi-amount';
 import { toEnglishPlaces } from '@/lib/place-names';
 import { distanceKm, findArea, findProject, findZone, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
 
@@ -31,7 +31,7 @@ function summarise(l, base) {
     type: l.property_type,
     for: l.deal_type === 'rent' ? 'rent' : 'sale',
     price: spokenPrice(l.price, l.deal_type),
-    size: l.area_sqft ? `${Number(l.area_sqft).toLocaleString('en-IN')} sq ft` : null,
+    size: l.area_sqft ? `${hindiSize(l.area_sqft)} square feet` : null, // in Hindi words, like the price
     link: base && l.show_on_website !== false ? `${base}/properties/${l.id}` : null, // never link to a page that isn't public
   };
 }
