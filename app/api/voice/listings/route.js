@@ -121,7 +121,8 @@ async function search(params, origin, isAgent) {
 
   // The sentences to say are written here, with the real areas and prices filled in: left to assemble them
   // from the lists, the agent skipped the same-area rental and named areas that have no listings.
-  const asked = areaRow?.name ?? zone?.name ?? (project || area);
+  // In the caller's own words: "Goregaon" stays "Goregaon", even though it is matched to Goregaon West for distances.
+  const asked = zone?.name ?? (project || area);
   const kind = (l) => (l.bhk ? `${l.bhk} BHK` : l.property_type);
   const both = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} और ${names.at(-1)}` : names[0]);
   const otherDealLine = otherDeal[0]
@@ -144,7 +145,8 @@ async function search(params, origin, isAgent) {
         otherDealLine,
         `अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${first.km > 8 ? `, ${asked} से थोड़ा दूर है` : ''}, देखना चाहेंगे?`,
       ].filter(Boolean).join(' '),
-      say_if_asked_again: `${asked} के लिए consultant fresh options निकालेंगे, अभी ready options ${ready} में हैं.`,
+      // The same-area property goes in here too: on a call she dropped it from say_now, even when asked directly.
+      say_if_asked_again: [`${asked} के लिए consultant fresh options निकालेंगे.`, otherDealLine, `${otherDealLine ? 'बाकी' : 'अभी'} ready options ${ready} में हैं.`].filter(Boolean).join(' '),
       note: `Nothing is listed in ${asked}. ${rules} If they say no to the first property, you may offer the next one in "other_areas".`,
     });
   }
