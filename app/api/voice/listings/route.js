@@ -79,9 +79,18 @@ async function search(params, origin, isAgent) {
   const base = firm.website_enabled === false ? '' : `${origin}/${firm.slug}`;
   const exact = await run();
   if (exact.length) {
+    // With a single match, the closest others too, so "और कोई option है?" gets a real property, not "हाँ" and the
+    // consultant sentence.
+    const taken = new Set(exact.map((l) => l.id));
+    const more = exact.length < 2
+      ? (await run({ withBhk: false })).concat(await run({ withPrice: false }), await run({ withArea: false, withProject: false }))
+        .filter((l) => !taken.has(l.id) && taken.add(l.id)).slice(0, 2)
+      : [];
     return NextResponse.json({
       matches: exact.map((l) => summarise(l, base)),
-      note: 'These match what the caller asked for. Mention at most two, briefly, and offer a site visit. Never read out links.',
+      ...(more.length && { more_options: more.map((l) => summarise(l, base)) }),
+      note: 'These match what the caller asked for. Mention at most two, briefly, and offer a site visit. Never read out links.'
+        + (more.length ? ' If they ask for more options, offer one from "more_options", saying briefly how it differs (area, BHK or price).' : ''),
     });
   }
 
