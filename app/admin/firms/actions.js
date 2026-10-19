@@ -82,7 +82,8 @@ export async function updateFirm(firmId, formData) {
     // AI calling costs the platform owner money, so only the platform admin switches it on and sets the cap.
     fields.ai_calls_enabled = formData.get('ai_calls_enabled') === 'on';
     fields.ai_calls_monthly_limit = Math.min(Math.max(Number.parseInt(text(formData, 'ai_calls_monthly_limit', 6), 10) || 0, 0), 100000);
-    fields.voice_agent = text(formData, 'voice_agent', 10) === 'simran' ? 'simran' : 'sia';
+    const voice = text(formData, 'voice_agent', 10);
+    fields.voice_agent = ['simran', 'sarvam'].includes(voice) ? voice : 'sia';
   }
 
   const db = createAdminClient();

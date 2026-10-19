@@ -62,7 +62,7 @@ export default function FirmForm({ firm, adminFields = false }) {
             <input type="checkbox" name="ai_calls_enabled" defaultChecked={firm.aiCallsEnabled} className="mt-1 h-4 w-4 accent-brand" />
             <span>
               <span className="block font-medium">Allow this firm to place AI calls</span>
-              <span className="text-sm text-muted">Calls are billed to your ElevenLabs and Twilio accounts.</span>
+              <span className="text-sm text-muted">Calls are billed to your ElevenLabs and Twilio accounts, or to Sarvam for the Sarvam voice.</span>
             </span>
           </label>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -75,6 +75,7 @@ export default function FirmForm({ firm, adminFields = false }) {
               <select name="voice_agent" defaultValue={firm.voiceAgent} className="field">
                 <option value="sia">Sia</option>
                 <option value="simran">Simran</option>
+                <option value="sarvam">Riya on Sarvam (Kavya, pilot)</option>
               </select>
             </label>
           </div>
