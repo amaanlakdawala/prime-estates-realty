@@ -1,7 +1,7 @@
 // Server only. Looks up towers/projects and areas in the knowledge base, and works out which areas
 // are near each other from their map positions.
 import { createAdminClient } from '@/lib/supabase/admin';
-import { hindiNumber } from '@/lib/hindi-amount';
+import { englishNumber } from '@/lib/spoken-amount';
 import { toEnglishPlaces } from '@/lib/place-names';
 
 // Read at most every 10 seconds per server instance: one search looks up several names, and an edit in the
@@ -106,11 +106,11 @@ export async function nearbyAreas(area, { count = 5, withinKm = 15 } = {}) {
     .map((a) => ({ ...a, nearness: nearness(a.km) }));
 }
 
-// "लगभग पैंतालीस से साठ हज़ार रुपये per square feet", or null when there is no checked price.
+// "about forty-five to sixty thousand rupees per square foot", or null when there is no checked price.
 export function spokenRate(p) {
   if (!p.price_verified || !p.price_min_psf) return null;
-  const k = (n) => hindiNumber(Math.round(n / 1000));
+  const k = (n) => englishNumber(Math.round(n / 1000));
   return p.price_max_psf && p.price_max_psf !== p.price_min_psf
-    ? `लगभग ${k(p.price_min_psf)} से ${k(p.price_max_psf)} हज़ार रुपये per square feet`
-    : `लगभग ${k(p.price_min_psf)} हज़ार रुपये per square feet`;
+    ? `about ${k(p.price_min_psf)} to ${k(p.price_max_psf)} thousand rupees per square foot`
+    : `about ${k(p.price_min_psf)} thousand rupees per square foot`;
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createPublicClient } from '@/lib/supabase/public';
 import { fromVoiceAgent } from '@/lib/voice-key';
-import { hindiAmount, hindiSize } from '@/lib/hindi-amount';
+import { englishAmount, englishNumber, englishSize } from '@/lib/spoken-amount';
 import { toEnglishPlaces } from '@/lib/place-names';
 import { distanceKm, findArea, findProject, findZone, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
 
@@ -16,9 +16,9 @@ export const dynamic = 'force-dynamic';
 
 const MAX_RESULTS = 4;
 
-// How the agent should say a price out loud, already in Hindi words ("पचपन हज़ार महीना", "साढ़े आठ करोड़"):
-// converting digits herself, she said 55,000 as "पचास पाँच हज़ार" and mixed up amounts.
-const spokenPrice = (price, deal) => `${hindiAmount(price)}${deal === 'rent' ? ' महीना' : ''}`;
+// How the agent says a price, already in English words as brokers say them on a Hinglish call ("fifty-five
+// thousand per month", "eight and a half crore"): converting digits herself, she mixed up amounts.
+const spokenPrice = (price, deal) => `${englishAmount(price)}${deal === 'rent' ? ' per month' : ''}`;
 
 // Free text from the caller goes into a PostgREST filter, so strip characters that have meaning there.
 const clean = (s) => (s ?? '').toString().replace(/[%,()*\\.:"]/g, ' ').trim().slice(0, 60);
@@ -31,7 +31,7 @@ function summarise(l, base) {
     type: l.property_type,
     for: l.deal_type === 'rent' ? 'rent' : 'sale',
     price: spokenPrice(l.price, l.deal_type),
-    size: l.area_sqft ? `${hindiSize(l.area_sqft)} square feet` : null, // in Hindi words, like the price
+    size: l.area_sqft ? `${englishSize(l.area_sqft)} square feet` : null, // in English words, like the price
     link: base && l.show_on_website !== false ? `${base}/properties/${l.id}` : null, // never link to a page that isn't public
   };
 }
@@ -134,7 +134,7 @@ async function search(params, origin, isAgent) {
   // from the lists, the agent skipped the same-area rental and named areas that have no listings.
   // In the caller's own words: "Goregaon" stays "Goregaon", even though it is matched to Goregaon West for distances.
   const asked = zone?.name ?? (project || area);
-  const kind = (l) => (l.bhk ? `${l.bhk} BHK` : l.property_type);
+  const kind = (l) => (l.bhk ? `${englishNumber(l.bhk)} BHK` : l.property_type); // "two BHK", like the prices
   const both = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} और ${names.at(-1)}` : names[0]);
   const otherDealLine = otherDeal[0]
     ? `${otherDeal[0].locality} में एक ${kind(otherDeal[0])} ${deal === 'rent' ? 'sale' : 'rent'} के लिए है, ${spokenPrice(otherDeal[0].price, otherDeal[0].deal_type)}, अगर वो चलेगा.`
