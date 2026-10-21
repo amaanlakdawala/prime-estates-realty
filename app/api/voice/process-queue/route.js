@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 const BATCH = 5;          // calls placed per run at most (keeps each run well inside the function time limit)
 const MAX_ATTEMPTS = 3;   // a technical failure is retried twice, 10 minutes apart
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // a call that couldn't go out within a day is dropped, never placed late
+const ENQUIRY_REASON = 'They filled a property enquiry form on our website.'; // as supabase/auto_call.sql writes it
 const minutesFromNow = (m) => new Date(Date.now() + m * 60 * 1000).toISOString();
 
 function authorised(request) {
@@ -52,6 +53,12 @@ export async function POST(request) {
       db.from('call_contacts').select('*').eq('id', item.contact_id).maybeSingle(),
     ]);
     if (!contact) { await finish({ status: 'skipped', note: 'The contact was removed.' }); report.skipped++; continue; }
+    // This call is for a website enquiry, even for a contact first added another way (e.g. as a callback):
+    // the enquiry trigger only fills the reason for new contacts, and Riya opened with "you asked for a callback".
+    if (item.enquiry_id && contact.context !== ENQUIRY_REASON) {
+      contact.context = ENQUIRY_REASON;
+      await db.from('call_contacts').update({ context: ENQUIRY_REASON }).eq('id', contact.id);
+    }
     if (!firm?.ai_auto_call_enquiries) { await finish({ status: 'skipped', note: 'Automatic calling was switched off.' }); report.skipped++; continue; }
 
     // One call at a time per firm: if one is running, try again in two minutes.

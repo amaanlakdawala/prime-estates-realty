@@ -124,9 +124,10 @@ async function search(params, origin, isAgent) {
       .concat(await byDistance(await run({ withProject: false, withArea: false, withBhk: false, withPrice: false, limit: 40 }))))
     : [];
   const nearby = wanted ? (await nearbyAreas(wanted, { count: 4, withinKm: 8 })).map((a) => a.name) : [];
-  // In the area they asked, but for rent when they want to buy (or the other way round): worth a mention,
-  // e.g. a caller who knows of the firm's Goregaon East rental and asks "Goregaon East में है ना?".
-  const otherDeal = deal && (area || project)
+  // In the area they asked, but for rent when they want to buy: worth a mention, e.g. a caller who knows of
+  // the firm's Goregaon East rental and asks "Goregaon East में है ना?". Never the other way round: a
+  // property for sale is no answer to someone renting on a monthly budget.
+  const otherDeal = deal === 'buy' && (area || project)
     ? await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })
     : [];
 
