@@ -36,7 +36,7 @@ export function propertyFromListing(listing, site, { origin = '', withPrice = tr
   };
 }
 
-// "9892662324", "+91 98926-62324" -> "+91 98926 62324"; anything else is returned as typed.
+// "8097546742", "+91 80975-46742" -> "+91 80975 46742"; anything else is returned as typed.
 export function prettyPhone(phone) {
   let d = (phone ?? '').replace(/\D/g, '');
   if (d.length === 12 && d.startsWith('91')) d = d.slice(2);

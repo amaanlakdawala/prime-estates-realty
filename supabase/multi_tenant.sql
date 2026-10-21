@@ -49,7 +49,7 @@ alter table public.enquiries add column if not exists firm_id uuid references pu
 -- Everything that existed before becomes the demo firm "Prime Estates Realty" at /prime-estates.
 insert into public.firms (slug, name, city, phone, email, address, hours, founded_year, localities, demo_content)
 values (
-  'prime-estates', 'Prime Estates Realty', 'Pune', '+91 98926 62324', 'info@primeestatesrealty.com',
+  'prime-estates', 'Prime Estates Realty', 'Pune', '+91 80975 46742', 'info@primeestatesrealty.com',
   'Office 402, Sai Heritage, Baner Road, Baner, Pune 411045', 'Monday to Saturday, 10 am to 7 pm', 2012,
   array['Baner','Balewadi','Aundh','Wakad','Hinjewadi','Pimple Saudagar','Kothrud','Kharadi','Viman Nagar','Hadapsar'],
   true
