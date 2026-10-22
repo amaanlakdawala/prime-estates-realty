@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getAdminContext } from '@/lib/auth';
+import { isUuid, requirePlatformAdmin as requireAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { searchPlaces } from '@/lib/places';
 import { cleanName, LEAD_STATUSES, scoreLead } from '@/lib/leads';
@@ -9,13 +9,7 @@ import { RESERVED_SLUGS } from '@/lib/site';
 
 const MONTHLY_LIMIT = Number(process.env.LEADS_MONTHLY_REQUEST_LIMIT) || 900;
 const thisMonth = () => new Date().toISOString().slice(0, 7);
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-async function requirePlatformAdmin() {
-  const ctx = await getAdminContext();
-  if (!ctx?.isPlatformAdmin) throw new Error('Only the platform admin can use the lead finder.');
-  return ctx;
-}
+const requirePlatformAdmin = () => requireAdmin('Only the platform admin can use the lead finder.');
 
 async function logActivity(db, leadId, kind, body = '') {
   await db.from('lead_activities').insert({ lead_id: leadId, kind, body });
@@ -85,7 +79,7 @@ export async function searchLeads({ city, locality, query, pageToken = null, req
 export async function updateLead(leadId, { status, nextFollowUp }) {
   try {
     await requirePlatformAdmin();
-    if (!UUID.test(leadId)) throw new Error('Unknown lead.');
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
     if (!LEAD_STATUSES.some((s) => s.value === status)) throw new Error('Unknown status.');
     const db = createAdminClient();
     const { data: before } = await db.from('leads').select('status').eq('id', leadId).single();
@@ -105,6 +99,7 @@ export async function updateLead(leadId, { status, nextFollowUp }) {
 export async function addLeadNote(leadId, body) {
   try {
     await requirePlatformAdmin();
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
     const text = (body ?? '').toString().trim().slice(0, 2000);
     if (!text) throw new Error('Write a note first.');
     const db = createAdminClient();
@@ -120,6 +115,7 @@ export async function addLeadNote(leadId, body) {
 export async function logContact(leadId, kind) {
   try {
     await requirePlatformAdmin();
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
     if (!['call', 'whatsapp'].includes(kind)) throw new Error('Unknown contact type.');
     const db = createAdminClient();
     const { data: lead } = await db.from('leads').select('status').eq('id', leadId).single();
@@ -141,7 +137,7 @@ export async function logContact(leadId, kind) {
 export async function markWhatsAppSent(leadId, { followUpDays = 3, message = '' } = {}) {
   try {
     await requirePlatformAdmin();
-    if (!UUID.test(leadId)) throw new Error('Unknown lead.');
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
     const db = createAdminClient();
     const { data: lead } = await db.from('leads').select('status').eq('id', leadId).single();
     if (lead?.status === 'do_not_contact') throw new Error('This lead asked not to be contacted.');
@@ -165,6 +161,7 @@ export async function markWhatsAppSent(leadId, { followUpDays = 3, message = '' 
 export async function createDemoSite(leadId) {
   try {
     await requirePlatformAdmin();
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
     const db = createAdminClient();
     const { data: lead } = await db.from('leads').select('*').eq('id', leadId).single();
     if (!lead) throw new Error('Unknown lead.');

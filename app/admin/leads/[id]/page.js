@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getAdminContext } from '@/lib/auth';
+import { getAdminContext, isUuid } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cleanName, scoreReasons } from '@/lib/leads';
 import { formatDateTime } from '@/lib/format';
@@ -12,14 +12,13 @@ import LeadNotes from '@/components/admin/leads/LeadNotes';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Lead' };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ACTIVITY_LABELS = { note: 'Note', call: 'Call', whatsapp: 'WhatsApp', status: 'Status', demo: 'Demo site' };
 
 export default async function LeadPage({ params }) {
   const { id } = await params;
   const ctx = await getAdminContext();
   if (!ctx?.isPlatformAdmin) redirect('/admin');
-  if (!UUID.test(id)) notFound();
+  if (!isUuid(id)) notFound();
 
   const db = createAdminClient();
   const [{ data: lead }, { data: activities }, { data: template }] = await Promise.all([

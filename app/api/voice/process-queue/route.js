@@ -1,24 +1,18 @@
 // Places automatic AI calls for website enquiries that are due, and saves the results of finished calls.
 // Called every minute by Supabase pg_cron (see supabase/auto_call_cron.sql) with the shared CRON_SECRET.
-import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked, lastReadError } from '@/lib/voice';
+import { sameSecret } from '@/lib/secret';
+import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked, ENQUIRY_REASON, lastReadError } from '@/lib/voice';
 
 export const dynamic = 'force-dynamic';
 
 const BATCH = 5;          // calls placed per run at most (keeps each run well inside the function time limit)
 const MAX_ATTEMPTS = 3;   // a technical failure is retried twice, 10 minutes apart
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // a call that couldn't go out within a day is dropped, never placed late
-const ENQUIRY_REASON = 'They filled a property enquiry form on our website.'; // as supabase/auto_call.sql writes it
 const minutesFromNow = (m) => new Date(Date.now() + m * 60 * 1000).toISOString();
 
-function authorised(request) {
-  const expected = process.env.CRON_SECRET;
-  const given = request.headers.get('x-cron-secret') ?? '';
-  if (!expected || given.length !== expected.length) return false;
-  return timingSafeEqual(Buffer.from(given), Buffer.from(expected));
-}
+const authorised = (request) => sameSecret(request.headers.get('x-cron-secret') ?? '', process.env.CRON_SECRET);
 
 export async function POST(request) {
   if (!authorised(request)) return NextResponse.json({ error: 'Not allowed' }, { status: 401 });

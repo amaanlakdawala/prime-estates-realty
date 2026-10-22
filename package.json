@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "set-admin": "node scripts/set-admin.mjs"
+    "set-admin": "node scripts/set-admin.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0",

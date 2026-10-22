@@ -25,7 +25,7 @@ Names are matched loosely, because callers' words arrive through speech-to-text:
 finds Lodha Park, and "oberoi sky-city" finds Oberoi Sky City. A word that's only part of a name,
 such as "Lodha" on its own, is not matched.
 
-Prices reach Riya already written in Hindi words (`lib/hindi-amount.js`), because she misread digits.
+Prices reach Riya already written in spoken English words, the way Mumbai brokers say them ("two crore ninety lakh", `lib/spoken-amount.js`), because she misread digits.
 
 ## Admin
 

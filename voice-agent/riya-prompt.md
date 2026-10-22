@@ -1,10 +1,10 @@
 # Riya: voice agent instructions
 
-Used by both ElevenLabs agents ("Riya (Sia voice)" and "Riya (Simran voice)"). Edit here, then ask Claude to push it to both agents.
+Used by both ElevenLabs agents ("Riya (Sia voice)" and "Riya (Simran voice)"). Edit here, then ask Claude to push it to both agents. The Sarvam agent has its own adapted copy: `riya-sarvam-prompt.md`.
 
 ## Variables sent with every call
 
-Set in `lib/voice.js` (`callVariables`): `greeting_name`, `customer_name`, `call_reason`, `known_requirement`, `firm_name`, `firm_city`, `firm_slug`, `firm_address`, `firm_hours`, `firm_areas`, `today`, `firm_founded`, `upcoming_days`. `today` is the date, day and time in India; `upcoming_days` is a ready-made calendar of the next 14 days, so Riya never works out dates herself.
+Set in `lib/voice.js` (`callVariables`), the same for ElevenLabs and Sarvam: `greeting_name`, `customer_name`, `name_rule`, `call_reason`, `known_requirement`, `firm_name`, `firm_city`, `firm_slug`, `firm_address`, `firm_hours`, `firm_areas`, `firm_founded`, `today`, `office_now`, `tomorrow`, `next_open_day`, `upcoming_days`. `today` is the date, day and time in India; `upcoming_days` is a ready-made calendar of the next 14 days, so Riya never works out dates herself.
 
 ## First message
 

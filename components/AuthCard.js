@@ -1,6 +1,6 @@
 import Logo from '@/components/Logo';
 
-// Shared centered card used by the sign-in and password reset pages.
+// Centered card for the sign-in page.
 export default function AuthCard({ title, subtitle, children }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-mist px-5">

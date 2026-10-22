@@ -1,11 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getAdminContext } from '@/lib/auth';
+import { getAdminContext, isUuid } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { callContactNow, readConversation, syncFirmCalls, toIndianMobile } from '@/lib/voice';
+import { callContactNow, ENQUIRY_REASON, syncFirmCalls, toIndianMobile } from '@/lib/voice';
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_IMPORT = 1000;
 const clip = (v, max) => (v ?? '').toString().trim().slice(0, max);
 
@@ -76,7 +75,7 @@ export async function importContacts(rows, consent) {
 }
 
 async function ownContact(firmId, contactId) {
-  if (!UUID.test(contactId ?? '')) throw new Error('Unknown contact.');
+  if (!isUuid(contactId)) throw new Error('Unknown contact.');
   const { data } = await createAdminClient().from('call_contacts').select('*').eq('id', contactId).eq('firm_id', firmId).maybeSingle();
   if (!data) throw new Error('Unknown contact.');
   return data;
@@ -129,7 +128,7 @@ export async function startCall(contactId) {
 export async function callEnquiry(enquiryId) {
   return run(async () => {
     const { ctx, firm } = await requireFirmRow();
-    if (!UUID.test(enquiryId ?? '')) throw new Error('Unknown enquiry.');
+    if (!isUuid(enquiryId)) throw new Error('Unknown enquiry.');
     const db = createAdminClient();
     const { data: enq } = await db.from('enquiries').select('*, listings(title)').eq('id', enquiryId).eq('firm_id', firm.id).maybeSingle();
     if (!enq) throw new Error('Unknown enquiry.');
@@ -138,7 +137,7 @@ export async function callEnquiry(enquiryId) {
     const notes = [enq.listings?.title && `Asked about: ${enq.listings.title}`, enq.message].filter(Boolean).join('. ');
     const { data: contact, error } = await db.from('call_contacts').upsert({
       firm_id: firm.id, name: clip(enq.name, 120), phone, source: 'website', enquiry_id: enq.id,
-      context: 'They filled a property enquiry form on our website.', notes: clip(notes, 500), consent_confirmed: true, created_by: ctx.user.id,
+      context: ENQUIRY_REASON, notes: clip(notes, 500), consent_confirmed: true, created_by: ctx.user.id,
     }, { onConflict: 'firm_id,phone' }).select('*').single();
     if (error) throw new Error(error.message);
     const callId = await callContact(ctx, firm, contact);
@@ -152,23 +151,8 @@ export async function refreshCalls(callIds = []) {
   return run(async () => {
     const { firm } = await requireFirmRow();
     await syncFirmCalls(firm.id);
-    const ids = callIds.filter((id) => UUID.test(id));
+    const ids = callIds.filter(isUuid);
     const { data } = ids.length ? await createAdminClient().from('calls').select('id, status').eq('firm_id', firm.id).in('id', ids) : { data: [] };
     return { success: true, calls: data ?? [] };
-  });
-}
-
-// Re-reads one finished call from ElevenLabs (e.g. if the summary arrived late).
-export async function reloadCall(callId) {
-  return run(async () => {
-    const { firm } = await requireFirmRow();
-    if (!UUID.test(callId ?? '')) throw new Error('Unknown call.');
-    const db = createAdminClient();
-    const { data: call } = await db.from('calls').select('conversation_id').eq('id', callId).eq('firm_id', firm.id).maybeSingle();
-    if (!call?.conversation_id) throw new Error('Unknown call.');
-    const info = await readConversation(call.conversation_id);
-    if (info) await db.from('calls').update(info).eq('id', callId);
-    revalidatePath('/admin/calls');
-    return { success: true };
   });
 }

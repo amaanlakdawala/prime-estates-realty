@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getAdminContext } from '@/lib/auth';
+import { getAdminContext, isUuid } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { href, toSite } from '@/lib/site';
 import { toEmployee } from '@/lib/team';
@@ -13,13 +13,12 @@ import { manageFirm } from '@/app/admin/firms/actions';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Firm' };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function FirmPage({ params }) {
   const { id } = await params;
   const ctx = await getAdminContext();
   if (!ctx?.isPlatformAdmin) redirect('/admin');
-  if (!UUID.test(id)) notFound();
+  if (!isUuid(id)) notFound();
 
   const db = createAdminClient();
   const { data: row } = await db.from('firms').select('*').eq('id', id).maybeSingle();

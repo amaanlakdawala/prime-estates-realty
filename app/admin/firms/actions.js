@@ -3,17 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getAdminContext, MANAGE_FIRM_COOKIE } from '@/lib/auth';
+import { getAdminContext, MANAGE_FIRM_COOKIE, requirePlatformAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { RESERVED_SLUGS } from '@/lib/site';
 import { revalidateSite } from '@/app/actions/site';
 
 // Firms are written with the secret key, so every action checks permission itself first.
-async function requirePlatformAdmin() {
-  const ctx = await getAdminContext();
-  if (!ctx?.isPlatformAdmin) throw new Error('Only the platform admin can do this.');
-  return ctx;
-}
 
 const text = (formData, key, max = 200) => (formData.get(key) ?? '').toString().trim().slice(0, max);
 

@@ -6,12 +6,12 @@ import { englishAmount, englishNumber, englishSize } from '@/lib/spoken-amount';
 import { toEnglishPlaces } from '@/lib/place-names';
 import { distanceKm, findArea, findProject, findZone, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
 
-// Listings search for the AI voice agents (ElevenLabs "tools").
+// Listings search for the AI voice agents (the search_listings tool of the ElevenLabs and Sarvam agents).
 // The agents send the x-voice-key header (VOICE_TOOL_SECRET): then the search covers the firm's whole
 // available inventory, including private listings and firms without a public website. Without the key
 // it returns only what a website visitor can already see.
 //   GET  /api/voice/listings?firm=prime-estates&area=Lower%20Parel&bhk=3&deal=buy&max_price=70000000
-//   POST /api/voice/listings?firm=prime-estates   body: { args: {…} } (Retell) or {…} (ElevenLabs)
+//   POST /api/voice/listings?firm=prime-estates   body: {…} (ElevenLabs, Sarvam) or { args: {…} }
 export const dynamic = 'force-dynamic';
 
 const MAX_RESULTS = 4;
@@ -184,6 +184,6 @@ export async function GET(request) {
 export async function POST(request) {
   const url = new URL(request.url);
   const body = await request.json().catch(() => ({}));
-  const args = body?.args ?? body ?? {}; // Retell sends { name, args, call }; ElevenLabs sends the parameters directly
+  const args = body?.args ?? body ?? {}; // ElevenLabs and Sarvam send the parameters directly; some platforms wrap them in args
   return search({ ...Object.fromEntries(url.searchParams), ...args }, url.origin, fromVoiceAgent(request));
 }

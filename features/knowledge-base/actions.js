@@ -1,15 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getAdminContext } from '@/lib/auth';
+import { requirePlatformAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { forgetKnowledge } from './lookup';
 
-// Written with the secret key, so every action checks permission itself first.
-async function requirePlatformAdmin() {
-  const ctx = await getAdminContext();
-  if (!ctx?.isPlatformAdmin) throw new Error('Only the platform admin can do this.');
-}
+// Written with the secret key, so every action checks permission itself first (requirePlatformAdmin).
 
 const text = (formData, key, max = 200) => (formData.get(key) ?? '').toString().trim().slice(0, max);
 const list = (formData, key) => text(formData, key, 1000).split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20);
