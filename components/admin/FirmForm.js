@@ -9,6 +9,9 @@ export default function FirmForm({ firm, adminFields = false }) {
   const router = useRouter();
   const [message, setMessage] = useState(null);
   const [pending, startTransition] = useTransition();
+  // AI calling runs on ElevenLabs (voice Sia or Simran) or Sarvam; both are stored in the one voice_agent column.
+  const [provider, setProvider] = useState(firm.voiceAgent === 'sarvam' ? 'sarvam' : 'elevenlabs');
+  const [elevenVoice, setElevenVoice] = useState(firm.voiceAgent === 'simran' ? 'simran' : 'sia');
 
   function onSubmit(e) {
     e.preventDefault();
@@ -70,14 +73,30 @@ export default function FirmForm({ firm, adminFields = false }) {
               <span className="field-label">Calls per month (limit)</span>
               <input name="ai_calls_monthly_limit" type="number" min="0" defaultValue={firm.aiCallsMonthlyLimit} className="field" />
             </label>
-            <label className="block">
-              <span className="field-label">Voice</span>
-              <select name="voice_agent" defaultValue={firm.voiceAgent} className="field">
-                <option value="sia">Sia</option>
-                <option value="simran">Simran</option>
-                <option value="sarvam">Riya on Sarvam (Kavya, pilot)</option>
-              </select>
-            </label>
+          </div>
+          <div className="mt-4">
+            <span className="field-label">Calling service</span>
+            <input type="hidden" name="voice_agent" value={provider === 'sarvam' ? 'sarvam' : elevenVoice} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+                <input type="radio" name="calling_service" checked={provider === 'elevenlabs'} onChange={() => setProvider('elevenlabs')} className="mt-1 h-4 w-4 accent-brand" />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium">ElevenLabs</span>
+                  <span className="text-sm text-muted">Riya over the Twilio number in ElevenLabs.</span>
+                  <select value={elevenVoice} onChange={(e) => setElevenVoice(e.target.value)} disabled={provider !== 'elevenlabs'} className="field mt-2" aria-label="ElevenLabs voice">
+                    <option value="sia">Sia voice</option>
+                    <option value="simran">Simran voice</option>
+                  </select>
+                </span>
+              </label>
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-light">
+                <input type="radio" name="calling_service" checked={provider === 'sarvam'} onChange={() => setProvider('sarvam')} className="mt-1 h-4 w-4 accent-brand" />
+                <span>
+                  <span className="block font-medium">Sarvam</span>
+                  <span className="text-sm text-muted">Riya with the Kavya voice, about a third of the cost per call. Pilot: until an Indian number is connected in Sarvam, calls only reach verified numbers.</span>
+                </span>
+              </label>
+            </div>
           </div>
         </fieldset>
       )}
