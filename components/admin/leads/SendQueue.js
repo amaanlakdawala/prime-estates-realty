@@ -53,7 +53,13 @@ export default function SendQueue({ leads, template, sentToday }) {
     () => leads.filter((l) => !handled.has(l.id) && (settings.includeWithWebsite || !l.website)),
     [leads, handled, settings.includeWithWebsite]
   );
-  const lead = queue[0] ?? null;
+  // The lead on screen stays there until it is sent, skipped or blocked, even when the page refreshes
+  // (creating a demo site refreshes it) and the list comes back in a different order.
+  const [currentId, setCurrentId] = useState(null);
+  const lead = queue.find((l) => l.id === currentId) ?? queue[0] ?? null;
+  useEffect(() => {
+    if (lead && lead.id !== currentId) setCurrentId(lead.id);
+  }, [lead, currentId]);
   const demoSlug = lead ? demoSlugs[lead.id] : null;
   const demoLink = demoSlug && origin ? `${origin}/${demoSlug}` : '';
   const limitReached = sentCount >= settings.dailyLimit && !override;
@@ -80,9 +86,11 @@ export default function SendQueue({ leads, template, sentToday }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?.id, settings.autoDemo, ready]);
 
+  // Rebuilt for a new lead or a new demo link only, so a refresh doesn't undo edits to the message.
   useEffect(() => {
     if (lead) setMessage(buildMessage(template, lead, demoLink));
-  }, [lead, template, demoLink]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lead?.id, template, demoLink]);
 
   function openWhatsApp() {
     const wa = whatsappNumber(lead.phone_intl);

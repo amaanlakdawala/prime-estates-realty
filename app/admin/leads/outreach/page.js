@@ -25,6 +25,10 @@ export default async function SendQueuePage() {
       .eq('status', 'new')
       .order('score', { ascending: false })
       .order('review_count', { ascending: false })
+      // Ties need a fixed order: saving a lead (its demo site) moves its row in the database, and the
+      // queue then jumped to a different lead after the page refreshed.
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
       .limit(1000),
     db.from('outreach_template').select('body').eq('id', 1).maybeSingle(),
     db.from('lead_activities').select('id', { count: 'exact', head: true }).eq('kind', 'whatsapp').gte('created_at', startOfTodayIST()),
