@@ -9,7 +9,7 @@ import phoneShot from '@/public/home/demo-phone.png';
 // The platform's own home page: Amaan's services for Mumbai brokerages. Firm websites live at /<slug>,
 // the demo firm at /prime-estates.
 export const metadata = {
-  title: { absolute: 'Amaan Lakdawala | Websites and AI calling for Mumbai property brokers' },
+  title: { absolute: 'Amaan | Websites and AI calling for Mumbai property brokers' },
   description: 'A property website in your firm’s name, one-click Instagram reels and Riya, an AI assistant that calls every enquiry back within a minute in Hindi, English or Hinglish.',
 };
 
@@ -81,8 +81,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-40 border-b border-line/70 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-page items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <a href="#top" className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand font-display text-sm font-bold text-white">AL</span>
-            <span className="font-display text-[17px] font-bold">Amaan Lakdawala</span>
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand font-display text-sm font-bold text-white">A</span>
+            <span className="font-display text-[17px] font-bold">Amaan</span>
           </a>
           <nav className="hidden items-center gap-7 text-[15px] font-medium text-muted md:flex">
             <a href="#services" className="hover:text-ink">Services</a>
@@ -258,7 +258,7 @@ export default function HomePage() {
 
       <footer className="bg-ink text-white/70">
         <div className="mx-auto flex max-w-page flex-col gap-3 px-4 py-8 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© {new Date().getFullYear()} Amaan Lakdawala · Websites and AI calling for Mumbai property brokers</p>
+          <p>© {new Date().getFullYear()} Amaan · Websites and AI calling for Mumbai property brokers</p>
           <div className="flex gap-5">
             <Link href={DEMO} className="hover:text-white">Sample website</Link>
             <Link href="/login" className="hover:text-white">Client login</Link>

@@ -52,7 +52,7 @@ for (const slug of firms) {
 await check('home page (your services)', async () => {
   const r = await fetch(`${site}/`, { redirect: 'manual' });
   if (r.status !== 200) throw new Error(`status ${r.status}`);
-  if (!(await r.text()).includes('Amaan Lakdawala')) throw new Error('services page not shown');
+  if (!(await r.text()).includes('Websites and AI calling for Mumbai property brokers')) throw new Error('services page not shown');
   return 'status 200';
 });
 await check('unknown firm is 404', async () => expect(await status('/no-such-firm-xyz'), 404, 'status'));

@@ -6,7 +6,7 @@ One codebase that gives each client brokerage its own property website and a pri
 
 ## How it fits together
 
-- **Firms.** Each client is a row in the `firms` table: name, web address (slug), phone, city, areas, MahaRERA number, logo. Its website is at `/<slug>`, e.g. `/prime-estates`. The site root (`/`, `app/page.js`) is your own services page for brokerages; its contact form adds the visitor to Leads as Interested (`app/actions/contact.js`).
+- **Firms.** Each client is a row in the `firms` table: name, web address (slug), phone, city, areas, MahaRERA number, logo. Its website is at `/<slug>`, e.g. `/prime-estates`. The site root (`/`, `app/page.js`) is your own services page for brokerages (under the name Amaan); its contact form adds the visitor to Leads as Interested (`app/actions/contact.js`).
 - **Platform admin (you).** A login with `app_metadata.role = 'admin'`. You see **Firms** and **Logins**, create firms and their logins, set passwords, pause firms, and can manage any firm's listings.
 - **Firm logins.** `app_metadata.role = 'firm'`, linked to one firm in `firm_users`. A firm login sees only its firm's **Listings**, **Add listing**, **Enquiries**, **AI calls**, **WhatsApp write-up** and **Firm profile**.
 - **Isolation in the database.** Row Level Security (`supabase/multi_tenant.sql`) stops a firm login from reading or changing another firm's listings, enquiries or photos, whatever the website code does. Photos live in a storage folder per firm.
