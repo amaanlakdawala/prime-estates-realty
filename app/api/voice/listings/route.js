@@ -4,7 +4,7 @@ import { createPublicClient } from '@/lib/supabase/public';
 import { fromVoiceAgent } from '@/lib/voice-key';
 import { englishAmount, englishNumber, englishSize } from '@/lib/spoken-amount';
 import { toEnglishPlaces } from '@/lib/place-names';
-import { distanceKm, findArea, findProject, findZone, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
+import { distanceKm, findArea, findProject, findZone, loadKnowledge, nearbyAreas, nearness } from '@/features/knowledge-base/lookup';
 
 // Listings search for the AI voice agents (the search_listings tool of the ElevenLabs and Sarvam agents).
 // The agents send the x-voice-key header (VOICE_TOOL_SECRET): then the search covers the firm's whole
@@ -41,7 +41,12 @@ async function search(params, origin, isAgent) {
   if (!slug) return NextResponse.json({ error: 'firm is required' }, { status: 400 });
 
   const db = isAgent ? createAdminClient() : createPublicClient();
-  const { data: firm } = await db.from('firms').select('id, slug, name, website_enabled').eq('slug', slug).eq('active', true).maybeSingle();
+  // The firm and the knowledge base load together: on a call every query run in sequence adds to the
+  // silence while Riya says "ek second".
+  const [{ data: firm }] = await Promise.all([
+    db.from('firms').select('id, slug, name, website_enabled').eq('slug', slug).eq('active', true).maybeSingle(),
+    loadKnowledge(),
+  ]);
   if (!firm) return NextResponse.json({ error: 'Unknown firm' }, { status: 404 });
 
   const deal = /rent/i.test(params.deal ?? '') ? 'rent' : /buy|sale|purchase/i.test(params.deal ?? '') ? 'buy' : '';
@@ -83,7 +88,7 @@ async function search(params, origin, isAgent) {
     // consultant sentence.
     const taken = new Set(exact.map((l) => l.id));
     const more = exact.length < 2
-      ? (await run({ withBhk: false })).concat(await run({ withPrice: false }), await run({ withArea: false, withProject: false }))
+      ? (await Promise.all([run({ withBhk: false }), run({ withPrice: false }), run({ withArea: false, withProject: false })])).flat()
         .filter((l) => !taken.has(l.id) && taken.add(l.id)).slice(0, 2)
       : [];
     return NextResponse.json({
@@ -97,7 +102,7 @@ async function search(params, origin, isAgent) {
   // Nothing exact: look for something close, but never tell the caller "we don't have it".
   const seen = new Set();
   const fresh = (rows) => rows.filter((l) => !seen.has(l.id) && seen.add(l.id)).slice(0, 2);
-  const similar = fresh(project ? await run({ withProject: false }) : (await run({ withBhk: false })).concat(await run({ withPrice: false })));
+  const similar = fresh(project ? await run({ withProject: false }) : (await Promise.all([run({ withBhk: false }), run({ withPrice: false })])).flat());
   if (similar.length) {
     return NextResponse.json({
       matches: [],
@@ -119,17 +124,18 @@ async function search(params, origin, isAgent) {
     const withKm = await Promise.all(rows.map(async (l) => ({ ...l, km: await kmFrom(l) })));
     return withKm.sort((a, b) => (a.km ?? 999) - (b.km ?? 999));
   };
-  const elsewhere = area || project
-    ? fresh((await byDistance(await run({ withProject: false, withArea: false, limit: 40 })))
-      .concat(await byDistance(await run({ withProject: false, withArea: false, withBhk: false, withPrice: false, limit: 40 }))))
-    : [];
-  const nearby = wanted ? (await nearbyAreas(wanted, { count: 4, withinKm: 8 })).map((a) => a.name) : [];
   // In the area they asked, but for rent when they want to buy: worth a mention, e.g. a caller who knows of
   // the firm's Goregaon East rental and asks "Goregaon East में है ना?". Never the other way round: a
   // property for sale is no answer to someone renting on a monthly budget.
-  const otherDeal = deal === 'buy' && (area || project)
-    ? await run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 })
-    : [];
+  const [fits, any, otherDeal] = area || project
+    ? await Promise.all([
+      run({ withProject: false, withArea: false, limit: 40 }).then(byDistance),
+      run({ withProject: false, withArea: false, withBhk: false, withPrice: false, limit: 40 }).then(byDistance),
+      deal === 'buy' ? run({ otherDeal: true, withProject: Boolean(project), withBhk: false, withPrice: false, limit: 2 }) : [],
+    ])
+    : [[], [], []];
+  const elsewhere = fresh(fits.concat(any));
+  const nearby = wanted ? (await nearbyAreas(wanted, { count: 4, withinKm: 8 })).map((a) => a.name) : [];
 
   // The sentences to say are written here, with the real areas and prices filled in: left to assemble them
   // from the lists, the agent skipped the same-area rental and named areas that have no listings.
@@ -147,21 +153,24 @@ async function search(params, origin, isAgent) {
   if (elsewhere.length) {
     const first = elsewhere[0];
     const ready = both([...new Set(elsewhere.map((l) => l.locality))]);
+    // "थोड़ा दूर" for Madh Island, 22 km from South Mumbai, sounded like a stretch to the caller.
+    const howFar = first.km > 15 ? `, पर वो ${asked} से काफ़ी दूर है` : first.km > 8 ? `, ${asked} से थोड़ा दूर है` : '';
     return NextResponse.json({
       matches: [],
       similar: [],
       other_areas: elsewhere.map((l) => ({ ...summarise(l, base), ...(l.km != null && { km_away: l.km, nearness: nearness(l.km) }) })),
       ...(otherDeal.length && { same_area_other_deal: otherDeal.map((l) => summarise(l, base)) }),
       // What we have comes first and the consultant last: opening with "consultant options निकालेंगे" made a
-      // caller ask three or four times before hearing a property.
+      // caller ask three or four times before hearing a property. A property for sale comes first: a buyer
+      // offered the Goregaon East rental asked "मेरे को तो buy करना है, rent का क्यों बता रहे हो?".
       say_now: [
-        otherDealLine,
-        `${otherDealLine ? 'और ' : ''}अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${first.km > 8 ? `, ${asked} से थोड़ा दूर है` : ''}.`,
+        `अभी मेरे पास ${first.locality} में एक ${kind(first)} है, ${spokenPrice(first.price, first.deal_type)}${howFar}.`,
         `${asked} के और options हमारे consultant भेज देंगे. देखना चाहेंगे?`,
-      ].filter(Boolean).join(' '),
-      // The same-area property goes in here too: on a call she dropped it from say_now, even when asked directly.
+      ].join(' '),
+      // The same-area rental only when they ask about that area again: on a call she dropped it even when asked directly.
       say_if_asked_again: [otherDealLine, `${otherDealLine ? 'बाकी' : 'अभी'} ready options ${ready} में हैं, और ${asked} के लिए consultant fresh options निकालेंगे.`].filter(Boolean).join(' '),
-      note: `Nothing is listed in ${asked}. ${rules} If they say no to the first property, you may offer the next one in "other_areas".`,
+      note: `Nothing is listed in ${asked}. ${rules} If they say no to the first property, you may offer the next one in "other_areas".`
+        + (otherDeal.length ? ' "same_area_other_deal" is for the other deal type: mention it only through say_if_asked_again, or if they say they would also consider it.' : ''),
     });
   }
   return NextResponse.json({
