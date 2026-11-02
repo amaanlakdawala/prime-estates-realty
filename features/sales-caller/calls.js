@@ -11,7 +11,7 @@ export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 // The Sarvam agent (features/sales-caller/prompt.md). Bump SALES_SARVAM_APP_VERSION after each commit in Sarvam.
 const app = () => ({
   id: process.env.SALES_SARVAM_APP_ID || 'Riya-sales--cee39f44-8fd2',
-  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 1,
+  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 3,
   webhookPath: SALES_WEBHOOK_PATH,
 });
 
@@ -34,10 +34,13 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://nexorautomate.netlify.
 
 function indiaNow() {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', hourCycle: 'h23', day: 'numeric', month: 'long', year: 'numeric',
+    timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', minute: '2-digit', hourCycle: 'h23', day: 'numeric', month: 'long', year: 'numeric',
   }).formatToParts(new Date()).map((p) => [p.type, p.value]));
   const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(parts.weekday);
-  return { day, hour: Number(parts.hour), label: `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}` };
+  const hour = Number(parts.hour);
+  // With the time: without it Riya guessed that 3:30 pm was "काफी देर" for a demo today.
+  const time = `${hour % 12 || 12}:${parts.minute} ${hour < 12 ? 'am' : 'pm'}`;
+  return { day, hour, label: `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}, ${time}` };
 }
 
 // Why this lead can't be called right now, or null. Same checks for the button and the server.
