@@ -41,7 +41,10 @@ export default async function LeadsPage() {
           <h1 className="text-3xl font-semibold">Leads</h1>
           <p className="mt-1 text-muted">Brokerages found on Google, to pitch your website service to.</p>
         </div>
-        <Link href="/admin/leads/outreach" className="btn-whatsapp">Start send queue</Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/admin/leads/outreach" className="btn-whatsapp">Start send queue</Link>
+          <Link href="/admin/leads/calls" className="btn-outline">AI sales calls</Link>
+        </div>
         <div className="min-w-[220px] text-sm">
           <p className="text-muted">Google searches this month</p>
           <p className="font-semibold">{used} of {MONTHLY_LIMIT}</p>

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ChatWidget from '@/components/ChatWidget';
 import { getSiteBySlug } from '@/lib/firm';
 
 // Every firm's public website lives under /<firm slug>/…
@@ -24,6 +25,7 @@ export default async function FirmLayout({ children, params }) {
       <main>{children}</main>
       <Footer site={site} />
       <WhatsAppButton site={site} />
+      {site.aiChatEnabled && <ChatWidget site={site} />}
     </>
   );
 }

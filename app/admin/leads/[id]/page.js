@@ -8,6 +8,8 @@ import { StatusBadge } from '@/components/admin/leads/LeadsTable';
 import LeadOutreach from '@/components/admin/leads/LeadOutreach';
 import LeadStatusForm from '@/components/admin/leads/LeadStatusForm';
 import LeadNotes from '@/components/admin/leads/LeadNotes';
+import SalesCallPanel from '@/features/sales-caller/admin/SalesCallPanel';
+import { callBlocker } from '@/features/sales-caller/calls';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Lead' };
@@ -21,10 +23,11 @@ export default async function LeadPage({ params }) {
   if (!isUuid(id)) notFound();
 
   const db = createAdminClient();
-  const [{ data: lead }, { data: activities }, { data: template }] = await Promise.all([
+  const [{ data: lead }, { data: activities }, { data: template }, { data: salesCalls }] = await Promise.all([
     db.from('leads').select('*').eq('id', id).maybeSingle(),
     db.from('lead_activities').select('*').eq('lead_id', id).order('created_at', { ascending: false }).limit(100),
     db.from('outreach_template').select('body').eq('id', 1).maybeSingle(),
+    db.from('sales_calls').select('id, created_at, status, duration_secs, result, transcript, error').eq('lead_id', id).order('created_at', { ascending: false }),
   ]);
   if (!lead) notFound();
   const { data: demoFirm } = lead.demo_firm_id
@@ -61,6 +64,11 @@ export default async function LeadPage({ params }) {
             <div className="mt-4">
               <LeadOutreach lead={lead} template={template?.body ?? ''} demoFirm={demoFirm} />
             </div>
+          </section>
+
+          <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
+            <h2 className="text-lg font-semibold">AI sales call</h2>
+            <div className="mt-4"><SalesCallPanel leadId={lead.id} blocker={callBlocker(lead, salesCalls ?? [])} calls={salesCalls ?? []} /></div>
           </section>
 
           <section className="rounded-xl border border-line bg-white p-5 sm:p-6">

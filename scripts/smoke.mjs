@@ -1,6 +1,6 @@
 // Live health check of the deployed platform: every firm's pages, login and admin protection, the voice API
 // and the database's enquiry protection. Reads only; writes nothing.
-//   npm run smoke                      checks https://delightful-otter-34d9ac.netlify.app
+//   npm run smoke                      checks https://nexorautomate.netlify.app
 //   npm run smoke -- https://other.site
 // Reads .env.local (Supabase URL and public key; VOICE_TOOL_SECRET for the keyed checks) when it exists.
 import { existsSync, readFileSync } from 'node:fs';
@@ -12,7 +12,7 @@ if (existsSync('.env.local')) {
     if (m && !env[m[1]]) env[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
   }
 }
-const site = (process.argv[2] || env.NEXT_PUBLIC_SITE_URL || 'https://delightful-otter-34d9ac.netlify.app').replace(/\/$/, '');
+const site = (process.argv[2] || env.NEXT_PUBLIC_SITE_URL || 'https://nexorautomate.netlify.app').replace(/\/$/, '');
 
 const results = [];
 const check = async (name, fn) => {
@@ -65,6 +65,8 @@ await check('admin needs login', async () => {
 await check('tower lookup refuses without key', async () => expect(await status('/api/voice/places?name=Powai'), 401, 'status'));
 await check('call queue refuses without secret', async () => expect(await status('/api/voice/process-queue', { method: 'POST' }), 401, 'status'));
 await check('Sarvam webhook refuses without key', async () => expect(await status('/api/voice/sarvam-webhook', { method: 'POST' }), 401, 'status'));
+await check('automatic sales calls refuse without secret', async () => expect(await status('/api/sales-calls/run', { method: 'POST' }), 401, 'status'));
+await check('sales-call webhook refuses without key', async () => expect(await status('/api/sales-calls/webhook', { method: 'POST' }), 401, 'status'));
 await check(`listings search (/${firms[0]})`, async () => {
   const r = await fetch(`${site}/api/voice/listings?firm=${firms[0]}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   const body = await r.json();

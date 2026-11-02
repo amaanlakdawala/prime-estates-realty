@@ -79,6 +79,7 @@ export async function updateFirm(firmId, formData) {
     fields.ai_calls_monthly_limit = Math.min(Math.max(Number.parseInt(text(formData, 'ai_calls_monthly_limit', 6), 10) || 0, 0), 100000);
     const voice = text(formData, 'voice_agent', 10);
     fields.voice_agent = ['simran', 'sarvam'].includes(voice) ? voice : 'sia';
+    fields.ai_chat_enabled = formData.get('ai_chat_enabled') === 'on'; // each chat message is a paid AI call too
   }
 
   const db = createAdminClient();

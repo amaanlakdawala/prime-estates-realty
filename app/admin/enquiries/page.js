@@ -7,7 +7,7 @@ import { formatDateTime, whatsappLink } from '@/lib/format';
 
 export const metadata = { title: 'Enquiries' };
 
-const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website' };
+const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website', chat: 'AI chatbot' };
 
 export default async function EnquiriesPage() {
   const ctx = await requireFirm();

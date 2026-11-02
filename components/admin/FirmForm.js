@@ -101,6 +101,18 @@ export default function FirmForm({ firm, adminFields = false }) {
         </fieldset>
       )}
       {adminFields && (
+        <fieldset className="rounded-lg border border-line p-4 sm:col-span-2">
+          <legend className="px-1 font-medium">AI chatbot</legend>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input type="checkbox" name="ai_chat_enabled" defaultChecked={firm.aiChatEnabled} className="mt-1 h-4 w-4 accent-brand" />
+            <span>
+              <span className="block font-medium">Show the AI chatbot on this firm&apos;s website</span>
+              <span className="text-sm text-muted">Riya answers visitors, shows matching listings and saves interested visitors as enquiries (and the automatic call follows, if switched on). Each message is billed to your Google Gemini account; limits: 40 messages per visitor an hour, 600 per firm a day.</span>
+            </span>
+          </label>
+        </fieldset>
+      )}
+      {adminFields && (
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-accent has-[:checked]:bg-accent/10">
           <input type="checkbox" name="demo_content" defaultChecked={firm.demoContent} className="mt-1 h-4 w-4 accent-brand" />
           <span>
