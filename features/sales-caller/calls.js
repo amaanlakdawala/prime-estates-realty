@@ -1,19 +1,19 @@
 // Sales caller: Riya calls a lead (a brokerage) on Sarvam, pitches your services and tries to book a demo.
 // Server only. Placing a call: placeLeadCall (from the lead's page). Results: handleCallReport (Sarvam's webhook).
 import { createAdminClient } from '@/lib/supabase/admin';
-import { placeSarvamCall, sarvamCallInfo } from '@/lib/sarvam';
+import { addToSarvamCampaign, sarvamCallInfo } from '@/lib/sarvam';
 import { toIndianMobile } from '@/lib/voice';
 import { cleanName } from '@/lib/leads';
 import { describeCall } from './format';
 
 export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 
-// The Sarvam agent (features/sales-caller/prompt.md). Bump SALES_SARVAM_APP_VERSION after each commit in Sarvam.
-const app = () => ({
-  id: process.env.SALES_SARVAM_APP_ID || 'Riya-sales--cee39f44-8fd2',
-  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 6,
-  webhookPath: SALES_WEBHOOK_PATH,
-});
+// Calls go through the Sarvam campaign "Riya sales calls": this account may call only OTP-verified numbers
+// with single API calls (HTTP 402 for anyone else), a campaign may call anyone. The campaign holds the agent
+// (Riya sales caller, features/sales-caller/prompt.md) and its version, the number, the hours (Mon–Sat 10–7)
+// and the webhook to SALES_WEBHOOK_PATH. After a new agent commit in Sarvam, raise the campaign's app version.
+// Campaigns last at most 90 days: this one ends 31 Jan 2027; then make a new one and set SALES_SARVAM_CAMPAIGN_ID.
+const CAMPAIGN_ID = () => process.env.SALES_SARVAM_CAMPAIGN_ID || 'Riya-sales--a8170050-778e';
 
 // Business calls to business owners: weekdays and Saturday, office hours, a few a day, never pushy.
 export const RULES = {
@@ -93,13 +93,14 @@ export async function placeLeadCall(leadId) {
   if (error) throw new Error(error.message);
 
   try {
-    const { conversationId } = await placeSarvamCall({ toNumber, variables: callVariables(lead, demo?.slug), app: app() });
-    await db.from('sales_calls').update({ attempt_id: conversationId.replace(/^sarvam:/, '') }).eq('id', row.id);
+    // The row id travels as the user identifier and comes back on the webhook, which then stores Sarvam's attempt id.
+    const { cohortId } = await addToSarvamCampaign({ campaignId: CAMPAIGN_ID(), toNumber, identifier: row.id, variables: callVariables(lead, demo?.slug) });
+    await db.from('sales_calls').update({ attempt_id: `cohort:${cohortId}` }).eq('id', row.id);
   } catch (err) {
     await db.from('sales_calls').update({ status: 'failed', error: err.message }).eq('id', row.id);
     throw err;
   }
-  await db.from('lead_activities').insert({ lead_id: lead.id, kind: 'call', body: 'AI sales call placed (Riya).' });
+  await db.from('lead_activities').insert({ lead_id: lead.id, kind: 'call', body: 'AI sales call queued (Riya): Sarvam dials within a few minutes.' });
   await db.from('leads').update({
     last_contacted_at: new Date().toISOString(),
     ...(lead.status === 'new' && { status: 'contacted' }),
@@ -110,11 +111,17 @@ export async function placeLeadCall(leadId) {
 // Sarvam's end-of-call report: save it on the call, note it on the lead, move the lead's status on.
 export async function handleCallReport(report) {
   const db = createAdminClient();
-  const { data: call } = await db.from('sales_calls').select('id, lead_id').eq('attempt_id', report.attempt_id).maybeSingle();
+  // Campaign calls are found by the row id sent as user_identifier; their attempt id is only known from here.
+  const byRow = /^[0-9a-f-]{36}$/i.test(report.user_identifier ?? '') && report.user_identifier;
+  const { data: call } = byRow
+    ? await db.from('sales_calls').select('id, lead_id').eq('id', byRow).maybeSingle()
+    : await db.from('sales_calls').select('id, lead_id').eq('attempt_id', report.attempt_id).maybeSingle();
   if (!call) return false;
+  if (report.next_action_status) return true; // Sarvam will try again; the last attempt carries the result
 
   const info = sarvamCallInfo(report, RESULT_FIELDS);
   await db.from('sales_calls').update({
+    attempt_id: report.attempt_id,
     status: info.status, duration_secs: info.duration_secs, result: info.result, transcript: info.transcript, error: info.error,
   }).eq('id', call.id);
 

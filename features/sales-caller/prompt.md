@@ -2,8 +2,8 @@
 
 The prompt of the Sarvam agent "Riya sales caller" (`Riya-sales--cee39f44-8fd2`), everything below the line,
 exactly as pushed. Agent setup (variables, post-call fields, voicemail, goal) is in this folder's README.
-After changing this file: push it to the agent, commit a new version in Sarvam, and set
-`SALES_SARVAM_APP_VERSION` to that version.
+After changing this file: push it to the agent, commit a new version in Sarvam, and raise the app version of
+the Sarvam campaign "Riya sales calls" to it (see the README).
 
 Opening line (set on the agent, English; Sarvam generates the Hindi): Namaste! This is Riya, an AI assistant
 calling from {{company_name}}. Am I speaking with {{firm_name}}?

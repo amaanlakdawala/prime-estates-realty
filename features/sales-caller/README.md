@@ -71,9 +71,13 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
    - post-call fields: `interested` (boolean), `demo_time`, `whatsapp_ok` (boolean), `callback_time`,
      `lead_sources`, `website_status`, `objection`, `do_not_call` (boolean)
    - success goal: a demo slot or WhatsApp OK; voicemail and silence messages that say Nexora will WhatsApp.
-3. The code defaults to that agent and version 6. After each new commit in Sarvam, set
-   `SALES_SARVAM_APP_VERSION` in Netlify (and `SALES_SARVAM_APP_ID` only if you make a different agent). It uses
-   the same Sarvam key, phone line and `VOICE_TOOL_SECRET` as AI calling.
+3. Calls go through the Sarvam **campaign** "Riya sales calls" (`Riya-sales--a8170050-778e`, Mon–Sat 10 am–7 pm,
+   no retries, number +91 79654 82158, webhook to `/api/sales-calls/webhook?key=VOICE_TOOL_SECRET`). The website
+   adds one lead at a time to it (`addToSarvamCampaign` in `lib/sarvam.js`), with the call's row id as the user
+   identifier that comes back on the webhook. Why: this Sarvam account refuses single API calls to numbers that
+   are not OTP-verified (HTTP 402); campaigns may call anyone. After a new agent commit, raise the campaign's
+   app version in Sarvam (pause, edit, resume). The campaign ends 31 Jan 2027 (90 days at most): make a new one
+   with the same settings and set `SALES_SARVAM_CAMPAIGN_ID`.
 4. Deploy, then test on your own verified number first.
 
 ## Before calling real leads
