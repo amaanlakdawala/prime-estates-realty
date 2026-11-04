@@ -9,6 +9,19 @@ export function estimatedCost(call) {
   return s ? Math.ceil(s / 60) * 3.5 + Math.ceil(s / 30) * 0.2 : 0;
 }
 
+// The call's result in a word or two, for the calls table, with a colour: good, bad or neutral.
+export function callOutcome(call) {
+  const r = call.result ?? {};
+  if (call.status === 'placing') return { label: 'Calling…', tone: 'neutral' };
+  if (call.status === 'failed') return { label: 'Failed', tone: 'bad' };
+  if (call.status !== 'done') return { label: 'No answer', tone: 'neutral' };
+  if (r.do_not_call) return { label: 'Do not call', tone: 'bad' };
+  if (r.demo_time) return { label: 'Demo booked', tone: 'good' };
+  if (r.interested) return { label: 'Interested', tone: 'good' };
+  if (r.interested === false) return { label: 'Not interested', tone: 'bad' };
+  return { label: 'Answered', tone: 'neutral' };
+}
+
 // One line for the lead's history: what happened and what to do next.
 export function describeCall(info) {
   if (info.status !== 'done') return info.status === 'failed' ? `AI call failed: ${info.error ?? 'not placed'}` : 'AI call: no answer.';

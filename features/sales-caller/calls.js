@@ -11,7 +11,7 @@ export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 // The Sarvam agent (features/sales-caller/prompt.md). Bump SALES_SARVAM_APP_VERSION after each commit in Sarvam.
 const app = () => ({
   id: process.env.SALES_SARVAM_APP_ID || 'Riya-sales--cee39f44-8fd2',
-  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 5,
+  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 6,
   webhookPath: SALES_WEBHOOK_PATH,
 });
 

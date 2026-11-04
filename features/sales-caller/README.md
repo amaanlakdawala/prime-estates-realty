@@ -71,7 +71,7 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
    - post-call fields: `interested` (boolean), `demo_time`, `whatsapp_ok` (boolean), `callback_time`,
      `lead_sources`, `website_status`, `objection`, `do_not_call` (boolean)
    - success goal: a demo slot or WhatsApp OK; voicemail and silence messages that say Nexora will WhatsApp.
-3. The code defaults to that agent and version 5. After each new commit in Sarvam, set
+3. The code defaults to that agent and version 6. After each new commit in Sarvam, set
    `SALES_SARVAM_APP_VERSION` in Netlify (and `SALES_SARVAM_APP_ID` only if you make a different agent). It uses
    the same Sarvam key, phone line and `VOICE_TOOL_SECRET` as AI calling.
 4. Deploy, then test on your own verified number first.

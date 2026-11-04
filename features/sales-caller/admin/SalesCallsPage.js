@@ -4,12 +4,13 @@ import { getAdminContext } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cleanName, statusLabel } from '@/lib/leads';
 import { formatDateTime } from '@/lib/format';
-import { describeCall, estimatedCost } from '../format';
+import { callOutcome, estimatedCost, minutes } from '../format';
 import { RULES } from '../calls';
 import { getAutoSettings, nextUp } from '../auto';
 import AutoCallSettings from './AutoCallSettings';
 
 const rupees = (n) => `₹${Math.round(n).toLocaleString('en-IN')}`;
+const TONES = { good: 'bg-green-100 text-green-800', bad: 'bg-red-100 text-red-800', neutral: 'bg-mist text-muted' };
 
 // Leads → AI sales calls: automatic calling, who is called next, and every call Riya made, with 30-day totals.
 export default async function SalesCallsPage() {
@@ -85,17 +86,42 @@ export default async function SalesCallsPage() {
       <section className="rounded-xl border border-line bg-white">
         <h2 className="border-b border-line px-4 py-3 text-lg font-semibold">All calls</h2>
         {rows.length ? (
-          <ul className="divide-y divide-line">
-            {rows.map((c) => (
-              <li key={c.id} className="p-4 text-sm">
-                <p className="flex flex-wrap items-baseline gap-x-3">
-                  {c.lead ? <Link href={`/admin/leads/${c.lead.id}`} className="font-semibold text-brand hover:underline">{cleanName(c.lead.name)}</Link> : <span>Deleted lead</span>}
-                  <span className="text-muted">{formatDateTime(c.created_at)}</span>
-                </p>
-                <p className="mt-1">{c.status === 'placing' ? 'Calling…' : describeCall(c)}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1100px] text-left text-sm">
+              <thead className="border-b border-line bg-mist text-muted">
+                <tr>
+                  {['Brokerage', 'Called', 'Result', 'Length', 'Demo', 'WhatsApp', 'Call back', 'Enquiries from', 'Website', 'Concern'].map((h) => (
+                    <th key={h} scope="col" className="px-4 py-3 font-medium">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {rows.map((c) => {
+                  const r = c.status === 'done' ? c.result ?? {} : {};
+                  const outcome = callOutcome(c);
+                  return (
+                    <tr key={c.id} className="align-top hover:bg-mist/60">
+                      <td className="px-4 py-3">
+                        {c.lead ? <Link href={`/admin/leads/${c.lead.id}`} className="font-semibold text-brand hover:underline">{cleanName(c.lead.name)}</Link> : <span className="text-muted">Deleted lead</span>}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted">{formatDateTime(c.created_at)}</td>
+                      <td className="px-4 py-3">
+                        <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TONES[outcome.tone]}`}>{outcome.label}</span>
+                        {c.status === 'failed' && c.error && <span className="mt-1 block max-w-[14rem] text-xs text-muted">{c.error}</span>}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">{c.status === 'done' ? minutes(c.duration_secs ?? 0) : '—'}</td>
+                      <td className="whitespace-nowrap px-4 py-3 font-medium">{r.demo_time || '—'}</td>
+                      <td className="px-4 py-3">{r.whatsapp_ok ? 'Yes, send' : '—'}</td>
+                      <td className="px-4 py-3">{r.callback_time || '—'}</td>
+                      <td className="px-4 py-3">{r.lead_sources || '—'}</td>
+                      <td className="px-4 py-3">{r.website_status || '—'}</td>
+                      <td className="max-w-[16rem] px-4 py-3 text-muted">{r.objection || '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p className="p-6 text-sm text-muted">No AI sales calls yet.</p>
         )}
