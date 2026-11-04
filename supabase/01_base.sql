@@ -31,7 +31,7 @@ create table if not exists public.listings (
   created_by    uuid default auth.uid() references auth.users(id) on delete set null  -- team member who added it
 );
 
--- For databases created before created_by existed (same as supabase/add_listing_owner.sql)
+-- For databases created before created_by existed (same as supabase/extras/add_listing_owner.sql)
 alter table public.listings
   add column if not exists created_by uuid default auth.uid() references auth.users(id) on delete set null;
 create index if not exists listings_created_by_idx on public.listings (created_by);

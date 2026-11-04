@@ -85,7 +85,7 @@ export default async function LoginDetailPage({ params }) {
         </h2>
         {ownerColumnMissing ? (
           <p className="mt-3 rounded-lg border border-accent/40 bg-accent/10 p-4 text-sm">
-            Listings aren&apos;t linked to who added them yet. Run <code>supabase/add_listing_owner.sql</code> once in the Supabase SQL Editor; listings added after that will show here.
+            Listings aren&apos;t linked to who added them yet. Run <code>supabase/extras/add_listing_owner.sql</code> once in the Supabase SQL Editor; listings added after that will show here.
           </p>
         ) : listingsError ? (
           <p className="mt-3 text-sm text-red-700" role="alert">Listings could not be loaded: {listingsError.message}</p>

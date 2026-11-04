@@ -1,7 +1,7 @@
 -- =============================================================
 -- Lead finder: brokerages found on Google, and your outreach to them.
 -- Platform admin only. Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again.
--- Needs multi_tenant.sql (for firms and is_platform_admin) to have been run first.
+-- Needs 02_multi_tenant.sql (for firms and is_platform_admin) to have been run first.
 -- =============================================================
 
 create table if not exists public.leads (

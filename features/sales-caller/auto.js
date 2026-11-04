@@ -1,4 +1,4 @@
-// Automatic sales calling: every 10 minutes in calling hours (cron.sql → /api/sales-calls/run), place the next
+// Automatic sales calling: every 10 minutes in calling hours (supabase/cron/sales_caller_cron.sql → /api/sales-calls/run), place the next
 // call to the best lead that may be called, one call at a time, up to the daily number set on the tracking page.
 import { createAdminClient } from '@/lib/supabase/admin';
 import { RULES, callBlocker, placeLeadCall } from './calls';

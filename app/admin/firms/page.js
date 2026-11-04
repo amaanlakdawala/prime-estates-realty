@@ -14,7 +14,7 @@ export default async function FirmsPage() {
   if (!ctx?.isPlatformAdmin) redirect('/admin');
 
   const db = createAdminClient();
-  // Counted in the database (supabase/scale.sql): reading every listing to count them breaks past 1,000 rows.
+  // Counted in the database (supabase/07_scale.sql): reading every listing to count them breaks past 1,000 rows.
   const [{ data: firms, error }, { data: counts }] = await Promise.all([
     db.from('firms').select('*').order('created_at', { ascending: false }),
     db.rpc('firm_counts'),

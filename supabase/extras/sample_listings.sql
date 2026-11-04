@@ -1,5 +1,5 @@
 -- Optional: sample listings so the site isn't empty while you test.
--- Run in Supabase SQL Editor after schema.sql. Delete them later from /admin.
+-- Run in Supabase SQL Editor after 01_base.sql. Delete them later from /admin.
 insert into public.listings (title, property_type, deal_type, price, area_sqft, bhk, floor, locality, address, latitude, longitude, description, amenities, rera_number, status, featured) values
 ('Spacious 2 BHK near Balewadi High Street', 'flat', 'buy', 8500000, 1050, 2, '7th of 14', 'Baner', 'Baner–Pashan Link Road, Baner, Pune 411045', 18.5590, 73.7868,
  'East-facing flat with two balconies and an open kitchen. Five minutes from Balewadi High Street and 20 minutes from Hinjewadi Phase 1.',

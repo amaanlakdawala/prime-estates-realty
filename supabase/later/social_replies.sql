@@ -1,6 +1,6 @@
 -- =============================================================
 -- Social replies: automatic replies to comments on each firm's Instagram and Facebook.
--- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs supabase/multi_tenant.sql.
+-- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs supabase/02_multi_tenant.sql.
 -- Firms read their own rows. Accounts, tokens and the comment log are written by the server only.
 -- =============================================================
 

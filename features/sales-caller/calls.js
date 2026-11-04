@@ -11,7 +11,7 @@ export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 // The Sarvam agent (features/sales-caller/prompt.md). Bump SALES_SARVAM_APP_VERSION after each commit in Sarvam.
 const app = () => ({
   id: process.env.SALES_SARVAM_APP_ID || 'Riya-sales--cee39f44-8fd2',
-  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 3,
+  version: Number(process.env.SALES_SARVAM_APP_VERSION) || 5,
   webhookPath: SALES_WEBHOOK_PATH,
 });
 
@@ -29,7 +29,8 @@ export const RULES = {
 // The post-call fields the agent fills (configured on the Sarvam agent with the same names).
 const RESULT_FIELDS = ['interested', 'demo_time', 'whatsapp_ok', 'callback_time', 'lead_sources', 'website_status', 'objection', 'do_not_call'];
 
-const OWNER = { name: 'Amaan', whatsapp: '80975 46742' };
+// Riya calls from the company, not a person; the WhatsApp number is yours.
+const OWNER = { company: 'Nexora', whatsapp: '80975 46742' };
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://nexorautomate.netlify.app';
 
 function indiaNow() {
@@ -67,7 +68,7 @@ function callVariables(lead, demoSlug) {
     area: lead.locality || '',
     has_website: lead.website ? 'yes' : 'no',
     demo_ready: demoSlug ? 'yes' : 'no', // a sample website already made for them (sent on WhatsApp, never read out)
-    owner_name: OWNER.name,
+    company_name: OWNER.company,
     owner_whatsapp: OWNER.whatsapp,
     today: indiaNow().label,
   };

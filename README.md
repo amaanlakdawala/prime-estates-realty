@@ -9,7 +9,7 @@ One codebase that gives each client brokerage its own property website and a pri
 - **Firms.** Each client is a row in the `firms` table: name, web address (slug), phone, city, areas, MahaRERA number, logo. Its website is at `/<slug>`, e.g. `/prime-estates`. The site root (`/`, `app/page.js`) is your own services page for brokerages (under the name Amaan); its contact form adds the visitor to Leads as Interested (`app/actions/contact.js`).
 - **Platform admin (you).** A login with `app_metadata.role = 'admin'`. You see **Firms** and **Logins**, create firms and their logins, set passwords, pause firms, and can manage any firm's listings.
 - **Firm logins.** `app_metadata.role = 'firm'`, linked to one firm in `firm_users`. A firm login sees only its firm's **Listings**, **Add listing**, **Enquiries**, **AI calls**, **WhatsApp write-up** and **Firm profile**.
-- **Isolation in the database.** Row Level Security (`supabase/multi_tenant.sql`) stops a firm login from reading or changing another firm's listings, enquiries or photos, whatever the website code does. Photos live in a storage folder per firm.
+- **Isolation in the database.** Row Level Security (`supabase/02_multi_tenant.sql`) stops a firm login from reading or changing another firm's listings, enquiries or photos, whatever the website code does. Photos live in a storage folder per firm.
 
 **`CLIENT_SETUP.md`** covers adding a client and day-to-day tasks.
 
@@ -23,7 +23,7 @@ New, larger features each live in their own folder under [`features/`](features/
 
 ## Private inventory and firms without a website
 
-Every listing has a **Show on the website** switch (on by default). Off = a private listing: the firm's team and the AI calling assistant see it, website visitors never do. The platform admin can also switch a firm's **Public website is live** off (Firms → the firm) for firms that only buy AI calling: their website is hidden, while their admin panel, listings and AI calls keep working. The voice agents' `search_listings` tool sends `x-voice-key` (= `VOICE_TOOL_SECRET`), and with it `/api/voice/listings` searches the firm's whole available inventory; without it, only what is public. Database: `supabase/inventory.sql`.
+Every listing has a **Show on the website** switch (on by default). Off = a private listing: the firm's team and the AI calling assistant see it, website visitors never do. The platform admin can also switch a firm's **Public website is live** off (Firms → the firm) for firms that only buy AI calling: their website is hidden, while their admin panel, listings and AI calls keep working. The voice agents' `search_listings` tool sends `x-voice-key` (= `VOICE_TOOL_SECRET`), and with it `/api/voice/listings` searches the firm's whole available inventory; without it, only what is public. Database: `supabase/06_inventory.sql`.
 
 ## AI calls (firm admin → AI calls)
 
@@ -38,17 +38,17 @@ The platform admin picks each firm's voice on the firm's page:
 
 Riya's prompts: `voice-agent/riya-prompt.md` (ElevenLabs) and `voice-agent/riya-sarvam-prompt.md` (Sarvam). After changing the Sarvam agent, commit a version in Sarvam, raise `SARVAM_APP_VERSION`, then redeploy.
 
-Safeguards: consent confirmation on every add/upload, calls only 9 am–9 pm IST, people who ask not to be called are marked "Do not call" automatically, and calling is off per firm until the platform admin switches it on (with a monthly cap) on the firm's page. Tables: `call_contacts`, `calls` (`supabase/ai_calls.sql`).
+Safeguards: consent confirmation on every add/upload, calls only 9 am–9 pm IST, people who ask not to be called are marked "Do not call" automatically, and calling is off per firm until the platform admin switches it on (with a monthly cap) on the firm's page. Tables: `call_contacts`, `calls` (`supabase/04_ai_calls.sql`).
 
-**Automatic callback for website enquiries.** A firm can switch on "Call new website enquiries automatically" on its AI calls page. A database trigger (`supabase/auto_call.sql`) then queues a call about a minute after each enquiry (enquiries at night wait until 9 am IST). Supabase pg_cron pings `/api/voice/process-queue` every minute while there is work (`supabase/auto_call_cron.sql`), which places due calls through the same safeguards as the Call button and saves finished calls' results. Each number is auto-called at most once a day, only one call per firm runs at a time, technical failures are retried twice 10 minutes apart, and anything not placed within 24 hours is dropped. Needs `CRON_SECRET` in the site env and in the cron SQL.
+**Automatic callback for website enquiries.** A firm can switch on "Call new website enquiries automatically" on its AI calls page. A database trigger (`supabase/05_auto_call.sql`) then queues a call about a minute after each enquiry (enquiries at night wait until 9 am IST). Supabase pg_cron pings `/api/voice/process-queue` every minute while there is work (`supabase/cron/auto_call_cron.sql`), which places due calls through the same safeguards as the Call button and saves finished calls' results. Each number is auto-called at most once a day, only one call per firm runs at a time, technical failures are retried twice 10 minutes apart, and anything not placed within 24 hours is dropped. Needs `CRON_SECRET` in the site env and in the cron SQL.
 
 ## AI chatbot on firms' websites (platform admin → Firms → firm)
 
-A chat button above the WhatsApp button. Riya (Google Gemini, `gemini-3.8-flash` at low thinking; change with `GEMINI_MODEL`) answers visitors, searches the firm's public listings and shows them as cards, and when a visitor wants a call back saves them as an enquiry with source "AI chatbot" (so the automatic AI call follows if the firm has it on). Off per firm until the platform admin ticks "Show the AI chatbot" on the firm's page. Code: `components/ChatWidget.js` → `/api/chat` → `lib/chat/assistant.js` (prompt and tools) and `lib/chat/search.js`. Limits: 600-character messages, 20 visitor messages per chat, 40 per visitor an hour, 600 per firm a day; each message is logged with its token counts in `chat_turns` (`supabase/chatbot.sql`). Needs `GEMINI_API_KEY` in the site env (from aistudio.google.com, with billing on: free-tier chats may be used by Google to improve its products).
+A chat button above the WhatsApp button. Riya (Google Gemini, `gemini-3.8-flash` at low thinking; change with `GEMINI_MODEL`) answers visitors, searches the firm's public listings and shows them as cards, and when a visitor wants a call back saves them as an enquiry with source "AI chatbot" (so the automatic AI call follows if the firm has it on). Off per firm until the platform admin ticks "Show the AI chatbot" on the firm's page. Code: `components/ChatWidget.js` → `/api/chat` → `lib/chat/assistant.js` (prompt and tools) and `lib/chat/search.js`. Limits: 600-character messages, 20 visitor messages per chat, 40 per visitor an hour, 600 per firm a day; each message is logged with its token counts in `chat_turns` (`supabase/09_chatbot.sql`). Needs `GEMINI_API_KEY` in the site env (from aistudio.google.com, with billing on: free-tier chats may be used by Google to improve its products).
 
 ## Lead finder (platform admin → Leads)
 
-Finds brokerages on Google (Places API Text Search) area by area, scores them as prospects for a website (no website +3, WhatsApp-able mobile +2, 20+ reviews +1, rating ≥ 4 +1), and tracks outreach: status, follow-up date, notes, Call/WhatsApp buttons that log contact, a fill-in WhatsApp message, and **Create demo website** (a demo firm built from the lead's details). Tables: `leads`, `lead_activities`, `outreach_template`, `places_usage` (`supabase/leads.sql`, platform admin only).
+Finds brokerages on Google (Places API Text Search) area by area, scores them as prospects for a website (no website +3, WhatsApp-able mobile +2, 20+ reviews +1, rating ≥ 4 +1), and tracks outreach: status, follow-up date, notes, Call/WhatsApp buttons that log contact, a fill-in WhatsApp message, and **Create demo website** (a demo firm built from the lead's details). Tables: `leads`, `lead_activities`, `outreach_template`, `places_usage` (`supabase/03_leads.sql`, platform admin only).
 
 Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY_REQUEST_LIMIT` Google requests (default 900) are used in a month, to stay inside Google's free allowance. Google's terms allow keeping place IDs long-term; other details are meant to be refreshed, which re-running a search does.
 
@@ -64,7 +64,7 @@ Needs `GOOGLE_PLACES_API_KEY` (server-only). Searching stops once `LEADS_MONTHLY
 
 You need Node.js 18.18+, a Supabase project (region Mumbai, ap-south-1) and a Netlify account.
 
-1. **Database.** In Supabase, open **SQL Editor** and run, in order: `supabase/schema.sql` (then optionally `supabase/seed.sql` for 5 sample listings: it only works before the next file), `supabase/multi_tenant.sql`, `supabase/leads.sql`, `supabase/ai_calls.sql`, `supabase/auto_call.sql`, `supabase/inventory.sql`, `supabase/scale.sql` (indexes and spam protection), `supabase/sarvam.sql`, `supabase/chatbot.sql`, then `features/knowledge-base/schema.sql` and its `seed.sql`. Last, run `supabase/auto_call_cron.sql` after putting your site address and `CRON_SECRET` into it (don't commit the secret). Never run `multi_tenant.sql` again on a live database: it would reopen the rules that `inventory.sql` and `scale.sql` closed.
+1. **Database.** In Supabase, open **SQL Editor** and run the files in `supabase/` in number order, `01_base.sql` to `12_sales_caller.sql`, then the two jobs in `supabase/cron/` after putting your site address and `CRON_SECRET` into them (save the filled-in copy as `*.local.sql`, which git ignores). [supabase/README.md](supabase/README.md) lists what each file adds. Never run `02_multi_tenant.sql` again on a live database: it would reopen the rules that `06_inventory.sql` and `07_scale.sql` closed.
 2. **Lock sign-ups.** **Authentication → Sign In / Providers → Email**: turn off "Allow new users to sign up".
 3. **Settings.** Copy `.env.example` to `.env.local` and fill in the Supabase URL, anon key and secret key.
 4. **Your admin login.** `npm install`, then `npm run set-admin -- you@example.com 'YourPassword'`.
@@ -84,7 +84,7 @@ What keeps the platform fast, cheap and safe as firms and visitors grow:
   - a hidden trap field and a minimum fill time stop simple bots;
   - limits: 5 enquiries per visitor per hour and 40 per firm per hour;
   - the same number twice within 10 minutes is saved once.
-- **Indexes** for the busiest queries, and counts done in the database (`supabase/scale.sql`).
+- **Indexes** for the busiest queries, and counts done in the database (`supabase/07_scale.sql`).
 - **Security headers** on every page (`next.config.mjs`).
 - **Automatic calls** are claimed one at a time, so no number is called twice; at most 5 calls start per minute, one per firm at a time (`app/api/voice/process-queue/route.js`).
 

@@ -31,7 +31,7 @@ export async function saveAutoSettings({ enabled, statuses, perDay }) {
       per_day: Math.min(Math.max(Number.parseInt(perDay, 10) || 1, 1), 30),
       updated_at: new Date().toISOString(),
     });
-    if (error) return { error: error.message.includes('sales_caller_settings') ? 'Run features/sales-caller/schema.sql in Supabase first.' : error.message };
+    if (error) return { error: error.message.includes('sales_caller_settings') ? 'Run supabase/12_sales_caller.sql in Supabase first.' : error.message };
     revalidatePath('/admin/leads/calls');
     return { ok: true };
   } catch (err) {

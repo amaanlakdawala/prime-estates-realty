@@ -38,7 +38,7 @@ so firms can see what went out.
 | Path | What it is |
 | --- | --- |
 | `README.md` | This file |
-| `schema.sql` | Outbox, send log, per-firm email settings, unsubscribes |
+| `supabase/` (new numbered file) | Outbox, send log, per-firm email settings, unsubscribes |
 | `templates/` | The emails, one file each, in the firm's name and colours |
 | `send.js` | Sends queued emails through the provider, retries, logs |
 | `admin/` | Settings: which emails are on, alert addresses, wording |

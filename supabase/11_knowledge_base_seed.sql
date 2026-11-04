@@ -1,5 +1,5 @@
 -- =============================================================
--- Starting list for the knowledge base. Run after schema.sql. Safe to run again: rows that already
+-- Starting list for the knowledge base. Run after 10_knowledge_base.sql. Safe to run again: rows that already
 -- exist are left as they are, so edits made in the admin panel are never overwritten.
 -- Map positions are the rough centre of each area. Prices are rough ranges in rupees per sq ft,
 -- all marked unverified: the assistant does not quote them until they are checked and ticked.

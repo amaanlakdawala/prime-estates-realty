@@ -1,5 +1,5 @@
 -- Sales caller: AI calls from Riya to your leads (brokerages), pitching your services.
--- Run once in Supabase → SQL Editor, after supabase/leads.sql. Safe to run again.
+-- Run once in Supabase → SQL Editor, after supabase/03_leads.sql. Safe to run again.
 
 create table if not exists public.sales_calls (
   id               uuid primary key default gen_random_uuid(),

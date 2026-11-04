@@ -39,7 +39,7 @@ assistant uses ordinary text messages, which Meta does not charge for. It never 
 | Path | What it is |
 | --- | --- |
 | `README.md` | This file |
-| `schema.sql` | Numbers, conversations, messages, per-firm settings |
+| `supabase/` (new numbered file) | Numbers, conversations, messages, per-firm settings |
 | `webhook.js` | Reads Meta's incoming-message payloads |
 | `engine.js` | One incoming message end to end: route, reply, log, hand over |
 | `admin/` | Conversations list, a conversation with "Take over", settings |

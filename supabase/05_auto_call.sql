@@ -2,8 +2,8 @@
 -- Automatic AI calls for new website enquiries.
 -- When an enquiry arrives for a firm that has auto-calling on, a call is queued for about a minute
 -- later (or 9 am IST if it arrives at night). The website's /api/voice/process-queue places due
--- calls; Supabase pg_cron pings it every minute (see auto_call_cron.sql, run separately with the secret).
--- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs ai_calls.sql.
+-- calls; Supabase pg_cron pings it every minute (see cron/auto_call_cron.sql, run separately with the secret).
+-- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs 04_ai_calls.sql.
 -- =============================================================
 
 alter table public.firms add column if not exists ai_auto_call_enquiries boolean not null default false;

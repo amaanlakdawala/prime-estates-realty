@@ -4,7 +4,7 @@
 --  - firms.website_enabled:    false = the firm has no public website (admin panel and AI calling still work)
 -- The public (anon) can only read available listings that are on the website of a live firm website.
 -- The AI assistant's search reads all available listings of the firm with the server key.
--- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs multi_tenant.sql.
+-- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs 02_multi_tenant.sql.
 -- =============================================================
 
 alter table public.listings add column if not exists show_on_website boolean not null default true;

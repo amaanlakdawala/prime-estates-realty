@@ -35,7 +35,7 @@ Instagram / Facebook ──webhook──▶ /api/social/webhook ──▶ engine
 | Path | What it is |
 | --- | --- |
 | `README.md` | This file: what the feature does, how it works, how to set it up |
-| `schema.sql` | Database tables and security rules. Run once in Supabase |
+| `supabase/later/social_replies.sql` | Database tables and security rules. Run once in Supabase when this feature is built |
 | `rules.js` | Keyword matching and the spam / skip filter (to come) |
 | `engine.js` | Handles one comment end to end and logs the result (to come) |
 | `admin/` | The firm's admin screens: connection, rules, settings, comment log (to come) |

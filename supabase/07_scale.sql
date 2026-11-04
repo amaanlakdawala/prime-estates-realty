@@ -1,6 +1,6 @@
 -- =============================================================
 -- Production hardening and indexes for large numbers of firms, listings and visitors.
--- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs multi_tenant.sql and auto_call.sql.
+-- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs 02_multi_tenant.sql and 05_auto_call.sql.
 -- =============================================================
 
 -- 1. Enquiries are only written by the website's server (app/actions/enquiry.js), which checks for spam

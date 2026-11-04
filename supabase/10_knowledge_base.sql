@@ -2,8 +2,8 @@
 -- Knowledge base: Mumbai areas (with map positions, to tell near from far) and towers/projects
 -- (which area each one is in, and an approximate price). One shared list for every firm, kept by
 -- the platform owner. The AI assistant reads it through /api/voice/places with the server key.
--- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs multi_tenant.sql.
--- Then run seed.sql for the starting list.
+-- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again. Needs 02_multi_tenant.sql.
+-- Then run 11_knowledge_base_seed.sql for the starting list.
 -- =============================================================
 
 create table if not exists public.kb_areas (

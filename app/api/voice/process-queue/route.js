@@ -1,5 +1,5 @@
 // Places automatic AI calls for website enquiries that are due, and saves the results of finished calls.
-// Called every minute by Supabase pg_cron (see supabase/auto_call_cron.sql) with the shared CRON_SECRET.
+// Called every minute by Supabase pg_cron (see supabase/cron/auto_call_cron.sql) with the shared CRON_SECRET.
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sameSecret } from '@/lib/secret';

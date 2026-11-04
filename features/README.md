@@ -2,7 +2,8 @@
 
 Larger features live in their own folder here, so each one can be read, changed or removed on its own.
 
-A feature folder holds its logic, its admin screens, its database setup and its own README. Next.js only
+A feature folder holds its logic, its admin screens and its own README. Its database setup is a numbered file in
+`../supabase/` (see `supabase/README.md`), so all SQL runs from one place in order. Next.js only
 allows pages and API routes under `app/`, so `app/` keeps thin route files that import from the feature
 folder and contain no logic of their own. Code used by more than one feature goes in `shared/`.
 

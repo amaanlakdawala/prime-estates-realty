@@ -1,8 +1,8 @@
 -- =============================================================
 -- Sales caller: every 10 minutes, Monday to Saturday in calling hours, ask the website to place the next
--- automatic sales call. Run AFTER schema.sql, in Supabase: SQL Editor -> New query.
+-- automatic sales call. Run AFTER 12_sales_caller.sql, in Supabase: SQL Editor -> New query.
 -- 1. Replace YOUR_SITE with your website address (e.g. https://nexorautomate.netlify.app)
--- 2. Replace PASTE_CRON_SECRET_HERE with the same CRON_SECRET you set in Netlify (as in supabase/auto_call_cron.sql).
+-- 2. Replace PASTE_CRON_SECRET_HERE with the same CRON_SECRET you set in Netlify (as in supabase/cron/auto_call_cron.sql).
 -- Don't commit the file with the real secret in it. Safe to run again (it replaces the old schedule).
 -- The ping is only sent while automatic calling is switched on.
 -- =============================================================

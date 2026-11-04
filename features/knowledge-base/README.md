@@ -41,11 +41,11 @@ Firm logins can't open it. Changes reach calls within about 10 seconds.
 
 | File | What it does |
 | --- | --- |
-| `schema.sql` | Tables `kb_areas` and `kb_projects`; only the platform admin can read or edit them |
-| `seed.sql` | Starting list: 72 areas, 56 towers, every rate unchecked. Safe to re-run; it never overwrites edits |
+| `supabase/10_knowledge_base.sql` | Tables `kb_areas` and `kb_projects`; only the platform admin can read or edit them |
+| `supabase/11_knowledge_base_seed.sql` | Starting list: 72 areas, 56 towers, every rate unchecked. Safe to re-run; it never overwrites edits |
 | `lookup.js` | Name matching, regions, distances, nearby areas, spoken rates |
 | `api.js` | The `lookup_place` tool (route: `app/api/voice/places/route.js`) |
 | `actions.js` | Saving, removing and adding, from the admin page |
 | `admin/KnowledgeAdmin.js` | The admin page (route: `app/admin/knowledge/page.js`) |
 
-Setup: run `schema.sql`, then `seed.sql`, in Supabase (SQL Editor).
+Setup: run `supabase/10_knowledge_base.sql`, then `supabase/11_knowledge_base_seed.sql`, in Supabase (SQL Editor).

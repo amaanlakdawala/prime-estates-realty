@@ -1,7 +1,7 @@
 -- =============================================================
 -- AI calling: contacts a firm wants the voice agent to call, and the calls made.
 -- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again.
--- Needs multi_tenant.sql (firms, can_manage_firm, is_platform_admin).
+-- Needs 02_multi_tenant.sql (firms, can_manage_firm, is_platform_admin).
 -- =============================================================
 
 -- Calls cost the platform owner money, so each firm is switched on individually, with a monthly cap.

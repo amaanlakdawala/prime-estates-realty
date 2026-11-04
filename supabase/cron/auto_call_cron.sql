@@ -1,6 +1,6 @@
 -- =============================================================
 -- Every minute, ping the website so it places due automatic calls and saves call results.
--- Run AFTER auto_call.sql, in Supabase: SQL Editor -> New query.
+-- Run AFTER 05_auto_call.sql, in Supabase: SQL Editor -> New query.
 -- 1. Replace YOUR_SITE with your website address (e.g. https://nexorautomate.netlify.app)
 -- 2. Replace PASTE_CRON_SECRET_HERE with the same CRON_SECRET you set in Netlify.
 -- Don't commit the file with the real secret in it. Safe to run again (it replaces the old schedule).

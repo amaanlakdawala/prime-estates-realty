@@ -4,10 +4,10 @@
 -- The platform admin (role 'admin' in app_metadata) sees everything.
 --
 -- Run once in Supabase: SQL Editor -> New query -> Run. Safe to run again.
--- Needs schema.sql to have been run first.
+-- Needs 01_base.sql to have been run first.
 -- =============================================================
 
--- Who added each listing (same as add_listing_owner.sql, repeated so this file is enough on its own).
+-- Who added each listing (same as extras/add_listing_owner.sql, repeated so this file is enough on its own).
 alter table public.listings
   add column if not exists created_by uuid default auth.uid() references auth.users(id) on delete set null;
 create index if not exists listings_created_by_idx on public.listings (created_by);
