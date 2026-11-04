@@ -78,8 +78,9 @@ export async function placeLeadCall(leadId) {
   const db = createAdminClient();
   const [{ data: lead }, { data: history }, today] = await Promise.all([
     db.from('leads').select('*').eq('id', leadId).maybeSingle(),
-    db.from('sales_calls').select('created_at').eq('lead_id', leadId).order('created_at', { ascending: false }),
-    db.from('sales_calls').select('id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 864e5).toISOString()),
+    // Calls that never reached Sarvam (no attempt id, e.g. out of credit) don't count against the lead or the day.
+    db.from('sales_calls').select('created_at').eq('lead_id', leadId).not('attempt_id', 'is', null).order('created_at', { ascending: false }),
+    db.from('sales_calls').select('id', { count: 'exact', head: true }).not('attempt_id', 'is', null).gte('created_at', new Date(Date.now() - 864e5).toISOString()),
   ]);
   if (!lead) throw new Error('Lead not found.');
   const blocked = callBlocker(lead, history ?? []);

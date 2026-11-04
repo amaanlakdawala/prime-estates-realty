@@ -19,7 +19,7 @@ export async function nextUp(settings, limit = 10, db = createAdminClient()) {
     .order('score', { ascending: false }).order('created_at').limit(300);
   if (!leads?.length) return [];
   const { data: calls } = await db.from('sales_calls').select('lead_id, created_at').in('lead_id', leads.map((l) => l.id))
-    .order('created_at', { ascending: false });
+    .not('attempt_id', 'is', null).order('created_at', { ascending: false });
   const history = (id) => (calls ?? []).filter((c) => c.lead_id === id);
   // The calling-hours check is left out here, so the list also shows who is next outside hours.
   return leads.filter((l) => {
@@ -38,7 +38,7 @@ export async function runAutoCalls() {
     .eq('status', 'placing').lt('created_at', minutesAgo(STALE_MINUTES));
   const [{ count: busy }, { count: today }] = await Promise.all([
     db.from('sales_calls').select('id', { count: 'exact', head: true }).eq('status', 'placing'),
-    db.from('sales_calls').select('id', { count: 'exact', head: true }).gte('created_at', minutesAgo(24 * 60)),
+    db.from('sales_calls').select('id', { count: 'exact', head: true }).not('attempt_id', 'is', null).gte('created_at', minutesAgo(24 * 60)),
   ]);
   if ((busy ?? 0) > 0) return { done: 'a call is still in progress' };
   if ((today ?? 0) >= Math.min(settings.per_day, RULES.perDay)) return { done: 'daily number reached' };
@@ -49,6 +49,8 @@ export async function runAutoCalls() {
     await placeLeadCall(lead.id); // checks the calling hours and every other rule again
     return { done: 'placed', lead: lead.name };
   } catch (err) {
+    // Out of Sarvam credit: every further call would fail the same way, so switch automatic calling off.
+    if (err.message.includes('HTTP 402')) await db.from('sales_caller_settings').update({ enabled: false, updated_at: new Date().toISOString() }).eq('id', 1);
     return { done: 'not placed', lead: lead.name, reason: err.message };
   }
 }
