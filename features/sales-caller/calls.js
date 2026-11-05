@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { addToSarvamCampaign, sarvamCallInfo } from '@/lib/sarvam';
 import { toIndianMobile } from '@/lib/voice';
-import { cleanName } from '@/lib/leads';
+import { cleanName, isUnknownName } from '@/lib/leads';
 import { describeCall } from './format';
 
 export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
@@ -27,7 +27,11 @@ export const RULES = {
 };
 
 // The post-call fields the agent fills (configured on the Sarvam agent with the same names).
-const RESULT_FIELDS = ['interested', 'demo_time', 'whatsapp_ok', 'callback_time', 'lead_sources', 'website_status', 'objection', 'do_not_call'];
+const RESULT_FIELDS = ['interested', 'demo_time', 'whatsapp_ok', 'callback_time', 'lead_sources', 'website_status', 'objection', 'do_not_call', 'firm_heard'];
+
+// firm_name when the lead's name is not known: the opening line then reads "Am I speaking with kisi property broker?",
+// which Riya says as natural Hindi (kya meri baat kisi property broker se ho rahi hai). The prompt checks for this value.
+const UNKNOWN_FIRM = 'kisi property broker';
 
 // Riya calls from the company, not a person; the WhatsApp number is yours.
 const OWNER = { company: 'Nexora', whatsapp: '80975 46742' };
@@ -63,7 +67,7 @@ export function callBlocker(lead, history = []) {
 // What the agent knows about the person it is calling (agent variables on the Sarvam agent).
 function callVariables(lead, demoSlug) {
   return {
-    firm_name: cleanName(lead.name),
+    firm_name: isUnknownName(lead.name) ? UNKNOWN_FIRM : cleanName(lead.name),
     city: lead.city || 'Mumbai',
     area: lead.locality || '',
     has_website: lead.website ? 'yes' : 'no',
@@ -125,9 +129,10 @@ export async function handleCallReport(report) {
     status: info.status, duration_secs: info.duration_secs, result: info.result, transcript: info.transcript, error: info.error,
   }).eq('id', call.id);
 
-  const { data: lead } = await db.from('leads').select('status').eq('id', call.lead_id).maybeSingle();
+  const { data: lead } = await db.from('leads').select('status, name').eq('id', call.lead_id).maybeSingle();
   const r = info.result ?? {};
   const update = {};
+  if (r.firm_heard && isUnknownName(lead?.name)) update.name = String(r.firm_heard).slice(0, 200);
   if (r.do_not_call) update.status = 'do_not_contact';
   else if ((r.interested || r.demo_time) && ['new', 'contacted'].includes(lead?.status)) update.status = 'interested';
   if (!r.do_not_call && (r.demo_time || r.whatsapp_ok || r.callback_time)) {

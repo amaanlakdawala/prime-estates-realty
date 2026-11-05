@@ -69,7 +69,8 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
    - no tools except the platform's voicemail and language switch
    - call inputs: `firm_name`, `city`, `area`, `has_website`, `demo_ready`, `company_name` (Nexora), `owner_whatsapp`, `today`
    - post-call fields: `interested` (boolean), `demo_time`, `whatsapp_ok` (boolean), `callback_time`,
-     `lead_sources`, `website_status`, `objection`, `do_not_call` (boolean)
+     `lead_sources`, `website_status`, `objection`, `do_not_call` (boolean), `firm_heard` (the firm's name,
+     asked when the lead's name is not known; it then becomes the lead's name)
    - success goal: a demo slot or WhatsApp OK; voicemail and silence messages that say Nexora will WhatsApp.
 3. Calls go through the Sarvam **campaign** "Riya sales calls" (`Riya-sales--a8170050-778e`, Mon–Sat 10 am–7 pm,
    no retries, number +91 79654 82158, webhook to `/api/sales-calls/webhook?key=VOICE_TOOL_SECRET`). The website

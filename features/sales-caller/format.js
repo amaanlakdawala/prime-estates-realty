@@ -28,6 +28,7 @@ export function describeCall(info) {
   const r = info.result ?? {};
   return [
     `AI call, ${minutes(info.duration_secs ?? 0)}.`,
+    r.firm_heard && `Firm: ${r.firm_heard}.`,
     r.do_not_call ? 'Asked not to be called again.' : r.interested ? 'Interested.' : r.interested === false ? 'Not interested.' : '',
     r.demo_time && `Demo booked: ${r.demo_time}.`,
     r.whatsapp_ok && `Send the demo link and pricing on WhatsApp.`,
