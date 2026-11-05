@@ -8,3 +8,6 @@ dev.log
 
 # Filled-in SQL with secrets (e.g. supabase/cron/*.local.sql)
 *.local.sql
+
+# Local Netlify folder
+.netlify
