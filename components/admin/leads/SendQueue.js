@@ -167,7 +167,7 @@ export default function SendQueue({ leads, template, sentToday }) {
 
             <div className="mt-4 rounded-lg bg-mist/60 px-4 py-3 text-sm">
               <span className="font-semibold">Demo website: </span>
-              {noName ? 'none, the firm name is not known (from the brokers’ group)'
+              {noName ? 'none, the firm name is not known'
                 : demoState === 'creating' ? 'creating…'
                 : demoLink ? <a href={demoLink} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline">{demoLink}</a>
                 : settings.autoDemo ? 'not created' : 'off (tick “Create a demo website” to include one)'}
