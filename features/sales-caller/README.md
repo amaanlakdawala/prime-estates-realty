@@ -39,7 +39,7 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
 | Rule | Value |
 | --- | --- |
 | Days and hours | Monday to Saturday, 10 am to 7 pm IST |
-| Calls in any 24 hours | 30 (`SALES_CALLS_PER_DAY`) |
+| Calls per day (from midnight IST) | 30 (`SALES_CALLS_PER_DAY`) |
 | Per lead | at most 3 AI calls, at least 3 days apart |
 | Never called | Do not contact, Won, Lost; no Indian mobile number |
 | On the call | she says she is an AI in the first line; "don't call" ends the call and blocks the lead |

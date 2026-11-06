@@ -20,7 +20,7 @@ export const RULES = {
   days: [1, 2, 3, 4, 5, 6],                                     // Mon–Sat (0 = Sunday)
   startHour: 10,                                                // IST
   endHour: 19,                                                  // last call starts before 7 pm
-  perDay: Number(process.env.SALES_CALLS_PER_DAY) || 30,             // in any 24 hours
+  perDay: Number(process.env.SALES_CALLS_PER_DAY) || 30,       // per day, counted from midnight IST
   daysBetweenCalls: 3,                                          // to the same lead
   maxCallsPerLead: 3,
   blockedStatuses: ['do_not_contact', 'won', 'lost'],
@@ -46,6 +46,13 @@ function indiaNow() {
   // With the time: without it Riya guessed that 3:30 pm was "काफी देर" for a demo today.
   const time = `${hour % 12 || 12}:${parts.minute} ${hour < 12 ? 'am' : 'pm'}`;
   return { day, hour, label: `${parts.weekday} ${parts.day} ${parts.month} ${parts.year}, ${time}` };
+}
+
+// Midnight India time today (IST is UTC+5:30 all year), as an ISO timestamp: the daily limit counts calls since then.
+const IST_OFFSET_MS = 330 * 60 * 1000;
+export function startOfIndiaDay() {
+  const ist = new Date(Date.now() + IST_OFFSET_MS);
+  return new Date(Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()) - IST_OFFSET_MS).toISOString();
 }
 
 // Why this lead can't be called right now, or null. Same checks for the button and the server.
@@ -84,12 +91,12 @@ export async function placeLeadCall(leadId) {
     db.from('leads').select('*').eq('id', leadId).maybeSingle(),
     // Calls that never reached Sarvam (no attempt id, e.g. out of credit) don't count against the lead or the day.
     db.from('sales_calls').select('created_at').eq('lead_id', leadId).not('attempt_id', 'is', null).order('created_at', { ascending: false }),
-    db.from('sales_calls').select('id', { count: 'exact', head: true }).not('attempt_id', 'is', null).gte('created_at', new Date(Date.now() - 864e5).toISOString()),
+    db.from('sales_calls').select('id', { count: 'exact', head: true }).not('attempt_id', 'is', null).gte('created_at', startOfIndiaDay()),
   ]);
   if (!lead) throw new Error('Lead not found.');
   const blocked = callBlocker(lead, history ?? []);
   if (blocked) throw new Error(blocked);
-  if ((today.count ?? 0) >= RULES.perDay) throw new Error(`The limit of ${RULES.perDay} AI sales calls in 24 hours is reached.`);
+  if ((today.count ?? 0) >= RULES.perDay) throw new Error(`The limit of ${RULES.perDay} AI sales calls today is reached.`);
 
   const toNumber = toIndianMobile(lead.phone_intl || lead.phone);
   const { data: demo } = lead.demo_firm_id ? await db.from('firms').select('slug').eq('id', lead.demo_firm_id).maybeSingle() : { data: null };
