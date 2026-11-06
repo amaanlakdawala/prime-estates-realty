@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/admin/leads/LeadsTable';
 import LeadOutreach from '@/components/admin/leads/LeadOutreach';
 import LeadStatusForm from '@/components/admin/leads/LeadStatusForm';
 import LeadNotes from '@/components/admin/leads/LeadNotes';
+import FindOwnerButton from '@/components/admin/leads/FindOwnerButton';
 import SalesCallPanel from '@/features/sales-caller/admin/SalesCallPanel';
 import { callBlocker } from '@/features/sales-caller/calls';
 
@@ -35,7 +36,21 @@ export default async function LeadPage({ params }) {
     : { data: null };
 
   const reasons = scoreReasons(lead);
+  const owner = (
+    <span key="o" className="block">
+      {lead.owner_name ? (
+        <>
+          <span className="font-semibold">{lead.owner_name}</span>{lead.owner_role && <span className="text-muted"> · {lead.owner_role}</span>}
+          {lead.owner_source && <span className="mt-0.5 block text-xs text-muted">Found on the web: {lead.owner_source}</span>}
+        </>
+      ) : (
+        <span className="text-muted">{lead.owner_checked_at ? 'Not found on the web' : 'Not searched yet'}</span>
+      )}
+      <FindOwnerButton leadId={lead.id} searched={Boolean(lead.owner_checked_at)} />
+    </span>
+  );
   const details = [
+    ['Owner', owner],
     ['Phone', lead.phone || 'Not listed on Google'],
     ['Website', lead.website ? <a key="w" href={lead.website} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline">{lead.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</a> : <span key="w" className="font-semibold text-red-700">None</span>],
     ['Address', lead.address || '—'],
@@ -98,7 +113,7 @@ export default async function LeadPage({ params }) {
           </section>
 
           <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
-            <h2 className="text-lg font-semibold">Details from Google</h2>
+            <h2 className="text-lg font-semibold">Details</h2>
             <dl className="mt-4 divide-y divide-line text-sm">
               {details.map(([label, value]) => (
                 <div key={label} className="grid grid-cols-[8.5rem_1fr] gap-3 py-2.5">

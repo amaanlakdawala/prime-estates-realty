@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { isUuid, requirePlatformAdmin as requireAdmin } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { searchPlaces } from '@/lib/places';
-import { cleanName, LEAD_STATUSES, scoreLead } from '@/lib/leads';
+import { cleanName, isUnknownName, LEAD_STATUSES, scoreLead } from '@/lib/leads';
+import { findOwner } from '@/lib/lead-owner';
 import { RESERVED_SLUGS } from '@/lib/site';
 
 const MONTHLY_LIMIT = Number(process.env.LEADS_MONTHLY_REQUEST_LIMIT) || 900;
@@ -54,15 +55,17 @@ export async function searchLeads({ city, locality, query, pageToken = null, req
     });
 
     let added = 0;
+    let newIds = [];
     if (rows.length) {
       const { data: existing } = await db.from('leads').select('place_id').in('place_id', rows.map((r) => r.place_id));
       const known = new Set((existing ?? []).map((r) => r.place_id));
       const fresh = rows.filter((r) => !known.has(r.place_id)).map((r) => ({ ...r, city: cityName, locality: area }));
       const refresh = rows.filter((r) => known.has(r.place_id)); // Google's details only: your status and notes stay
       if (fresh.length) {
-        const { error } = await db.from('leads').insert(fresh);
+        const { data: inserted, error } = await db.from('leads').insert(fresh).select('id');
         if (error) throw error;
         added = fresh.length;
+        newIds = (inserted ?? []).map((r) => r.id);
       }
       if (refresh.length) {
         const { error } = await db.from('leads').upsert(refresh, { onConflict: 'place_id' });
@@ -70,7 +73,45 @@ export async function searchLeads({ city, locality, query, pageToken = null, req
       }
     }
 
-    return { textQuery, found: rows.length, added, nextPageToken, used: used ?? (usageRow?.requests ?? 0) + 1, limit: MONTHLY_LIMIT };
+    return { textQuery, found: rows.length, added, newIds, nextPageToken, used: used ?? (usageRow?.requests ?? 0) + 1, limit: MONTHLY_LIMIT };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+// Searches the web for the person who runs the brokerage and saves it on the lead (lib/lead-owner.js).
+// Leads known only by their number have no firm name to search for.
+export async function findLeadOwner(leadId) {
+  try {
+    await requirePlatformAdmin();
+    if (!isUuid(leadId)) throw new Error('Unknown lead.');
+    const db = createAdminClient();
+    const { data: lead } = await db.from('leads').select('id, name, address, city, website, phone').eq('id', leadId).single();
+    if (!lead) throw new Error('Unknown lead.');
+    if (isUnknownName(lead.name)) return { owner: null, skipped: true };
+
+    const owner = await findOwner(lead);
+    const { error } = await db.from('leads').update({
+      owner_name: owner?.name ?? '', owner_role: owner?.role ?? '', owner_source: owner?.source ?? '',
+      owner_checked_at: new Date().toISOString(),
+    }).eq('id', leadId);
+    if (error) throw new Error(error.message.includes('owner_') ? 'Run supabase/13_lead_owners.sql in Supabase first.' : error.message);
+    if (owner) await logActivity(db, leadId, 'note', `Owner found on the web: ${owner.name} (${owner.role}). ${owner.source}`);
+    return { owner };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+// Leads whose owner was never searched for, best prospects first (for "Find owners" on the leads page).
+export async function ownerlessLeadIds() {
+  try {
+    await requirePlatformAdmin();
+    const { data, error } = await createAdminClient().from('leads').select('id, name')
+      .is('owner_checked_at', null).not('status', 'in', '(do_not_contact,won,lost)')
+      .order('score', { ascending: false }).order('created_at').limit(1000);
+    if (error) throw new Error(error.message.includes('owner_') ? 'Run supabase/13_lead_owners.sql in Supabase first.' : error.message);
+    return { ids: (data ?? []).filter((l) => !isUnknownName(l.name)).map((l) => l.id) };
   } catch (err) {
     return { error: err.message };
   }

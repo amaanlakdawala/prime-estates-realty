@@ -48,10 +48,10 @@ export default function LeadsTable({ leads, today }) {
   }, [leads, search, status, locality, noWebsite, dueOnly, sort, today]);
 
   function exportCsv() {
-    const header = ['Name', 'Phone', 'WhatsApp', 'Website', 'Area', 'City', 'Rating', 'Reviews', 'Score', 'Status', 'Follow-up'];
+    const header = ['Name', 'Owner', 'Owner role', 'Phone', 'WhatsApp', 'Website', 'Area', 'City', 'Rating', 'Reviews', 'Score', 'Status', 'Follow-up'];
     const lines = filtered.map((l) => {
       const wa = whatsappNumber(l.phone_intl);
-      return [cleanName(l.name), l.phone, wa ? `https://wa.me/${wa}` : '', l.website, l.locality, l.city, l.rating ?? '', l.review_count, l.score, statusLabel(l.status), l.next_follow_up ?? ''].map(csvCell).join(',');
+      return [cleanName(l.name), l.owner_name ?? '', l.owner_role ?? '', l.phone, wa ? `https://wa.me/${wa}` : '', l.website, l.locality, l.city, l.rating ?? '', l.review_count, l.score, statusLabel(l.status), l.next_follow_up ?? ''].map(csvCell).join(',');
     });
     const blob = new Blob(['﻿' + [header.join(','), ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8' });
     const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `leads-${today}.csv` });
@@ -136,6 +136,7 @@ export default function LeadsTable({ leads, today }) {
                 <tr key={l.id} className="relative hover:bg-mist/60">
                   <td className="px-4 py-3">
                     <Link href={`/admin/leads/${l.id}`} className="font-semibold after:absolute after:inset-0 hover:underline">{cleanName(l.name)}</Link>
+                    {l.owner_name && <span className="block">{l.owner_name}<span className="text-muted"> · {l.owner_role || 'Owner'}</span></span>}
                     <span className="block text-muted">{l.locality || l.city}</span>
                   </td>
                   <td className="px-4 py-3">

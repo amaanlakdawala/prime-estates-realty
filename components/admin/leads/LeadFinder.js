@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { searchLeads } from '@/app/admin/leads/actions';
+import { findLeadOwner, ownerlessLeadIds, searchLeads } from '@/app/admin/leads/actions';
 import { DEFAULT_CITY, DEFAULT_LOCALITIES, DEFAULT_QUERIES } from '@/lib/leads';
 
 const splitList = (text) => text.split(/[,\n]/).map((s) => s.trim()).filter(Boolean);
@@ -17,6 +17,7 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
   const [queries, setQueries] = useState(DEFAULT_QUERIES.join(', '));
   const [pages, setPages] = useState(1);
   const [requireCity, setRequireCity] = useState(true);
+  const [findOwners, setFindOwners] = useState(true);
   const [running, setRunning] = useState(false);
   const [log, setLog] = useState([]);
   const [totals, setTotals] = useState(null);
@@ -28,6 +29,40 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
   const maxRequests = Math.max(areaList.length, 1) * queryList.length * pages;
   const remaining = Math.max(0, limit - usedNow);
 
+  // The owners of these leads, one at a time (each is a web search of a few seconds). An error from Gemini
+  // stops the owner search for this run; the lead search carries on.
+  async function lookUpOwners(ids, sum) {
+    for (const id of ids) {
+      if (stopRef.current || sum.ownerError) return;
+      const result = await findLeadOwner(id);
+      if (result.error) {
+        sum.ownerError = result.error;
+        setLog((l) => [...l, { error: true, text: `Owner search stopped: ${result.error}` }]);
+        return;
+      }
+      if (result.skipped) continue;
+      sum.ownersChecked += 1;
+      if (result.owner) sum.owners += 1;
+      setTotals({ ...sum });
+    }
+  }
+
+  async function ownersOfEarlierLeads() {
+    stopRef.current = false;
+    setRunning(true);
+    const sum = { requests: 0, found: 0, added: 0, owners: 0, ownersChecked: 0 };
+    setTotals({ ...sum });
+    const result = await ownerlessLeadIds();
+    if (result.error) {
+      setLog([{ error: true, text: result.error }]);
+    } else {
+      setLog([{ text: `${result.ids.length} leads not searched yet, best prospects first` }]);
+      await lookUpOwners(result.ids, sum);
+    }
+    setRunning(false);
+    router.refresh();
+  }
+
   async function run() {
     if (!city.trim() || !queryList.length) return;
     if (maxRequests > remaining && !window.confirm(`This search could use up to ${maxRequests} Google requests, but only ${remaining} are left this month. It will stop when the limit is reached. Continue?`)) return;
@@ -35,7 +70,7 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
     stopRef.current = false;
     setRunning(true);
     setLog([]);
-    const sum = { requests: 0, found: 0, added: 0 };
+    const sum = { requests: 0, found: 0, added: 0, owners: 0, ownersChecked: 0 };
     setTotals({ ...sum });
     const areas = areaList.length ? areaList : [''];
 
@@ -56,6 +91,7 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
           setTotals({ ...sum });
           setUsedNow(result.used);
           setLog((l) => [...l, { text: `${result.textQuery}${page > 1 ? ` (page ${page})` : ''}: ${result.found} found, ${result.added} new` }]);
+          if (findOwners && result.newIds?.length) await lookUpOwners(result.newIds, sum);
           pageToken = result.nextPageToken;
           if (!pageToken) break;
         }
@@ -110,13 +146,23 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
               <input type="checkbox" checked={requireCity} onChange={(e) => setRequireCity(e.target.checked)} disabled={running} className="h-4 w-4 accent-brand" />
               Only keep firms whose address is in {city || 'this city'}
             </label>
+            <label className="flex items-start gap-3 rounded-lg border border-line px-4 py-3 text-[15px] lg:col-span-2">
+              <input type="checkbox" checked={findOwners} onChange={(e) => setFindOwners(e.target.checked)} disabled={running} className="mt-1 h-4 w-4 accent-brand" />
+              <span>
+                Find each new lead&apos;s owner on the web
+                <span className="block text-sm text-muted">The person who runs the firm (owner, proprietor, founder or partner), from its website, MahaRERA and listings like JustDial. A few seconds per lead, using Gemini.</span>
+              </span>
+            </label>
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
             {running ? (
               <button type="button" className="btn-outline" onClick={() => { stopRef.current = true; }}>Stop</button>
             ) : (
-              <button type="button" className="btn-primary" onClick={run} disabled={!keyConfigured || !queryList.length || remaining === 0}>Find leads</button>
+              <>
+                <button type="button" className="btn-primary" onClick={run} disabled={!keyConfigured || !queryList.length || remaining === 0}>Find leads</button>
+                <button type="button" className="btn-outline" onClick={ownersOfEarlierLeads}>Find owners of earlier leads</button>
+              </>
             )}
             <p className="text-sm text-muted">
               Up to <span className="font-semibold text-ink">{maxRequests}</span> Google requests · {remaining} left this month
@@ -127,7 +173,10 @@ export default function LeadFinder({ used, limit, keyConfigured }) {
             <div className="mt-5 rounded-lg bg-mist p-4">
               <p className="text-sm font-semibold" role="status">
                 {running ? 'Searching… ' : 'Done. '}
-                {totals.found} found, {totals.added} new leads, {totals.requests} requests used
+                {[
+                  totals.requests > 0 && `${totals.found} found, ${totals.added} new leads, ${totals.requests} requests used`,
+                  totals.ownersChecked > 0 && `owner found for ${totals.owners} of ${totals.ownersChecked}`,
+                ].filter(Boolean).join(' · ')}
               </p>
               <ol className="mt-2 max-h-48 space-y-0.5 overflow-y-auto text-sm">
                 {log.map((entry, i) => (

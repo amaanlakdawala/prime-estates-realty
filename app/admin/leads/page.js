@@ -20,7 +20,7 @@ export default async function LeadsPage() {
   const month = new Date().toISOString().slice(0, 7);
   const [{ data: leads, error }, { data: template }, { data: usage }] = await Promise.all([
     db.from('leads')
-      .select('id, name, phone, phone_intl, website, city, locality, rating, review_count, score, status, next_follow_up, last_contacted_at, created_at')
+      .select('id, name, owner_name, owner_role, phone, phone_intl, website, city, locality, rating, review_count, score, status, next_follow_up, last_contacted_at, created_at')
       .order('score', { ascending: false })
       .order('review_count', { ascending: false })
       .limit(3000),
