@@ -1,14 +1,14 @@
 // Automatic sales calling: every 10 minutes in calling hours (supabase/cron/sales_caller_cron.sql → /api/sales-calls/run), place the next
-// call to the best lead that may be called, one call at a time, up to the daily number set on the tracking page.
+// call to the best lead that may be called, one call at a time, with no daily limit.
 import { createAdminClient } from '@/lib/supabase/admin';
-import { RULES, callBlocker, placeLeadCall, startOfIndiaDay } from './calls';
+import { callBlocker, placeLeadCall } from './calls';
 
-const DEFAULTS = { enabled: false, statuses: ['contacted'], per_day: 20 };
+const DEFAULTS = { enabled: false, statuses: ['contacted'] };
 const STALE_MINUTES = 60; // a call Sarvam never reported on is closed after this
 const minutesAgo = (m) => new Date(Date.now() - m * 60 * 1000).toISOString();
 
 export async function getAutoSettings(db = createAdminClient()) {
-  const { data } = await db.from('sales_caller_settings').select('enabled, statuses, per_day').eq('id', 1).maybeSingle();
+  const { data } = await db.from('sales_caller_settings').select('enabled, statuses').eq('id', 1).maybeSingle();
   return { ...DEFAULTS, ...data };
 }
 
@@ -36,12 +36,8 @@ export async function runAutoCalls() {
 
   await db.from('sales_calls').update({ status: 'failed', error: 'No result from Sarvam within an hour.' })
     .eq('status', 'placing').lt('created_at', minutesAgo(STALE_MINUTES));
-  const [{ count: busy }, { count: today }] = await Promise.all([
-    db.from('sales_calls').select('id', { count: 'exact', head: true }).eq('status', 'placing'),
-    db.from('sales_calls').select('id', { count: 'exact', head: true }).not('attempt_id', 'is', null).gte('created_at', startOfIndiaDay()),
-  ]);
+  const { count: busy } = await db.from('sales_calls').select('id', { count: 'exact', head: true }).eq('status', 'placing');
   if ((busy ?? 0) > 0) return { done: 'a call is still in progress' };
-  if ((today ?? 0) >= Math.min(settings.per_day, RULES.perDay)) return { done: 'daily number reached' };
 
   const [lead] = await nextUp(settings, 1, db);
   if (!lead) return { done: 'nobody to call' };

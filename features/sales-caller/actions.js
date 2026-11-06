@@ -20,7 +20,7 @@ export async function callLeadWithAI(leadId) {
 }
 
 // Leads → AI sales calls → Automatic calling.
-export async function saveAutoSettings({ enabled, statuses, perDay }) {
+export async function saveAutoSettings({ enabled, statuses }) {
   try {
     await requirePlatformAdmin('Only the platform admin can change automatic calling.');
     const allowed = ['contacted', 'new', 'interested', 'demo_sent'];
@@ -28,7 +28,6 @@ export async function saveAutoSettings({ enabled, statuses, perDay }) {
       id: 1,
       enabled: Boolean(enabled),
       statuses: (statuses ?? []).filter((s) => allowed.includes(s)),
-      per_day: Math.min(Math.max(Number.parseInt(perDay, 10) || 1, 1), 30),
       updated_at: new Date().toISOString(),
     });
     if (error) return { error: error.message.includes('sales_caller_settings') ? 'Run supabase/12_sales_caller.sql in Supabase first.' : error.message };

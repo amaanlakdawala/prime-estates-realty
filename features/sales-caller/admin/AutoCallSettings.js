@@ -16,7 +16,6 @@ export default function AutoCallSettings({ settings }) {
   const router = useRouter();
   const [enabled, setEnabled] = useState(settings.enabled);
   const [statuses, setStatuses] = useState(settings.statuses);
-  const [perDay, setPerDay] = useState(settings.per_day);
   const [message, setMessage] = useState(null);
   const [pending, startTransition] = useTransition();
 
@@ -25,7 +24,7 @@ export default function AutoCallSettings({ settings }) {
   function save() {
     setMessage(null);
     startTransition(async () => {
-      const result = await saveAutoSettings({ enabled, statuses, perDay });
+      const result = await saveAutoSettings({ enabled, statuses });
       setMessage(result.error ? { error: true, text: result.error } : { text: enabled ? 'Saved. Riya calls the next lead within 10 minutes (in calling hours).' : 'Saved. Automatic calling is off.' });
       router.refresh();
     });
@@ -51,10 +50,6 @@ export default function AutoCallSettings({ settings }) {
           ))}
         </div>
       </fieldset>
-      <label className="block max-w-[12rem]">
-        <span className="field-label">Calls per day (1 to 30)</span>
-        <input type="number" min="1" max="30" value={perDay} onChange={(e) => setPerDay(e.target.value)} className="field" />
-      </label>
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={save} disabled={pending} className="btn-primary">{pending ? 'Saving…' : 'Save'}</button>
         {message && <p className={`text-sm ${message.error ? 'text-red-700' : 'text-brand-dark'}`} role="status">{message.text}</p>}

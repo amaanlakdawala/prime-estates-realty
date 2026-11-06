@@ -28,7 +28,7 @@ create table if not exists public.sales_caller_settings (
   id          smallint primary key default 1 check (id = 1),
   enabled     boolean not null default false,
   statuses    text[] not null default '{contacted}',   -- which leads get called: contacted = WhatsApp sent, no reply yet
-  per_day     integer not null default 20 check (per_day between 1 and 30),
+  per_day     integer not null default 20 check (per_day between 1 and 30),  -- no longer used: no daily limit since 6 Nov 2026
   updated_at  timestamptz not null default now()
 );
 insert into public.sales_caller_settings (id) values (1) on conflict (id) do nothing;
