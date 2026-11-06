@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { createDemoSite, markWhatsAppSent, updateLead } from '@/app/admin/leads/actions';
-import { buildMessage, cleanName, whatsappNumber } from '@/lib/leads';
+import { buildMessage, cleanName, isUnknownName, whatsappNumber } from '@/lib/leads';
 
 const SETTINGS_KEY = 'sendQueueSettings';
 const DEFAULTS = { dailyLimit: 25, includeWithWebsite: false, autoDemo: true, followUpDays: 3 };
@@ -50,7 +50,7 @@ export default function SendQueue({ leads, template, sentToday }) {
   const [pending, startTransition] = useTransition();
 
   const queue = useMemo(
-    () => leads.filter((l) => !handled.has(l.id) && (settings.includeWithWebsite || !l.website)),
+    () => leads.filter((l) => !handled.has(l.id) && (l.afterCall || settings.includeWithWebsite || !l.website)),
     [leads, handled, settings.includeWithWebsite]
   );
   // The lead on screen stays there until it is sent, skipped or blocked, even when the page refreshes
@@ -62,14 +62,16 @@ export default function SendQueue({ leads, template, sentToday }) {
   }, [lead, currentId]);
   const demoSlug = lead ? demoSlugs[lead.id] : null;
   const demoLink = demoSlug && origin ? `${origin}/${demoSlug}` : '';
-  const limitReached = sentCount >= settings.dailyLimit && !override;
+  // Follow-ups after a call are messages they agreed to, so the daily limit for new people doesn't hold them back.
+  const limitReached = sentCount >= settings.dailyLimit && !override && !lead?.afterCall;
+  const noName = lead ? isUnknownName(lead.name) : false; // no firm name, so no demo website
 
   // New lead on screen: make its demo site if wanted, then prepare the message.
   useEffect(() => {
     if (!lead || !ready) return;
     setOpened(false);
     setError('');
-    if (settings.autoDemo && !demoSlugs[lead.id]) {
+    if (settings.autoDemo && !demoSlugs[lead.id] && !isUnknownName(lead.name)) {
       setDemoState('creating');
       createDemoSite(lead.id).then((result) => {
         if (result?.error) {
@@ -88,7 +90,7 @@ export default function SendQueue({ leads, template, sentToday }) {
 
   // Rebuilt for a new lead or a new demo link only, so a refresh doesn't undo edits to the message.
   useEffect(() => {
-    if (lead) setMessage(buildMessage(template, lead, demoLink));
+    if (lead) setMessage(buildMessage(lead.template ?? template, lead, demoLink));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lead?.id, template, demoLink]);
 
@@ -148,10 +150,15 @@ export default function SendQueue({ leads, template, sentToday }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-sm text-muted">Next of {queue.length} waiting</p>
+                {lead.afterCall && (
+                  <p className="mt-1 inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                    After Riya&apos;s call{lead.demoTime ? ` · demo ${lead.demoTime}` : ' · said WhatsApp is fine'}
+                  </p>
+                )}
                 <h2 className="text-2xl font-semibold">{cleanName(lead.name)}</h2>
                 <p className="text-muted">
                   {[lead.locality, lead.city].filter(Boolean).join(', ')} · {lead.phone}
-                  {lead.rating ? ` · ${lead.rating}★ (${lead.review_count})` : ''} · score {lead.score}/7
+                  {lead.rating ? ` · ${lead.rating}★ (${lead.review_count})` : ''} · score {lead.score}
                   {!lead.website && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800">No website</span>}
                 </p>
               </div>
@@ -160,7 +167,8 @@ export default function SendQueue({ leads, template, sentToday }) {
 
             <div className="mt-4 rounded-lg bg-mist/60 px-4 py-3 text-sm">
               <span className="font-semibold">Demo website: </span>
-              {demoState === 'creating' ? 'creating…'
+              {noName ? 'none, the firm name is not known (from the brokers’ group)'
+                : demoState === 'creating' ? 'creating…'
                 : demoLink ? <a href={demoLink} target="_blank" rel="noopener noreferrer" className="break-all text-brand underline">{demoLink}</a>
                 : settings.autoDemo ? 'not created' : 'off (tick “Create a demo website” to include one)'}
             </div>

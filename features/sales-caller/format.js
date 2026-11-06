@@ -12,7 +12,7 @@ export function estimatedCost(call) {
 // Why a call did not become a conversation (sarvamCallInfo's missed): a label for the calls table, and the
 // sentence saved as the call's error, which is how the label is found again.
 export const MISSED = {
-  hung_up: ['Hung up', 'Picked up and hung up during Riya\'s greeting.'],
+  hung_up: ['Hung up', 'Picked up but did not say anything, then hung up.'],
   voicemail: ['Voicemail', 'Went to voicemail.'],
   busy: ['Rejected', 'Cut the call while it rang, or the line was busy.'],
   no_answer: ['No answer', 'Rang, nobody picked up.'],
