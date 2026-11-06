@@ -16,7 +16,7 @@ export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 const CAMPAIGN_ID = () => process.env.SALES_SARVAM_CAMPAIGN_ID || 'Riya-sales--a8170050-778e';
 
 // Business calls to business owners: weekdays and Saturday, office hours, never pushy. No daily limit (your own
-// outreach, admin only): automatic calling places at most one call every 10 minutes.
+// outreach, admin only): automatic calling places at most one call every 5 minutes.
 export const RULES = {
   days: [1, 2, 3, 4, 5, 6],                                     // Mon–Sat (0 = Sunday)
   startHour: 10,                                                // IST

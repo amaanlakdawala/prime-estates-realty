@@ -27,7 +27,7 @@ After a call, you send the WhatsApp yourself (sample site + pricing PDF) from th
 
 **Leads → AI sales calls → Automatic calling.** Off until you switch it on. Choose which leads (default:
 Contacted, meaning WhatsApp sent and no reply yet). There is no daily limit. Supabase pg_cron pings
-`/api/sales-calls/run` every 10 minutes, Monday to Saturday in calling hours, only while it is on. Each run places at
+`/api/sales-calls/run` every 5 minutes, Monday to Saturday in calling hours, only while it is on. Each run places at
 most one call: the highest-score lead nothing blocks, never while another call is still going. A call Sarvam
 never reports on is closed as failed after an hour. The page shows the next 10 leads in line and an estimated
 Sarvam cost.
@@ -39,7 +39,7 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
 | Rule | Value |
 | --- | --- |
 | Days and hours | Monday to Saturday, 10 am to 7 pm IST |
-| Calls per day | no limit; automatic calling places at most one call every 10 minutes |
+| Calls per day | no limit; automatic calling places at most one call every 5 minutes |
 | Per lead | at most 3 AI calls, at least 3 days apart |
 | Never called | Do not contact, Won, Lost; no Indian mobile number |
 | On the call | she says she is an AI in the first line; "don't call" ends the call and blocks the lead |
