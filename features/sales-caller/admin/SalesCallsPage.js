@@ -4,7 +4,7 @@ import { getAdminContext } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { cleanName, statusLabel } from '@/lib/leads';
 import { formatDateTime } from '@/lib/format';
-import { callOutcome, estimatedCost, minutes } from '../format';
+import { MISSED, callOutcome, estimatedCost, minutes } from '../format';
 import { RULES } from '../calls';
 import { getAutoSettings, nextUp } from '../auto';
 import AutoCallSettings from './AutoCallSettings';
@@ -37,6 +37,9 @@ export default async function SalesCallsPage() {
     ['Minutes', Math.round(answered.reduce((s, c) => s + (c.duration_secs ?? 0), 0) / 60)],
     ['Sarvam cost (est.)', rupees(rows.reduce((s, c) => s + estimatedCost(c), 0))],
   ];
+  const missed = Object.values(MISSED)
+    .map(([label, text]) => [label, rows.filter((c) => c.status !== 'done' && c.error === text).length])
+    .filter(([, n]) => n);
 
   return (
     <div className="space-y-6">
@@ -57,6 +60,11 @@ export default async function SalesCallsPage() {
           </div>
         ))}
       </div>
+      {missed.length > 0 && (
+        <p className="-mt-3 text-sm text-muted">
+          Not answered: {missed.map(([label, n]) => `${label} ${n}`).join(' · ')}. Each lead is called again later, up to {RULES.maxCallsPerLead} times.
+        </p>
+      )}
       <p className="-mt-3 text-xs text-muted">Last 30 days. Cost is estimated at ₹3.50 a minute plus ₹0.20 per 30 seconds of phone line, billed per started minute; the Indian number is ₹59 per 30 days on top.</p>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -107,7 +115,7 @@ export default async function SalesCallsPage() {
                       <td className="whitespace-nowrap px-4 py-3 text-muted">{formatDateTime(c.created_at)}</td>
                       <td className="px-4 py-3">
                         <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${TONES[outcome.tone]}`}>{outcome.label}</span>
-                        {c.status === 'failed' && c.error && <span className="mt-1 block max-w-[14rem] text-xs text-muted">{c.error}</span>}
+                        {c.status !== 'done' && c.error && <span className="mt-1 block max-w-[14rem] text-xs text-muted">{c.error}</span>}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">{c.status === 'done' ? minutes(c.duration_secs ?? 0) : '—'}</td>
                       <td className="whitespace-nowrap px-4 py-3 font-medium">{r.demo_time || '—'}</td>

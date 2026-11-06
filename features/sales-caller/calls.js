@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { addToSarvamCampaign, sarvamCallInfo } from '@/lib/sarvam';
 import { toIndianMobile } from '@/lib/voice';
 import { cleanName, isUnknownName } from '@/lib/leads';
-import { describeCall } from './format';
+import { MISSED, describeCall } from './format';
 
 export const SALES_WEBHOOK_PATH = '/api/sales-calls/webhook';
 
@@ -124,6 +124,7 @@ export async function handleCallReport(report) {
   if (report.next_action_status) return true; // Sarvam will try again; the last attempt carries the result
 
   const info = sarvamCallInfo(report, RESULT_FIELDS);
+  if (info.missed) info.error = MISSED[info.missed][1];
   await db.from('sales_calls').update({
     attempt_id: report.attempt_id,
     status: info.status, duration_secs: info.duration_secs, result: info.result, transcript: info.transcript, error: info.error,
