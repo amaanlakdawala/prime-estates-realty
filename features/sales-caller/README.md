@@ -66,7 +66,9 @@ Setup: `supabase/12_sales_caller.sql` (adds `sales_caller_settings`), then `supa
 2. The Sarvam agent exists: **Riya sales caller**, `Riya-sales--cee39f44-8fd2` (created 25 Oct 2026, cloned
    from the property Riya for the Kavya voice and the tested speech settings; version 1 committed). It has:
    - prompt: `prompt.md` below the line; opening line in English (Sarvam generates the Hindi)
-   - no tools except the platform's voicemail and language switch
+   - no tools except the platform's voicemail and language switch; the language switches only after 5 seconds
+     of speech in the other language (speech to text, min audio for language detection), so a firm name said in
+     English letters does not turn the call into English. Language rules cannot go in the prompt (Sarvam refuses them)
    - call inputs: `firm_name`, `city`, `area`, `has_website`, `demo_ready`, `company_name` (Nexora), `owner_whatsapp`, `today`
    - post-call fields: `interested` (boolean), `demo_time`, `whatsapp_ok` (boolean), `callback_time`,
      `lead_sources`, `website_status`, `objection`, `do_not_call` (boolean), `firm_heard` (the firm's name,
