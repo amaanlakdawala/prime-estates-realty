@@ -19,6 +19,8 @@ file, click **Run**. Each file is safe to run again unless it says otherwise bel
 | 10 | `10_knowledge_base.sql` | Mumbai areas and towers Riya knows |
 | 11 | `11_knowledge_base_seed.sql` | The starting list of areas and towers |
 | 12 | `12_sales_caller.sql` | Riya's sales calls to your leads, and the automatic calling switch |
+| 13 | `13_lead_owners.sql` | The owner (decision maker) of each lead, found on the web |
+| 14 | `14_services.sql` | Add-ons: portal leads, listing checks (owner numbers), WhatsApp assistant |
 
 ## Scheduled jobs (`cron/`), last
 
@@ -44,4 +46,4 @@ These need your site address and `CRON_SECRET` typed in. Don't commit a filled-i
 | --- | --- |
 | `later/social_replies.sql` | Automatic replies to Instagram and Facebook comments (planned) |
 
-A new feature's SQL gets the next number (13, 14, ...) and a line in the table above.
+A new feature's SQL gets the next number (15, 16, ...) and a line in the table above.

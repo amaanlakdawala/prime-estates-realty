@@ -13,9 +13,11 @@ folder and contain no logic of their own. Code used by more than one feature goe
 | [`sales-caller/`](sales-caller/README.md) | Riya calls your leads and pitches your services, books demos with you | Built, needs Sarvam agent |
 | [`knowledge-base/`](knowledge-base/README.md) | Towers and areas Riya knows: which area each tower is in, approximate rates, which areas are near | Built |
 | [`social-replies/`](social-replies/README.md) | Automatic replies to comments on each firm's Instagram and Facebook | Planned |
-| [`whatsapp-assistant/`](whatsapp-assistant/README.md) | AI replies to clients who message the firm's WhatsApp | Planned |
+| [`whatsapp-assistant/`](whatsapp-assistant/README.md) | AI replies to clients who message the firm's WhatsApp | Built, needs a Meta app |
+| [`portal-leads/`](portal-leads/README.md) | Lead emails from 99acres, MagicBricks… become enquiries; Riya calls back in a minute | Built, needs an inbound email address |
+| [`listing-checks/`](listing-checks/README.md) | Riya calls listing owners to check availability and price; listings closed or re-priced | Built, needs a Sarvam agent + campaign |
 | [`email/`](email/README.md) | Alerts to firms and automatic emails to clients | Planned |
-| [`shared/`](shared/README.md) | Meta client and text AI assistant, used by the features above | Planned |
+| [`shared/`](shared/README.md) | `firm-service.js`: the firm check for the add-on services' actions | Built |
 
 Older features (website, listings, AI calls, reels, lead finder) predate this folder and still live in
 `app/`, `components/` and `lib/`.

@@ -1,5 +1,6 @@
 'use server';
 
+import { randomBytes } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -80,10 +81,18 @@ export async function updateFirm(firmId, formData) {
     const voice = text(formData, 'voice_agent', 10);
     fields.voice_agent = ['simran', 'sarvam'].includes(voice) ? voice : 'sia';
     fields.ai_chat_enabled = formData.get('ai_chat_enabled') === 'on'; // each chat message is a paid AI call too
+    // Paid add-ons (supabase/14_services.sql).
+    fields.portal_leads_enabled = formData.get('portal_leads_enabled') === 'on';
+    fields.listing_checks_enabled = formData.get('listing_checks_enabled') === 'on';
+    fields.listing_checks_monthly_limit = Math.min(Math.max(Number.parseInt(text(formData, 'listing_checks_monthly_limit', 6), 10) || 0, 0), 100000);
+    fields.listing_check_days = Math.min(Math.max(Number.parseInt(text(formData, 'listing_check_days', 3), 10) || 7, 3), 60);
+    fields.whatsapp_ai_enabled = formData.get('whatsapp_ai_enabled') === 'on';
   }
 
   const db = createAdminClient();
-  const { data: before } = await db.from('firms').select('slug').eq('id', firmId).maybeSingle();
+  const { data: before } = await db.from('firms').select('slug, portal_inbox_key').eq('id', firmId).maybeSingle();
+  // The secret part of the firm's portal-lead forwarding address, made once.
+  if (fields.portal_leads_enabled && !before?.portal_inbox_key) fields.portal_inbox_key = randomBytes(12).toString('hex');
   const { error } = await db.from('firms').update(fields).eq('id', firmId);
   if (error) return { error: error.code === '23505' ? 'That web address is taken. Choose another.' : error.message };
 

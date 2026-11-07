@@ -15,6 +15,8 @@ export default async function EditListingPage({ params }) {
   const supabase = await createClient();
   const { data: listing } = await supabase.from('listings').select('*').eq('id', id).eq('firm_id', ctx.firm.id).maybeSingle();
   if (!listing) notFound();
+  // Private owner details (supabase/14_services.sql); none yet, or the table not set up, is just empty.
+  const { data: owner } = await supabase.from('listing_owners').select('owner_name, owner_phone').eq('listing_id', id).maybeSingle();
 
   return (
     <>
@@ -23,7 +25,7 @@ export default async function EditListingPage({ params }) {
         <h1 className="text-3xl font-semibold">Edit listing</h1>
         {listing.photos?.length > 0 && <Link href={`/admin/${listing.id}/reel`} className="btn-outline">Make reel</Link>}
       </div>
-      <ListingForm firm={ctx.firm} initial={listing} />
+      <ListingForm firm={ctx.firm} initial={listing} owner={owner} />
     </>
   );
 }

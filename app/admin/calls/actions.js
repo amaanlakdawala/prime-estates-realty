@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getAdminContext, isUuid } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { callContactNow, ENQUIRY_REASON, syncFirmCalls, toIndianMobile } from '@/lib/voice';
+import { callContactNow, enquiryReason, syncFirmCalls, toIndianMobile } from '@/lib/voice';
 
 const MAX_IMPORT = 1000;
 const clip = (v, max) => (v ?? '').toString().trim().slice(0, max);
@@ -137,7 +137,7 @@ export async function callEnquiry(enquiryId) {
     const notes = [enq.listings?.title && `Asked about: ${enq.listings.title}`, enq.message].filter(Boolean).join('. ');
     const { data: contact, error } = await db.from('call_contacts').upsert({
       firm_id: firm.id, name: clip(enq.name, 120), phone, source: 'website', enquiry_id: enq.id,
-      context: ENQUIRY_REASON, notes: clip(notes, 500), consent_confirmed: true, created_by: ctx.user.id,
+      context: enquiryReason(enq.source), notes: clip(notes, 500), consent_confirmed: true, created_by: ctx.user.id,
     }, { onConflict: 'firm_id,phone' }).select('*').single();
     if (error) throw new Error(error.message);
     const callId = await callContact(ctx, firm, contact);

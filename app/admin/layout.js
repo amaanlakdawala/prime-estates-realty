@@ -27,6 +27,7 @@ export default async function AdminLayout({ children }) {
   let blocked = null;
   if (!isPlatformAdmin && !firm) blocked = <Notice title="Account not set up">This login isn&apos;t linked to a firm yet. Please contact us.</Notice>;
   else if (!isPlatformAdmin && !firm.active) blocked = <Notice title="Account paused">Your website and admin access are paused. Please contact us to restart them.</Notice>;
+  const services = { portalLeads: firm?.portalLeadsEnabled, listingChecks: firm?.listingChecksEnabled, whatsapp: firm?.whatsappAiEnabled };
 
   return (
     <div className="min-h-screen bg-mist">
@@ -36,7 +37,7 @@ export default async function AdminLayout({ children }) {
             <Link href={isPlatformAdmin && !firm ? '/admin/firms' : '/admin'} className="font-display text-lg font-semibold">
               {isPlatformAdmin ? PLATFORM_NAME : firm?.name ?? PLATFORM_NAME} <span className="font-sans text-sm font-normal text-white/60">Admin</span>
             </Link>
-            {!blocked && <AdminNav isPlatformAdmin={isPlatformAdmin} hasFirm={!!firm} />}
+            {!blocked && <AdminNav isPlatformAdmin={isPlatformAdmin} hasFirm={!!firm} services={services} />}
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-white/70 sm:inline">{user.email}</span>
@@ -44,7 +45,7 @@ export default async function AdminLayout({ children }) {
             <SignOutButton />
           </div>
         </div>
-        {!blocked && <div className="page pb-3 md:hidden"><AdminNav mobile isPlatformAdmin={isPlatformAdmin} hasFirm={!!firm} /></div>}
+        {!blocked && <div className="page pb-3 md:hidden"><AdminNav mobile isPlatformAdmin={isPlatformAdmin} hasFirm={!!firm} services={services} /></div>}
       </header>
 
       {isPlatformAdmin && firm && (

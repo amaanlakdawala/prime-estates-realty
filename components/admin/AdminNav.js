@@ -8,6 +8,9 @@ const FIRM_LINKS = [
   { href: '/admin/new', label: 'Add listing', match: (p) => p === '/admin/new' },
   { href: '/admin/enquiries', label: 'Enquiries', match: (p) => p.startsWith('/admin/enquiries') },
   { href: '/admin/calls', label: 'AI calls', match: (p) => p.startsWith('/admin/calls') },
+  { href: '/admin/portal-leads', label: 'Portal leads', match: (p) => p.startsWith('/admin/portal-leads'), service: 'portalLeads' },
+  { href: '/admin/listing-checks', label: 'Listing checks', match: (p) => p.startsWith('/admin/listing-checks'), service: 'listingChecks' },
+  { href: '/admin/whatsapp', label: 'WhatsApp', match: (p) => p.startsWith('/admin/whatsapp'), service: 'whatsapp' },
   { href: '/admin/writeup', label: 'WhatsApp write-up', match: (p) => p.startsWith('/admin/writeup') },
   { href: '/admin/profile', label: 'Firm profile', match: (p) => p.startsWith('/admin/profile') },
 ];
@@ -20,10 +23,12 @@ const PLATFORM_LINKS = [
 ];
 
 // Platform admin: Firms and Logins, plus the firm pages while managing a firm.
-// Firm login: only its own firm's pages.
-export default function AdminNav({ mobile = false, isPlatformAdmin = false, hasFirm = false }) {
+// Firm login: only its own firm's pages. Add-on service pages show only when that service is on for the firm.
+// services: { portalLeads, listingChecks, whatsapp } booleans.
+export default function AdminNav({ mobile = false, isPlatformAdmin = false, hasFirm = false, services = {} }) {
   const pathname = usePathname();
-  const links = [...(isPlatformAdmin ? PLATFORM_LINKS : []), ...(hasFirm ? FIRM_LINKS : [])];
+  const firmLinks = FIRM_LINKS.filter((l) => !l.service || services[l.service]);
+  const links = [...(isPlatformAdmin ? PLATFORM_LINKS : []), ...(hasFirm ? firmLinks : [])];
   return (
     <nav className={mobile ? 'flex flex-wrap gap-1' : 'hidden gap-1 md:flex'} aria-label="Admin">
       {links.map((l) => {

@@ -113,6 +113,46 @@ export default function FirmForm({ firm, adminFields = false }) {
         </fieldset>
       )}
       {adminFields && (
+        <fieldset className="rounded-lg border border-line p-4 sm:col-span-2">
+          <legend className="px-1 font-medium">Add-on services</legend>
+          <div className="space-y-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input type="checkbox" name="portal_leads_enabled" defaultChecked={firm.portalLeadsEnabled} className="mt-1 h-4 w-4 accent-brand" />
+              <span>
+                <span className="block font-medium">Portal leads: instant callback</span>
+                <span className="text-sm text-muted">The firm forwards lead emails from 99acres, MagicBricks, Housing.com… to its own address; each becomes an enquiry and the automatic AI call follows (needs AI calling and automatic calls on). Reading each email is a small Gemini cost.</span>
+              </span>
+            </label>
+            <div>
+              <label className="flex cursor-pointer items-start gap-3">
+                <input type="checkbox" name="listing_checks_enabled" defaultChecked={firm.listingChecksEnabled} className="mt-1 h-4 w-4 accent-brand" />
+                <span>
+                  <span className="block font-medium">Listing checks: Riya calls owners</span>
+                  <span className="text-sm text-muted">Riya calls the owner of each available listing (owner number saved on the listing) to check it is still available and the price; listings are closed or re-priced from the answer. Short Sarvam calls, about ₹5–8 each.</span>
+                </span>
+              </label>
+              <div className="mt-3 grid gap-4 pl-7 sm:grid-cols-2">
+                <label className="block">
+                  <span className="field-label">Check calls per month (limit)</span>
+                  <input name="listing_checks_monthly_limit" type="number" min="0" defaultValue={firm.listingChecksMonthlyLimit} className="field" />
+                </label>
+                <label className="block">
+                  <span className="field-label">Check each listing every (days)</span>
+                  <input name="listing_check_days" type="number" min="3" max="60" defaultValue={firm.listingCheckDays} className="field" />
+                </label>
+              </div>
+            </div>
+            <label className="flex cursor-pointer items-start gap-3">
+              <input type="checkbox" name="whatsapp_ai_enabled" defaultChecked={firm.whatsappAiEnabled} className="mt-1 h-4 w-4 accent-brand" />
+              <span>
+                <span className="block font-medium">WhatsApp AI assistant</span>
+                <span className="text-sm text-muted">Riya answers clients on the firm&apos;s WhatsApp Business number, sends matching listings and passes interested clients on. Connect the number on the firm&apos;s WhatsApp page. Each reply is a Gemini cost; Meta doesn&apos;t charge for replies.</span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      )}
+      {adminFields && (
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-4 sm:col-span-2 has-[:checked]:border-accent has-[:checked]:bg-accent/10">
           <input type="checkbox" name="demo_content" defaultChecked={firm.demoContent} className="mt-1 h-4 w-4 accent-brand" />
           <span>

@@ -1,9 +1,11 @@
-// Places automatic AI calls for website enquiries that are due, and saves the results of finished calls.
+// Places automatic AI calls for website enquiries that are due, saves the results of finished calls, and places
+// the next listing check calls.
 // Called every minute by Supabase pg_cron (see supabase/cron/auto_call_cron.sql) with the shared CRON_SECRET.
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sameSecret } from '@/lib/secret';
-import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked, ENQUIRY_REASON, lastReadError } from '@/lib/voice';
+import { runListingChecks } from '@/features/listing-checks/checks';
+import { callContactNow, syncFirmCalls, withinCallingHours, CallBlocked, enquiryReason, lastReadError } from '@/lib/voice';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,11 +49,16 @@ export async function POST(request) {
       db.from('call_contacts').select('*').eq('id', item.contact_id).maybeSingle(),
     ]);
     if (!contact) { await finish({ status: 'skipped', note: 'The contact was removed.' }); report.skipped++; continue; }
-    // This call is for a website enquiry, even for a contact first added another way (e.g. as a callback):
+    // This call is for an enquiry, even for a contact first added another way (e.g. as a callback):
     // the enquiry trigger only fills the reason for new contacts, and Riya opened with "you asked for a callback".
-    if (item.enquiry_id && contact.context !== ENQUIRY_REASON) {
-      contact.context = ENQUIRY_REASON;
-      await db.from('call_contacts').update({ context: ENQUIRY_REASON }).eq('id', contact.id);
+    // The reason follows where the enquiry came from (website form, a property portal, WhatsApp).
+    if (item.enquiry_id) {
+      const { data: enquiry } = await db.from('enquiries').select('source').eq('id', item.enquiry_id).maybeSingle();
+      const reason = enquiryReason(enquiry?.source);
+      if (contact.context !== reason) {
+        contact.context = reason;
+        await db.from('call_contacts').update({ context: reason }).eq('id', contact.id);
+      }
     }
     if (!firm?.ai_auto_call_enquiries) { await finish({ status: 'skipped', note: 'Automatic calling was switched off.' }); report.skipped++; continue; }
 
@@ -90,6 +97,9 @@ export async function POST(request) {
   }
   report.sync = sync;
   if (sync.unreadable) report.elevenlabsError = lastReadError;
+
+  // Listing checks (features/listing-checks) ride on this every-minute schedule: at most one call per firm at a time.
+  report.listingChecks = await runListingChecks().catch((err) => ({ done: 'error', reason: err.message }));
 
   return NextResponse.json({ ok: true, ...report });
 }

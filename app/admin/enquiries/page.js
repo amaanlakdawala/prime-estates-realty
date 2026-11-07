@@ -7,7 +7,8 @@ import { formatDateTime, whatsappLink } from '@/lib/format';
 
 export const metadata = { title: 'Enquiries' };
 
-const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website', chat: 'AI chatbot' };
+const SOURCE_LABELS = { property: 'Property page', callback: 'Callback request', contact: 'Contact page', website: 'Website', chat: 'AI chatbot', whatsapp: 'WhatsApp (AI assistant)' };
+const sourceLabel = (s) => (s?.startsWith('portal:') ? s.slice(7) : SOURCE_LABELS[s] ?? s);
 
 export default async function EnquiriesPage() {
   const ctx = await requireFirm();
@@ -25,7 +26,7 @@ export default async function EnquiriesPage() {
   return (
     <>
       <h1 className="text-3xl font-semibold">Enquiries</h1>
-      <p className="mt-1 text-muted">Leads sent through forms on the website, newest first.</p>
+      <p className="mt-1 text-muted">Leads from your website, the AI chatbot, WhatsApp and property portals, newest first.</p>
       {error && <p className="mt-6 rounded-xl border border-red-200 bg-red-50 p-5 text-red-800" role="alert">Enquiries could not be loaded: {error.message}</p>}
       {!error && !enquiries?.length && (
         <div className="mt-6 rounded-xl border border-dashed border-line bg-white p-10 text-center text-muted">
@@ -42,7 +43,7 @@ export default async function EnquiriesPage() {
                 <div>
                   <p className="font-semibold">{q.name}</p>
                   <p className="text-sm text-muted">
-                    {formatDateTime(q.created_at)}, {SOURCE_LABELS[q.source] ?? q.source}
+                    {formatDateTime(q.created_at)}, {sourceLabel(q.source)}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

@@ -12,7 +12,7 @@ const MAX_FILE_MB = 5;
 const MAX_PHOTOS = 20;
 const ACCEPTED = 'image/jpeg,image/png,image/webp';
 
-function toFormState(l) {
+function toFormState(l, owner) {
   return {
     title: l?.title ?? '',
     property_type: l?.property_type ?? 'flat',
@@ -30,7 +30,17 @@ function toFormState(l) {
     status: l?.status ?? 'available',
     featured: l?.featured ?? false,
     show_on_website: l?.show_on_website ?? true,
+    owner_name: owner?.owner_name ?? '',
+    owner_phone: owner?.owner_phone ?? '',
   };
+}
+
+// "98200 12345" / "+91 98200-12345" -> "+919820012345", or null.
+function indianMobile(phone) {
+  let digits = phone.replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+  if (digits.length === 12 && digits.startsWith('91')) digits = digits.slice(2);
+  return /^[6-9]\d{9}$/.test(digits) ? `+91${digits}` : null;
 }
 
 function parseCoords(text) {
@@ -53,10 +63,11 @@ async function uploadFile(supabase, folder, file) {
 
 // firm: the firm this listing belongs to (from the admin context, never from the browser's choice;
 // the database also refuses a listing for any firm the login doesn't belong to).
-export default function ListingForm({ firm, initial = null }) {
+// owner: the listing's private owner details (listing_owners), when editing.
+export default function ListingForm({ firm, initial = null, owner = null }) {
   const router = useRouter();
   const isEdit = !!initial;
-  const [form, setForm] = useState(() => toFormState(initial));
+  const [form, setForm] = useState(() => toFormState(initial, owner));
   // Each photo is either { url } (already uploaded) or { file, preview } (new, not uploaded yet)
   const [photos, setPhotos] = useState(() => (initial?.photos ?? []).map((url) => ({ url })));
   const [floorPlan, setFloorPlan] = useState(() => (initial?.floor_plan ? { url: initial.floor_plan } : null));
@@ -146,6 +157,7 @@ export default function ListingForm({ firm, initial = null }) {
     if (form.area_sqft && Number(form.area_sqft) < 0) er.area_sqft = 'Area cannot be negative.';
     if (form.bhk && (Number(form.bhk) < 0 || Number(form.bhk) > 20)) er.bhk = 'Enter a BHK between 0 and 20.';
     if (form.coords.trim() && parseCoords(form.coords) === null) er.coords = 'Use the format 18.5590, 73.7868 (latitude, longitude).';
+    if (form.owner_phone.trim() && !indianMobile(form.owner_phone)) er.owner_phone = 'Enter a 10-digit Indian mobile number, e.g. 98200 12345.';
     return er;
   }
 
@@ -212,12 +224,22 @@ export default function ListingForm({ firm, initial = null }) {
         show_on_website: form.show_on_website,
       };
 
-      const { error } = isEdit
-        ? await supabase.from('listings').update(record).eq('id', initial.id)
-        : await supabase.from('listings').insert({ ...record, firm_id: firm.id });
+      const { data: saved, error } = isEdit
+        ? await supabase.from('listings').update(record).eq('id', initial.id).select('id').single()
+        : await supabase.from('listings').insert({ ...record, firm_id: firm.id }).select('id').single();
       if (error) throw new Error(`The listing could not be saved: ${error.message}`);
 
-      // 4. Clean up photos that were removed during editing
+      // 4. The owner's details, kept apart from the listing (anyone can read listings, only the team reads these)
+      const ownerName = form.owner_name.trim();
+      const ownerPhone = form.owner_phone.trim() ? indianMobile(form.owner_phone) : '';
+      if (ownerName || ownerPhone || owner) {
+        const { error: ownerError } = await supabase.from('listing_owners').upsert({
+          listing_id: saved.id, firm_id: firm.id, owner_name: ownerName.slice(0, 120), owner_phone: ownerPhone, updated_at: new Date().toISOString(),
+        });
+        if (ownerError) throw new Error(`The listing was saved, but the owner's details were not: ${ownerError.message}`);
+      }
+
+      // 5. Clean up photos that were removed during editing
       if (removedUrls.current.length) await removeImages(supabase, removedUrls.current);
       await refreshFirmSite().catch(() => {}); // the cached website shows the change straight away
 
@@ -396,6 +418,26 @@ export default function ListingForm({ firm, initial = null }) {
             {floorPlan && <button type="button" onClick={removeFloorPlan} className="text-sm font-medium text-red-700 hover:underline">Remove</button>}
           </div>
           <Err k="floor_plan" />
+        </div>
+      </section>
+
+      {/* Owner: private */}
+      <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
+        <h2 className="text-xl font-semibold">Owner <span className="text-base font-normal text-muted">(private, optional)</span></h2>
+        <p className="mt-1 text-sm text-muted">
+          Only your team sees this; it never appears on the website.
+          {firm.listingChecksEnabled && ' With Listing checks on, Riya calls this number to check the listing is still available and at what price.'}
+        </p>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <label className="block">
+            <span className="field-label">Owner&apos;s name</span>
+            <input className="field" value={form.owner_name} onChange={set('owner_name')} placeholder="Suresh Patil" maxLength={120} />
+          </label>
+          <label className="block">
+            <span className="field-label">Owner&apos;s mobile</span>
+            <input className={fieldClass('owner_phone')} type="tel" value={form.owner_phone} onChange={set('owner_phone')} placeholder="98200 12345" />
+            <Err k="owner_phone" />
+          </label>
         </div>
       </section>
 
