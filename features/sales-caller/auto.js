@@ -12,15 +12,29 @@ export async function getAutoSettings(db = createAdminClient()) {
   return { ...DEFAULTS, ...data };
 }
 
+// Supabase returns at most 1,000 rows per request, so longer lists are read in pages.
+async function allRows(query) {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data } = await query().range(from, from + 999);
+    rows.push(...(data ?? []));
+    if (!data || data.length < 1000) return rows;
+  }
+}
+
 // The leads automatic calling would call next, best first (score, then oldest), with nothing blocking them.
+// Reads every candidate lead and every placed call: at ~110 calls a day, the best few hundred leads are all inside
+// their 3-day gap at once, and looking only at those stopped calling while hundreds of others were waiting.
 export async function nextUp(settings, limit = 10, db = createAdminClient()) {
   if (!settings.statuses.length) return [];
-  const { data: leads } = await db.from('leads').select('*').in('status', settings.statuses)
-    .order('score', { ascending: false }).order('created_at').limit(300);
-  if (!leads?.length) return [];
-  const { data: calls } = await db.from('sales_calls').select('lead_id, created_at').in('lead_id', leads.map((l) => l.id))
-    .not('attempt_id', 'is', null).order('created_at', { ascending: false });
-  const history = (id) => (calls ?? []).filter((c) => c.lead_id === id);
+  const [leads, calls] = await Promise.all([
+    allRows(() => db.from('leads').select('*').in('status', settings.statuses).order('score', { ascending: false }).order('created_at').order('id')),
+    allRows(() => db.from('sales_calls').select('lead_id, created_at').not('attempt_id', 'is', null).order('created_at', { ascending: false }).order('id')),
+  ]);
+  if (!leads.length) return [];
+  const byLead = new Map();
+  for (const c of calls) byLead.set(c.lead_id, [...(byLead.get(c.lead_id) ?? []), c]);
+  const history = (id) => byLead.get(id) ?? [];
   // The calling-hours check is left out here, so the list also shows who is next outside hours.
   return leads.filter((l) => {
     const why = callBlocker(l, history(l.id));

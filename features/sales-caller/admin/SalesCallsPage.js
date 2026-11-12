@@ -11,6 +11,20 @@ import AutoCallSettings from './AutoCallSettings';
 
 const rupees = (n) => `₹${Math.round(n).toLocaleString('en-IN')}`;
 const TONES = { good: 'bg-green-100 text-green-800', bad: 'bg-red-100 text-red-800', neutral: 'bg-mist text-muted' };
+const TABLE_ROWS = 200;
+const PAGE = 1000; // Supabase returns at most 1,000 rows per request
+const indiaDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+// Every call of the last 30 days, for the totals: about 110 a day with automatic calling, so read in pages.
+async function callsSince(db, since) {
+  const all = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await db.from('sales_calls').select('created_at, status, duration_secs, result, error')
+      .gte('created_at', since).order('created_at', { ascending: false }).range(from, from + PAGE - 1);
+    all.push(...(data ?? []));
+    if (!data || data.length < PAGE) return all;
+  }
+}
 
 // Leads → AI sales calls: automatic calling, who is called next, and every call Riya made, with 30-day totals.
 export default async function SalesCallsPage() {
@@ -19,27 +33,40 @@ export default async function SalesCallsPage() {
 
   const db = createAdminClient();
   const settings = await getAutoSettings(db);
-  const [{ data: calls }, upcoming] = await Promise.all([
+  const since = new Date(Date.now() - 30 * 864e5).toISOString();
+  const [all, { data: calls }, upcoming] = await Promise.all([
+    callsSince(db, since),
     db.from('sales_calls')
       .select('id, created_at, status, duration_secs, result, error, lead:leads(id, name, status)')
-      .gte('created_at', new Date(Date.now() - 30 * 864e5).toISOString())
+      .gte('created_at', since)
       .order('created_at', { ascending: false })
-      .limit(300),
+      .limit(TABLE_ROWS),
     nextUp(settings, 10, db),
   ]);
   const rows = calls ?? [];
-  const answered = rows.filter((c) => c.status === 'done');
+  const answered = all.filter((c) => c.status === 'done');
   const totals = [
-    ['Calls placed', rows.length],
+    ['Calls placed', all.length],
     ['Answered', answered.length],
     ['Interested', answered.filter((c) => c.result?.interested || c.result?.demo_time).length],
     ['Demos booked', answered.filter((c) => c.result?.demo_time).length],
     ['Minutes', Math.round(answered.reduce((s, c) => s + (c.duration_secs ?? 0), 0) / 60)],
-    ['Sarvam cost (est.)', rupees(rows.reduce((s, c) => s + estimatedCost(c), 0))],
+    ['Sarvam cost (est.)', rupees(all.reduce((s, c) => s + estimatedCost(c), 0))],
   ];
   const missed = Object.values(MISSED)
-    .map(([label, text]) => [label, rows.filter((c) => c.status !== 'done' && c.error === text).length])
+    .map(([label, text]) => [label, all.filter((c) => c.status !== 'done' && c.error === text).length])
     .filter(([, n]) => n);
+  // Calls per day for the last 7 days with calls, newest first: "Wed 11 Nov 108 (11 answered)".
+  const days = new Map();
+  for (const c of all) {
+    const d = days.get(indiaDay(c.created_at)) ?? { placed: 0, answered: 0 };
+    d.placed++;
+    if (c.status === 'done') d.answered++;
+    days.set(indiaDay(c.created_at), d);
+  }
+  const perDay = [...days].slice(0, 7).map(([day, d]) => [
+    new Date(`${day}T12:00:00+05:30`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' }), d,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -63,6 +90,11 @@ export default async function SalesCallsPage() {
       {missed.length > 0 && (
         <p className="-mt-3 text-sm text-muted">
           Not answered: {missed.map(([label, n]) => `${label} ${n}`).join(' · ')}. Each lead is called again later, up to {RULES.maxCallsPerLead} times.
+        </p>
+      )}
+      {perDay.length > 0 && (
+        <p className="-mt-3 text-sm text-muted">
+          Per day: {perDay.map(([day, d]) => `${day} ${d.placed} (${d.answered} answered)`).join(' · ')}
         </p>
       )}
       <p className="-mt-3 text-xs text-muted">Last 30 days. Cost is estimated at ₹3.50 a minute plus ₹0.20 per 30 seconds of phone line, billed per started minute; the Indian number is ₹59 per 30 days on top.</p>
@@ -92,7 +124,9 @@ export default async function SalesCallsPage() {
       </div>
 
       <section className="rounded-xl border border-line bg-white">
-        <h2 className="border-b border-line px-4 py-3 text-lg font-semibold">All calls</h2>
+        <h2 className="border-b border-line px-4 py-3 text-lg font-semibold">
+          {all.length > rows.length ? <>Latest {rows.length} calls <span className="text-sm font-normal text-muted">of {all.length} in the last 30 days (totals above count them all)</span></> : 'All calls'}
+        </h2>
         {rows.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] text-left text-sm">
