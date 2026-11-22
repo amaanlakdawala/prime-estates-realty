@@ -53,7 +53,7 @@ export default async function LeadPage({ params }) {
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">{cleanName(lead.name)}</h1>
           <StatusBadge status={lead.status} />
-          <span className="rounded-full bg-mist px-2.5 py-1 text-xs font-semibold">Score {lead.score}/7</span>
+          <span className="rounded-full bg-mist px-2.5 py-1 text-xs font-semibold">Score {lead.score}</span>
         </div>
       </div>
 

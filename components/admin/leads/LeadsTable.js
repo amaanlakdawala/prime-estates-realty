@@ -146,7 +146,7 @@ export default function LeadsTable({ leads, today }) {
                     {l.website ? <span className="text-muted">Has website</span> : <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800">No website</span>}
                   </td>
                   <td className="px-4 py-3 text-muted">{l.rating ? `${l.rating}★ (${l.review_count})` : '—'}</td>
-                  <td className="px-4 py-3"><span className="font-display text-lg font-semibold">{l.score}</span><span className="text-muted">/7</span></td>
+                  <td className="px-4 py-3"><span className="font-display text-lg font-semibold">{l.score}</span></td>
                   <td className="px-4 py-3"><StatusBadge status={l.status} /></td>
                   <td className={`px-4 py-3 ${due ? 'font-semibold text-red-700' : 'text-muted'}`}>{l.next_follow_up ? formatDate(l.next_follow_up) : '—'}</td>
                 </tr>
