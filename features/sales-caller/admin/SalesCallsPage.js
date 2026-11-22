@@ -6,7 +6,7 @@ import { cleanName, statusLabel } from '@/lib/leads';
 import { formatDateTime } from '@/lib/format';
 import { MISSED, callOutcome, estimatedCost, minutes } from '../format';
 import { RULES } from '../calls';
-import { getAutoSettings, nextUp } from '../auto';
+import { CALL_GROUPS, callGroup, getAutoSettings, nextUp } from '../auto';
 import AutoCallSettings from './AutoCallSettings';
 
 const rupees = (n) => `₹${Math.round(n).toLocaleString('en-IN')}`;
@@ -107,13 +107,14 @@ export default async function SalesCallsPage() {
         </section>
         <section className="rounded-xl border border-line bg-white p-5 sm:p-6">
           <h2 className="text-lg font-semibold">Next up</h2>
+          <p className="mt-1 text-xs text-muted">Order: {CALL_GROUPS.map((g) => g.label).join(' → ')}; within each, leads not called yet first, then most Google reviews.</p>
           {upcoming.length ? (
             <ol className="mt-3 space-y-2 text-sm">
               {upcoming.map((l, i) => (
                 <li key={l.id} className="flex flex-wrap items-baseline gap-x-2">
                   <span className="w-5 text-muted">{i + 1}.</span>
                   <Link href={`/admin/leads/${l.id}`} className="font-medium text-brand hover:underline">{cleanName(l.name)}</Link>
-                  <span className="text-muted">{[l.locality, statusLabel(l.status), `score ${l.score}`, l.website ? 'has website' : 'no website'].filter(Boolean).join(' · ')}</span>
+                  <span className="text-muted">{[CALL_GROUPS[callGroup(l)].label, l.city || l.locality, statusLabel(l.status), l.review_count ? `${l.review_count} reviews` : null].filter(Boolean).join(' · ')}</span>
                 </li>
               ))}
             </ol>
