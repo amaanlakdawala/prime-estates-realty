@@ -34,7 +34,7 @@ export default async function AdminLayout({ children }) {
       <header className="bg-ink text-white">
         <div className="page flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-6">
-            <Link href={isPlatformAdmin && !firm ? '/admin/firms' : '/admin'} className="font-display text-lg font-semibold">
+            <Link href={isPlatformAdmin && !firm ? '/admin/firms' : '/admin/dashboard'} className="font-display text-lg font-semibold">
               {isPlatformAdmin ? PLATFORM_NAME : firm?.name ?? PLATFORM_NAME} <span className="font-sans text-sm font-normal text-white/60">Admin</span>
             </Link>
             {!blocked && <AdminNav isPlatformAdmin={isPlatformAdmin} hasFirm={!!firm} services={services} />}

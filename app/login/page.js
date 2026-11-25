@@ -25,7 +25,7 @@ function LoginForm() {
       return;
     }
     const next = params.get('next');
-    router.replace(next && next.startsWith('/admin') ? next : '/admin');
+    router.replace(next && next.startsWith('/admin') ? next : '/admin/dashboard');
     router.refresh();
   }
 

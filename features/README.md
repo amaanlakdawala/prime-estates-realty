@@ -9,6 +9,7 @@ folder and contain no logic of their own. Code used by more than one feature goe
 
 | Folder | What it is | Status |
 | --- | --- | --- |
+| [`clients/`](clients/README.md) | Dashboard, clients pipeline, requirements matched to listings automatically, one-tap share | Built, needs 15_clients.sql |
 | [`whatsapp-writeup/`](whatsapp-writeup/README.md) | Neat WhatsApp posts of properties for groups, with each sender's own number | Built |
 | [`sales-caller/`](sales-caller/README.md) | Riya calls your leads and pitches your services, books demos with you | Built, needs Sarvam agent |
 | [`knowledge-base/`](knowledge-base/README.md) | Towers and areas Riya knows: which area each tower is in, approximate rates, which areas are near | Built |

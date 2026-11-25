@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const FIRM_LINKS = [
+  { href: '/admin/dashboard', label: 'Dashboard', match: (p) => p.startsWith('/admin/dashboard') },
+  { href: '/admin/clients', label: 'Clients', match: (p) => p.startsWith('/admin/clients') },
   { href: '/admin', label: 'Listings', match: (p) => p === '/admin' || /^\/admin\/[0-9a-f-]{36}\/edit/.test(p) },
   { href: '/admin/new', label: 'Add listing', match: (p) => p === '/admin/new' },
   { href: '/admin/enquiries', label: 'Enquiries', match: (p) => p.startsWith('/admin/enquiries') },
